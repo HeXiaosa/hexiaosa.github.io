@@ -5,16 +5,16 @@
   
   <title>View 属性 | Hexiaosa</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="关于 View 设置属性的方式：  JavaxmlstyledefStyleAttrdefStyleResTheme  关于 defStyleRes 的使用，和在 xml 中声明 style=”@style/*“ 使用是一样的；Theme 中定义，就是在当前应用使用的 theme 中，方式和 style 中定义的一样，其作用范围是全局的，只要有使用这个属性的地方，value 就是 theme 中定">
+  <meta name="description" content="关于 View 设置属性的方式： JavaxmlstyledefStyleAttrdefStyleResTheme  关于 defStyleRes 的使用，和在 xml 中声明 style=”@style/*“ 使用是一样的；Theme 中定义，就是在当前应用使用的 theme 中，方式和 style 中定义的一样，其作用范围是全局的，只要有使用这个属性的地方，value 就是 theme 中定义">
 <meta property="og:type" content="article">
 <meta property="og:title" content="View 属性">
 <meta property="og:url" content="http://hexiaosa.com/2017/10/11/View-Attribute-Set/index.html">
 <meta property="og:site_name" content="Hexiaosa">
-<meta property="og:description" content="关于 View 设置属性的方式：  JavaxmlstyledefStyleAttrdefStyleResTheme  关于 defStyleRes 的使用，和在 xml 中声明 style=”@style/*“ 使用是一样的；Theme 中定义，就是在当前应用使用的 theme 中，方式和 style 中定义的一样，其作用范围是全局的，只要有使用这个属性的地方，value 就是 theme 中定">
-<meta property="og:updated_time" content="2017-10-11T08:57:19.444Z">
+<meta property="og:description" content="关于 View 设置属性的方式： JavaxmlstyledefStyleAttrdefStyleResTheme  关于 defStyleRes 的使用，和在 xml 中声明 style=”@style/*“ 使用是一样的；Theme 中定义，就是在当前应用使用的 theme 中，方式和 style 中定义的一样，其作用范围是全局的，只要有使用这个属性的地方，value 就是 theme 中定义">
+<meta property="og:updated_time" content="2017-10-11T09:00:16.120Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="View 属性">
-<meta name="twitter:description" content="关于 View 设置属性的方式：  JavaxmlstyledefStyleAttrdefStyleResTheme  关于 defStyleRes 的使用，和在 xml 中声明 style=”@style/*“ 使用是一样的；Theme 中定义，就是在当前应用使用的 theme 中，方式和 style 中定义的一样，其作用范围是全局的，只要有使用这个属性的地方，value 就是 theme 中定">
+<meta name="twitter:description" content="关于 View 设置属性的方式： JavaxmlstyledefStyleAttrdefStyleResTheme  关于 defStyleRes 的使用，和在 xml 中声明 style=”@style/*“ 使用是一样的；Theme 中定义，就是在当前应用使用的 theme 中，方式和 style 中定义的一样，其作用范围是全局的，只要有使用这个属性的地方，value 就是 theme 中定义">
   
     <link rel="alternate" href="/atom.xml" title="Hexiaosa" type="application/atom+xml">
   
@@ -85,17 +85,14 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>关于 View 设置属性的方式：</p>
-<blockquote>
-<p>Java<br>xml<br>style<br>defStyleAttr<br>defStyleRes<br>Theme</p>
-</blockquote>
+        <p>关于 View 设置属性的方式：<br> Java<br>xml<br>style<br>defStyleAttr<br>defStyleRes<br>Theme</p>
+<hr>
 <p>关于 defStyleRes 的使用，和在 xml 中声明 style=”@style/<em>*</em>“ 使用是一样的；<br>Theme 中定义，就是在当前应用使用的 theme 中，方式和 style 中定义的一样，其作用范围是全局的，只要有使用这个属性的地方，value 就是 theme 中定义的；<br>defStyleRes, defStyleAttr 的作用主要是用于自定义 View 中，想要使用该自定义 View 的地方都是这些属性</p>
-<p>defStyleAttr 使用方法一般如下：</p>
-<blockquote>
-<p>attr.xml<br>    <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&lt;attr name=&quot;ZTV_def_style&quot; format=&quot;reference&quot;/&gt;</div></pre></td></tr></table></figure></p>
-</blockquote>
+<hr>
+<p>defStyleAttr 使用方法一般如下：<br>attr.xml<br>    <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&lt;attr name=&quot;ZTV_def_style&quot; format=&quot;reference&quot;/&gt;</div></pre></td></tr></table></figure></p>
 <p>style.xml<br>    <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">&lt;style name=&quot;AppTheme&quot; parent=&quot;Theme.AppCompat.DayNight&quot;&gt;</div><div class="line">    &lt;!-- Customize your theme here. --&gt;</div><div class="line">    &lt;item name=&quot;ZTV_def_style&quot;&gt;@style/---&lt;/item&gt;</div><div class="line">&lt;/style&gt;</div></pre></td></tr></table></figure></p>
 <p>然后定义你想要指定属性的 style, 再在自定义的 View 中使用 R.attr.ZTV_def_style</p>
+<hr>
 <p>这几中方式的优先级：Java &gt; xml &gt; style &gt; defStyleAttr &gt; defStyleRes &gt; Theme<br>原因可以根据使用的习惯想要，defStyleAttr &gt; defStyleRes 在官方文档中有声明 defStyleRes used only if defStyleAttr is 0 or can not be found in the theme。</p>
 
       
