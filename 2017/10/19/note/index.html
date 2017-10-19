@@ -11,10 +11,12 @@
 <meta property="og:url" content="http://hexiaosa.com/2017/10/19/note/index.html">
 <meta property="og:site_name" content="Hexiaosa">
 <meta property="og:description" content="最近总结1. Serializable 和 ParcelableSerializable 和 Parcelable 都是用于序列化的。Serializable 是 Java 中定义的用于序列化的，使用方法是直接实现 Serializable 接口即可;使用 Parcelable 比 Serializable 快大概十倍，因为 Serializable 使用了反射是一个很慢的过程，并且会产生大量的临">
-<meta property="og:updated_time" content="2017-10-19T01:39:18.990Z">
+<meta property="og:image" content="http://hexiaosa.com/image/valatile1.jpg">
+<meta property="og:updated_time" content="2017-10-19T01:42:16.413Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="笔记">
 <meta name="twitter:description" content="最近总结1. Serializable 和 ParcelableSerializable 和 Parcelable 都是用于序列化的。Serializable 是 Java 中定义的用于序列化的，使用方法是直接实现 Serializable 接口即可;使用 Parcelable 比 Serializable 快大概十倍，因为 Serializable 使用了反射是一个很慢的过程，并且会产生大量的临">
+<meta name="twitter:image" content="http://hexiaosa.com/image/valatile1.jpg">
   
     <link rel="alternate" href="/atom.xml" title="Hexiaosa" type="application/atom+xml">
   
@@ -54,7 +56,7 @@
         
           <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
         
-        <a id="nav-search-btn" class="nav-icon" title="Zoeken"></a>
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
       </nav>
       <div id="search-form-wrap">
         <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://hexiaosa.com"></form>
@@ -91,28 +93,20 @@
 <h6 id="5-transient"><a href="#5-transient" class="headerlink" title="5. transient"></a>5. transient</h6><p>transient 的作用是：对于已经序列化的对象，创建实例时前面加上 transient 可以阻止序列化。</p>
 <h6 id="6-volatile"><a href="#6-volatile" class="headerlink" title="6. volatile"></a>6. volatile</h6><p>volatile 的作用：</p>
 <ol>
-<li><p>防止编译器优化代码，如：<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div></pre></td><td class="code"><pre><div class="line">a = 1;</div><div class="line">a = 2;</div><div class="line">a = 3;</div><div class="line">```上面三句代码，如果没有 volatile 修饰，编译就会对其进行优化，只生成 a = 3; 这一句的机器代码，如果有 volatile 修饰，则每一句都会生成代码。</div><div class="line"></div><div class="line">2. volatile 保证不同线程操作时，对变量的修改立即可见</div><div class="line">![volatile 作用](/image/valatile1.jpg)</div><div class="line"></div><div class="line">###### 7. static 方法重写无效</div><div class="line"></div><div class="line">###### 8. Java 中的引用：</div><div class="line">强引用：new 出来的对象</div><div class="line">软引用：当堆发生 OOM 时会被回收，若回收后内存仍不足，才会发生 OOM.</div><div class="line">弱引用：WeakReference 只要发生 gc, 就会被回收</div><div class="line"></div><div class="line">###### 9. 静态块</div><div class="line">执行顺序：静态块 -&gt; 构造函数 -&gt; 调用方法</div><div class="line">静态块在当前类的调用中只执行一次</div><div class="line"></div><div class="line">###### 10. fail-fast 和 fail-safe</div><div class="line">fail-fast 发生条件：单线程-集合在被访问的过程中内部结构发生修改；多线程-多个线程同时修改同一个集合</div><div class="line">解决方法就是用 fail-safe 机制，即可以使用 CopyOnWriteArrayList 或 ConCurrentHashMap, 它的实现机制是所有的修改都在一个复制的集合上操作</div><div class="line"></div><div class="line">###### 11. 线程池</div><div class="line">newCacheThreadPool, 可缓存的线程池</div><div class="line">newFixedThreadPool， 创建固定数量的线程池</div><div class="line">newScheduledThreadPool</div><div class="line">newSingleThreadExcytor, 所有的线程单线程执行</div><div class="line"></div><div class="line">###### 12. canvas</div><div class="line">canvas drawArc 时，paint 需要 setStyle(Paint.Style.STROKE) 才能画成弧，FILL 画成是扇形</div><div class="line"></div><div class="line">###### 13. 捕获全局异常  http://www.jianshu.com/p/01b69d91a3a8</div></pre></td></tr></table></figure></p>
-<p> /**</p>
-<ul>
-<li>捕获未处理的异常<br>*/<br>private void handleUncaughtException() {<br> new Handler(Looper.getMainLooper()).post(new Runnable() {<pre><code>@Override
-public void run() {
-    //主线程异常拦截
-    while (true) {
-        try {
-            Looper.loop();//主线程的异常会从这里抛出
-        } catch (Throwable e) {
-            Log.e(&quot;TAG&quot;, &quot;主线程异常----&quot; + e.getMessage());
-            if (e != null) {
-                handleAfterUncaught();
-            }
-        }
-    }
-}
-</code></pre> });<br> //所有线程异常拦截，由于主线程的异常都被我们catch住了，所以下面的代码拦截到的都是子线程的异常<br> Thread.setDefaultUncaughtExceptionHandler(new MyException());<br>}<br>```</li>
-</ul>
+<li>防止编译器优化代码，如：<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">a = 1;</div><div class="line">a = 2;</div><div class="line">a = 3;</div></pre></td></tr></table></figure>
 </li>
 </ol>
-<h6 id="14-onDraw-使用"><a href="#14-onDraw-使用" class="headerlink" title="14. onDraw 使用"></a>14. onDraw 使用</h6><p>onDraw 不能做耗时操作，否则会导致界面卡顿。<br>原因：onDraw 引起了 Android 界面渲染，而渲染机制是：系统每 16ms 会执行一次。超过 16ms, 就开始了下次的渲染，导致界面卡顿。</p>
+<p>上面三句代码，如果没有 volatile 修饰，编译就会对其进行优化，只生成 a = 3; 这一句的机器代码，如果有 volatile 修饰，则每一句都会生成代码。</p>
+<ol>
+<li>volatile 保证不同线程操作时，对变量的修改立即可见<br><img src="/image/valatile1.jpg" alt="volatile 作用"></li>
+</ol>
+<h6 id="7-static-方法重写无效"><a href="#7-static-方法重写无效" class="headerlink" title="7. static 方法重写无效"></a>7. static 方法重写无效</h6><h6 id="8-Java-中的引用："><a href="#8-Java-中的引用：" class="headerlink" title="8. Java 中的引用："></a>8. Java 中的引用：</h6><p>强引用：new 出来的对象<br>软引用：当堆发生 OOM 时会被回收，若回收后内存仍不足，才会发生 OOM.<br>弱引用：WeakReference 只要发生 gc, 就会被回收</p>
+<h6 id="9-静态块"><a href="#9-静态块" class="headerlink" title="9. 静态块"></a>9. 静态块</h6><p>执行顺序：静态块 -&gt; 构造函数 -&gt; 调用方法<br>静态块在当前类的调用中只执行一次</p>
+<h6 id="10-fail-fast-和-fail-safe"><a href="#10-fail-fast-和-fail-safe" class="headerlink" title="10. fail-fast 和 fail-safe"></a>10. fail-fast 和 fail-safe</h6><p>fail-fast 发生条件：单线程-集合在被访问的过程中内部结构发生修改；多线程-多个线程同时修改同一个集合<br>解决方法就是用 fail-safe 机制，即可以使用 CopyOnWriteArrayList 或 ConCurrentHashMap, 它的实现机制是所有的修改都在一个复制的集合上操作</p>
+<h6 id="11-线程池"><a href="#11-线程池" class="headerlink" title="11. 线程池"></a>11. 线程池</h6><p>newCacheThreadPool, 可缓存的线程池<br>newFixedThreadPool， 创建固定数量的线程池<br>newScheduledThreadPool<br>newSingleThreadExcytor, 所有的线程单线程执行</p>
+<h6 id="12-canvas"><a href="#12-canvas" class="headerlink" title="12. canvas"></a>12. canvas</h6><p>canvas drawArc 时，paint 需要 setStyle(Paint.Style.STROKE) 才能画成弧，FILL 画成是扇形</p>
+<h6 id="13-捕获全局异常-http-www-jianshu-com-p-01b69d91a3a8"><a href="#13-捕获全局异常-http-www-jianshu-com-p-01b69d91a3a8" class="headerlink" title="13. 捕获全局异常  http://www.jianshu.com/p/01b69d91a3a8"></a>13. 捕获全局异常  <a href="http://www.jianshu.com/p/01b69d91a3a8" target="_blank" rel="external">http://www.jianshu.com/p/01b69d91a3a8</a></h6><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">private void handleUncaughtException() &#123;</div><div class="line">	new Handler(Looper.getMainLooper()).post(new Runnable() &#123;</div><div class="line">		@Override</div><div class="line">		public void run() &#123;</div><div class="line">			//主线程异常拦截</div><div class="line">			while (true) &#123;</div><div class="line">				try &#123;</div><div class="line">					Looper.loop();//主线程的异常会从这里抛出</div><div class="line">				&#125; catch (Throwable e) &#123;</div><div class="line">					Log.e(&quot;TAG&quot;, &quot;主线程异常----&quot; + e.getMessage());</div><div class="line">					if (e != null) &#123;</div><div class="line">						handleAfterUncaught();</div><div class="line">					&#125;</div><div class="line">				&#125;</div><div class="line">			&#125;</div><div class="line">		&#125;</div><div class="line">	&#125;);</div><div class="line">	//所有线程异常拦截，由于主线程的异常都被我们catch住了，所以下面的代码拦截到的都是子线程的异常</div><div class="line">	Thread.setDefaultUncaughtExceptionHandler(new MyException());</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</code></pre><h6 id="14-onDraw-使用"><a href="#14-onDraw-使用" class="headerlink" title="14. onDraw 使用"></a>14. onDraw 使用</h6><p>onDraw 不能做耗时操作，否则会导致界面卡顿。<br>原因：onDraw 引起了 Android 界面渲染，而渲染机制是：系统每 16ms 会执行一次。超过 16ms, 就开始了下次的渲染，导致界面卡顿。</p>
 <h6 id="15-this-关键字的作用"><a href="#15-this-关键字的作用" class="headerlink" title="15. this 关键字的作用"></a>15. this 关键字的作用</h6><ol>
 <li><p>上下文，当前类的引用</p>
 </li>
@@ -152,7 +146,7 @@ public void run() {
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://hexiaosa.com/2017/10/19/note/" data-id="cj8xsuicc0000i4t4ly4bckvq" class="article-share-link">Delen</a>
+      <a data-url="http://hexiaosa.com/2017/10/19/note/" data-id="cj8xsuicc0000i4t4ly4bckvq" class="article-share-link">Share</a>
       
       
     </footer>
@@ -163,7 +157,7 @@ public void run() {
   
   
     <a href="/2017/10/11/View-Attribute-Set/" id="article-nav-older" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Ouder</strong>
+      <strong class="article-nav-caption">Older</strong>
       <div class="article-nav-title">View 属性</div>
     </a>
   
@@ -186,7 +180,7 @@ public void run() {
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">Archieven</h3>
+    <h3 class="widget-title">Archives</h3>
     <div class="widget">
       <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/10/">October 2017</a></li></ul>
     </div>
@@ -196,7 +190,7 @@ public void run() {
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">Recente berichten</h3>
+    <h3 class="widget-title">Recent Posts</h3>
     <div class="widget">
       <ul>
         
