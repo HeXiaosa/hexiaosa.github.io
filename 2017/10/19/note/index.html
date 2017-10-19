@@ -12,7 +12,7 @@
 <meta property="og:site_name" content="Hexiaosa">
 <meta property="og:description" content="最近总结1. Serializable 和 ParcelableSerializable 和 Parcelable 都是用于序列化的。Serializable 是 Java 中定义的用于序列化的，使用方法是直接实现 Serializable 接口即可;使用 Parcelable 比 Serializable 快大概十倍，因为 Serializable 使用了反射是一个很慢的过程，并且会产生大量的临">
 <meta property="og:image" content="http://hexiaosa.com/image/valatile1.jpg">
-<meta property="og:updated_time" content="2017-10-19T01:42:16.413Z">
+<meta property="og:updated_time" content="2017-10-19T03:29:50.639Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="笔记">
 <meta name="twitter:description" content="最近总结1. Serializable 和 ParcelableSerializable 和 Parcelable 都是用于序列化的。Serializable 是 Java 中定义的用于序列化的，使用方法是直接实现 Serializable 接口即可;使用 Parcelable 比 Serializable 快大概十倍，因为 Serializable 使用了反射是一个很慢的过程，并且会产生大量的临">
@@ -56,7 +56,7 @@
         
           <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
         
-        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+        <a id="nav-search-btn" class="nav-icon" title="Zoeken"></a>
       </nav>
       <div id="search-form-wrap">
         <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://hexiaosa.com"></form>
@@ -141,12 +141,37 @@
 <p>在理解以上分发流程的基础上，以下方法返回 true 代表：<br>dispatchTouchEvent : 事件到此结束，不再继续分发</p>
 <p>onInterceptTouchEvent : 拦截事件，不再往子 View 分发</p>
 <p>onTouch : 由自己完全处理，事件不再往父 View 传递</p>
-<h6 id="20-属性动画"><a href="#20-属性动画" class="headerlink" title="20. 属性动画"></a>20. 属性动画</h6><p>PropertyValuesHolder 类似AnimatorSet, 多个动画一起执行<br>动画的监听，animator.addListener(), new AnimatorListener/AnimatorListenerAdapter<br>view.animate 方法，也就类似于 Animator 的效果</p>
+<h6 id="20-动画"><a href="#20-动画" class="headerlink" title="20. 动画"></a>20. 动画</h6><ol>
+<li>补间动画 (Animation)</li>
+<li>属性动画 (Animator)<blockquote>
+<ol>
+<li>ValueAnimator 的用法<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">ValueAnimator valueAnimator = new ValueAnimator(1, 100);</div><div class="line">valueAnimator.setTarget(view);</div><div class="line">valueAnimator.setDuration(500);</div><div class="line">valueAnimator.start();</div><div class="line">valueAnimator.addUpdateListener(new AnimatorUpdateListener()&#123;</div><div class="line">	@Override</div><div class="line">	publid void onAnimationUpdate(ValueAnimator animator) &#123;</div><div class="line">	    Float value = (Float)animator.getAnimatedValue();</div><div class="line">	    //todo use the value</div><div class="line">	&#125;</div><div class="line">&#125;);</div></pre></td></tr></table></figure>
+</li>
+</ol>
+</blockquote>
+</li>
+</ol>
+<blockquote>
+<ol>
+<li>PropertyValuesHolder 类似AnimatorSet, 多个动画一起执行</li>
+<li>动画的监听，animator.addListener(), new AnimatorListener/AnimatorListenerAdapter</li>
+<li>View 的 animate<br>View 可以直接使用 animate() 方法</li>
+</ol>
+</blockquote>
+<ol>
+<li>布局动画<br>用于 ViewGroup, 用法：<blockquote>
+<ol>
+<li>xml中在 ViewGroup 声明 animationLayoutDChanges=”true”, 但是测试时并未发现有动画效果</li>
+<li>代码中动态添加，如：<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">LinearLayout ll = (LinearLayout)findViewById(R.id.ll);</div><div class="line"></div><div class="line">ScaleAnimation sa = new ScaleAnimation(0, 1, 0, 1);</div><div class="line">sa.setDuration(500);</div><div class="line"></div><div class="line">LayoutAnimationControllor lac = new LayoutAnimationControlor(sa, 0.5f);</div><div class="line">lac.setOrder(LayoutAnimationControlor.ORDER_NORMAL);</div><div class="line"></div><div class="line">ll.setLayoutAnimationControlor(lac);</div></pre></td></tr></table></figure></li>
+</ol>
+</blockquote>
+</li>
+</ol>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://hexiaosa.com/2017/10/19/note/" data-id="cj8xsuicc0000i4t4ly4bckvq" class="article-share-link">Share</a>
+      <a data-url="http://hexiaosa.com/2017/10/19/note/" data-id="cj8xsuicc0000i4t4ly4bckvq" class="article-share-link">Delen</a>
       
       
     </footer>
@@ -157,7 +182,7 @@
   
   
     <a href="/2017/10/11/View-Attribute-Set/" id="article-nav-older" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Older</strong>
+      <strong class="article-nav-caption">Ouder</strong>
       <div class="article-nav-title">View 属性</div>
     </a>
   
@@ -180,7 +205,7 @@
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">Archives</h3>
+    <h3 class="widget-title">Archieven</h3>
     <div class="widget">
       <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/10/">October 2017</a></li></ul>
     </div>
@@ -190,7 +215,7 @@
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">Recent Posts</h3>
+    <h3 class="widget-title">Recente berichten</h3>
     <div class="widget">
       <ul>
         
