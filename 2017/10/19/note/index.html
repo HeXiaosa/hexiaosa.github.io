@@ -3,14 +3,18 @@
 <head>
   <meta charset="utf-8">
   
-  <title>Hexiaosa</title>
+  <title>笔记 | Hexiaosa</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta property="og:type" content="website">
-<meta property="og:title" content="Hexiaosa">
-<meta property="og:url" content="http://hexiaosa.com/index.html">
+  <meta name="description" content="最近总结1. Serializable 和 ParcelableSerializable 和 Parcelable 都是用于序列化的。Serializable 是 Java 中定义的用于序列化的，使用方法是直接实现 Serializable 接口即可;使用 Parcelable 比 Serializable 快大概十倍，因为 Serializable 使用了反射是一个很慢的过程，并且会产生大量的临">
+<meta property="og:type" content="article">
+<meta property="og:title" content="笔记">
+<meta property="og:url" content="http://hexiaosa.com/2017/10/19/note/index.html">
 <meta property="og:site_name" content="Hexiaosa">
+<meta property="og:description" content="最近总结1. Serializable 和 ParcelableSerializable 和 Parcelable 都是用于序列化的。Serializable 是 Java 中定义的用于序列化的，使用方法是直接实现 Serializable 接口即可;使用 Parcelable 比 Serializable 快大概十倍，因为 Serializable 使用了反射是一个很慢的过程，并且会产生大量的临">
+<meta property="og:updated_time" content="2017-10-19T01:39:18.990Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Hexiaosa">
+<meta name="twitter:title" content="笔记">
+<meta name="twitter:description" content="最近总结1. Serializable 和 ParcelableSerializable 和 Parcelable 都是用于序列化的。Serializable 是 Java 中定义的用于序列化的，使用方法是直接实现 Serializable 接口即可;使用 Parcelable 比 Serializable 快大概十倍，因为 Serializable 使用了反射是一个很慢的过程，并且会产生大量的临">
   
     <link rel="alternate" href="/atom.xml" title="Hexiaosa" type="application/atom+xml">
   
@@ -59,9 +63,7 @@
   </div>
 </header>
       <div class="outer">
-        <section id="main">
-  
-    <article id="post-note" class="article article-type-post" itemscope itemprop="blogPost">
+        <section id="main"><article id="post-note" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2017/10/19/note/" class="article-date">
   <time datetime="2017-10-19T01:32:48.000Z" itemprop="datePublished">2017-10-19</time>
@@ -74,8 +76,8 @@
       <header class="article-header">
         
   
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/10/19/note/">笔记</a>
+    <h1 class="article-title" itemprop="name">
+      笔记
     </h1>
   
 
@@ -156,96 +158,19 @@ public void run() {
     </footer>
   </div>
   
-</article>
-
-
+    
+<nav id="article-nav">
   
-    <article id="post-View-Attribute-Set" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2017/10/11/View-Attribute-Set/" class="article-date">
-  <time datetime="2017-10-11T08:56:51.000Z" itemprop="datePublished">2017-10-11</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
   
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/10/11/View-Attribute-Set/">View 属性</a>
-    </h1>
+    <a href="/2017/10/11/View-Attribute-Set/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Ouder</strong>
+      <div class="article-nav-title">View 属性</div>
+    </a>
   
+</nav>
 
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>关于 View 设置属性的方式：<br> Java<br>xml<br>style<br>defStyleAttr<br>defStyleRes<br>Theme</p>
-<hr>
-<p>关于 defStyleRes 的使用，和在 xml 中声明 style=”@style/<em>*</em>“ 使用是一样的；<br>Theme 中定义，就是在当前应用使用的 theme 中，方式和 style 中定义的一样，其作用范围是全局的，只要有使用这个属性的地方，value 就是 theme 中定义的；<br>defStyleRes, defStyleAttr 的作用主要是用于自定义 View 中，想要使用该自定义 View 的地方都是这些属性</p>
-<hr>
-<p>defStyleAttr 使用方法一般如下：<br>attr.xml<br>    <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&lt;attr name=&quot;ZTV_def_style&quot; format=&quot;reference&quot;/&gt;</div></pre></td></tr></table></figure></p>
-<p>style.xml<br>    <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">&lt;style name=&quot;AppTheme&quot; parent=&quot;Theme.AppCompat.DayNight&quot;&gt;</div><div class="line">    &lt;!-- Customize your theme here. --&gt;</div><div class="line">    &lt;item name=&quot;ZTV_def_style&quot;&gt;@style/---&lt;/item&gt;</div><div class="line">&lt;/style&gt;</div></pre></td></tr></table></figure></p>
-<p>然后定义你想要指定属性的 style, 再在自定义的 View 中使用 R.attr.ZTV_def_style</p>
-<hr>
-<p>这几中方式的优先级：Java &gt; xml &gt; style &gt; defStyleAttr &gt; defStyleRes &gt; Theme<br>原因可以根据使用的习惯想要，defStyleAttr &gt; defStyleRes 在官方文档中有声明 defStyleRes used only if defStyleAttr is 0 or can not be found in the theme。</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://hexiaosa.com/2017/10/11/View-Attribute-Set/" data-id="cj8msybyr0001t0t4ln42tcje" class="article-share-link">Delen</a>
-      
-      
-    </footer>
-  </div>
   
 </article>
-
-
-  
-    <article id="post-MotionEvent_description" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2017/10/09/MotionEvent_description/" class="article-date">
-  <time datetime="2017-10-09T02:32:48.000Z" itemprop="datePublished">2017-10-09</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/10/09/MotionEvent_description/">MotionEvent介绍</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>本文主要介绍 MotionEvent 的两点，一：MotionEvent 的点击事件；二：MotionEvent 的 X, Y 等含义。</p>
-<h4 id="MotionEvent-的点击事件"><a href="#MotionEvent-的点击事件" class="headerlink" title="MotionEvent 的点击事件"></a>MotionEvent 的点击事件</h4><p>常用的有这几个：<br>ACTION_DOWN 刚接触到屏幕执行一次<br>ACTION_MOVE 在屏幕上滑动<br>ACTION_UP 离开屏幕执行一次<br>ACTION_POINTER_DOWN 已经有event 事件，又有一个手指的触摸 DOWN 事件发生<br>ACTION_POINTER_UP 一个手指离开屏幕，但还有其它触摸点在</p>
-<p>单指触摸事件：ACTION_DOWN -&gt; ACTION_MOVE -&gt; ACTION_UP<br>多指触摸事件：ACTION_DOWN -&gt; ACTION_MOVE -&gt; ACTION_POINTER_DOWN -&gt; ACTION_POINTER_UP -&gt; ACTION_UP</p>
-<h4 id="MotionEvent-的位置参数含义"><a href="#MotionEvent-的位置参数含义" class="headerlink" title="MotionEvent 的位置参数含义"></a>MotionEvent 的位置参数含义</h4><p>常用的主要有 getX(), getY(), getRawX(), getRawY(), 下面用一张图来展示：<br>getX : 触摸点到当前 view 左边的距离<br>getY : 触摸点到当前 view 上边的距离<br>getRawX : 触摸点到屏幕左边的距离<br>getRawY : 触摸点到屏幕上边的距离</p>
-<p><img src="/image/motionevent_description1.jpg" alt="motionevent_description1"></p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://hexiaosa.com/2017/10/09/MotionEvent_description/" data-id="cj8msyby40000t0t4eundlbpl" class="article-share-link">Delen</a>
-      
-      
-    </footer>
-  </div>
-  
-</article>
-
-
-  
 
 </section>
         
