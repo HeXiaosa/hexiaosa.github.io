@@ -86,21 +86,17 @@
         <p>事件分发中设计到的几个方法：dispatchTouchEvent(), onInterceptTouchEvent(), onTouchEvent(), 这几个都有返回值 boolean 类型，默认情况下都返回 false, </p>
 <p>若有 A(B(MyView)), 则事件的默认传递：</p>
 <p>A dispatch<br>A onIntercept<br>B dispatch<br>B onIntercept<br>MyView dispatch<br>MyView onTouch<br>B onTouch<br>A onTouch</p>
-<blockquote>
 <p>当 dispatchTouchEvent 返回 true 时，上面的分发流程就此中止；<br>当 onInterceptTouchEvent 返回 true 时，事件不再往子 View 传递，其余都还正常；<br>当 onTouchEvent 返回 true 时，onTouchEvent 由自己处理，不再交给父级处理。</p>
-</blockquote>
 <p>由上面的分析看来已经很清晰了，有下面这些特殊情况：</p>
-<blockquote>
 <ol>
 <li>这几个事件中，ACTION_DOWN 返回 true 和整个事件返回 true 的效果一样。也就是 ACTION_DOWN 返回 true 表示之后的事件都由此处理。</li>
 <li>PS: onInterceptTouchEvent() 中有事件返回 true, 则之后的事件该方法不会再被调用，直到本次事件结束。</li>
 </ol>
-</blockquote>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://hexiaosa.com/2017/11/09/event_dispatch/" data-id="cj9rv64t30001c0t4t498seah" class="article-share-link">Share</a>
+      <a data-url="http://hexiaosa.com/2017/11/09/event_dispatch/" data-id="cj9rv8u5x0002h0t4ho4zdnnb" class="article-share-link">Share</a>
       
       
     </footer>
@@ -206,7 +202,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://hexiaosa.com/2017/10/19/note/" data-id="cj9rv64t30002c0t4iqqlpzh5" class="article-share-link">Share</a>
+      <a data-url="http://hexiaosa.com/2017/10/19/note/" data-id="cj9rv8u6c0003h0t45ptpihsl" class="article-share-link">Share</a>
       
       
     </footer>
@@ -251,7 +247,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://hexiaosa.com/2017/10/11/View-Attribute-Set/" data-id="cj9rv64t30003c0t4vdkl3n25" class="article-share-link">Share</a>
+      <a data-url="http://hexiaosa.com/2017/10/11/View-Attribute-Set/" data-id="cj9rv8u5x0001h0t4zrehpv4k" class="article-share-link">Share</a>
       
       
     </footer>
@@ -292,7 +288,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://hexiaosa.com/2017/10/09/MotionEvent_description/" data-id="cj9rv64s70000c0t42iuno2hh" class="article-share-link">Share</a>
+      <a data-url="http://hexiaosa.com/2017/10/09/MotionEvent_description/" data-id="cj9rv8u5h0000h0t48ga1vwft" class="article-share-link">Share</a>
       
       
     </footer>
