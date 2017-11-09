@@ -12,7 +12,7 @@
 <meta property="og:site_name" content="Hexiaosa">
 <meta property="og:description" content="最近总结1. Serializable 和 ParcelableSerializable 和 Parcelable 都是用于序列化的。Serializable 是 Java 中定义的用于序列化的，使用方法是直接实现 Serializable 接口即可;使用 Parcelable 比 Serializable 快大概十倍，因为 Serializable 使用了反射是一个很慢的过程，并且会产生大量的临">
 <meta property="og:image" content="http://hexiaosa.com/image/valatile1.jpg">
-<meta property="og:updated_time" content="2017-10-19T03:55:18.994Z">
+<meta property="og:updated_time" content="2017-10-19T05:59:34.013Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="笔记">
 <meta name="twitter:description" content="最近总结1. Serializable 和 ParcelableSerializable 和 Parcelable 都是用于序列化的。Serializable 是 Java 中定义的用于序列化的，使用方法是直接实现 Serializable 接口即可;使用 Parcelable 比 Serializable 快大概十倍，因为 Serializable 使用了反射是一个很慢的过程，并且会产生大量的临">
@@ -153,13 +153,15 @@
 <h6 id="布局动画"><a href="#布局动画" class="headerlink" title="布局动画"></a>布局动画</h6><p>用于 ViewGroup, 用法：</p>
 <ol>
 <li>xml中在 ViewGroup 声明 animationLayoutDChanges=”true”, 但是测试时并未发现有动画效果</li>
-<li>代码中动态添加，如：<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">LinearLayout ll = (LinearLayout)findViewById(R.id.ll);</div><div class="line"></div><div class="line">ScaleAnimation sa = new ScaleAnimation(0, 1, 0, 1);</div><div class="line">sa.setDuration(500);</div><div class="line"></div><div class="line">LayoutAnimationControllor lac = new LayoutAnimationControlor(sa, 0.5f);</div><div class="line">lac.setOrder(LayoutAnimationControlor.ORDER_NORMAL);</div><div class="line"></div><div class="line">ll.setLayoutAnimationControlor(lac);</div></pre></td></tr></table></figure></li>
+<li>代码中动态添加，如：<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">LinearLayout ll = (LinearLayout)findViewById(R.id.ll);</div><div class="line"></div><div class="line">ScaleAnimation sa = new ScaleAnimation(0, 1, 0, 1);</div><div class="line">sa.setDuration(500);</div><div class="line"></div><div class="line">LayoutAnimationControllor lac = new LayoutAnimationControlor(sa, 0.5f);</div><div class="line">lac.setOrder(LayoutAnimationControlor.ORDER_NORMAL);</div><div class="line"></div><div class="line">ll.setLayoutAnimationControlor(lac);</div></pre></td></tr></table></figure>
+</li>
 </ol>
+<h4 id="21-清空任务栈"><a href="#21-清空任务栈" class="headerlink" title="21. 清空任务栈"></a>21. 清空任务栈</h4><p>AndroidManifest 中 activity 标签中的几个属性：<br>clearTaskOnLaunch : 每次初始化该 activity, 任务栈就会被清空，只有这一个实例<br>finishOnTaskLaunch : 离开任务栈，再次初始化时，如果有该 activity, 就会被 finish.<br>alwaysRetainTaskState : 给了该 activity 一个免死金牌，永远不会被清理</p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://hexiaosa.com/2017/10/19/note/" data-id="cj8xxjhfj0002t4t4yvvlthra" class="article-share-link">Share</a>
+      <a data-url="http://hexiaosa.com/2017/10/19/note/" data-id="cj9rv64t30002c0t4iqqlpzh5" class="article-share-link">Share</a>
       
       
     </footer>
@@ -167,6 +169,15 @@
   
     
 <nav id="article-nav">
+  
+    <a href="/2017/11/09/event_dispatch/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          事件分发
+        
+      </div>
+    </a>
   
   
     <a href="/2017/10/11/View-Attribute-Set/" id="article-nav-older" class="article-nav-link-wrap">
@@ -195,7 +206,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/10/">October 2017</a></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/11/">November 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/10/">October 2017</a></li></ul>
     </div>
   </div>
 
@@ -206,6 +217,10 @@
     <h3 class="widget-title">Recent Posts</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2017/11/09/event_dispatch/">事件分发</a>
+          </li>
         
           <li>
             <a href="/2017/10/19/note/">笔记</a>

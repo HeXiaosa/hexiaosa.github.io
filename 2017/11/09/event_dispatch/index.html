@@ -3,14 +3,18 @@
 <head>
   <meta charset="utf-8">
   
-  <title>Archives: 2017/10 | Hexiaosa</title>
+  <title>事件分发 | Hexiaosa</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta property="og:type" content="website">
-<meta property="og:title" content="Hexiaosa">
-<meta property="og:url" content="http://hexiaosa.com/archives/2017/10/index.html">
+  <meta name="description" content="事件分发中设计到的几个方法：dispatchTouchEvent(), onInterceptTouchEvent(), onTouchEvent(), 这几个都有返回值 boolean 类型，默认情况下都返回 false,  若有 A(B(MyView)), 则事件的默认传递： A dispatchA onInterceptB dispatchB onInterceptMyView dispat">
+<meta property="og:type" content="article">
+<meta property="og:title" content="事件分发">
+<meta property="og:url" content="http://hexiaosa.com/2017/11/09/event_dispatch/index.html">
 <meta property="og:site_name" content="Hexiaosa">
+<meta property="og:description" content="事件分发中设计到的几个方法：dispatchTouchEvent(), onInterceptTouchEvent(), onTouchEvent(), 这几个都有返回值 boolean 类型，默认情况下都返回 false,  若有 A(B(MyView)), 则事件的默认传递： A dispatchA onInterceptB dispatchB onInterceptMyView dispat">
+<meta property="og:updated_time" content="2017-11-09T02:36:56.185Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Hexiaosa">
+<meta name="twitter:title" content="事件分发">
+<meta name="twitter:description" content="事件分发中设计到的几个方法：dispatchTouchEvent(), onInterceptTouchEvent(), onTouchEvent(), 这几个都有返回值 boolean 类型，默认情况下都返回 false,  若有 A(B(MyView)), 则事件的默认传递： A dispatchA onInterceptB dispatchB onInterceptMyView dispat">
   
     <link rel="alternate" href="/atom.xml" title="Hexiaosa" type="application/atom+xml">
   
@@ -59,77 +63,64 @@
   </div>
 </header>
       <div class="outer">
-        <section id="main">
-  
-  
-    
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2017" class="archive-year">2017</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2017/10/19/note/" class="archive-article-date">
-  <time datetime="2017-10-19T01:32:48.000Z" itemprop="datePublished">Oct 19</time>
+        <section id="main"><article id="post-event_dispatch" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/11/09/event_dispatch/" class="article-date">
+  <time datetime="2017-11-09T01:32:48.000Z" itemprop="datePublished">2017-11-09</time>
 </a>
-      
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
   
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/10/19/note/">笔记</a>
+    <h1 class="article-title" itemprop="name">
+      事件分发
     </h1>
   
 
-    </header>
-  </div>
-</article>
-  
+      </header>
     
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2017/10/11/View-Attribute-Set/" class="archive-article-date">
-  <time datetime="2017-10-11T08:56:51.000Z" itemprop="datePublished">Oct 11</time>
-</a>
+    <div class="article-entry" itemprop="articleBody">
       
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/10/11/View-Attribute-Set/">View 属性</a>
-    </h1>
-  
+        <p>事件分发中设计到的几个方法：dispatchTouchEvent(), onInterceptTouchEvent(), onTouchEvent(), 这几个都有返回值 boolean 类型，默认情况下都返回 false, </p>
+<p>若有 A(B(MyView)), 则事件的默认传递：</p>
+<p>A dispatch<br>A onIntercept<br>B dispatch<br>B onIntercept<br>MyView dispatch<br>MyView onTouch<br>B onTouch<br>A onTouch</p>
+<blockquote>
+<p>当 dispatchTouchEvent 返回 true 时，上面的分发流程就此中止；<br>当 onInterceptTouchEvent 返回 true 时，事件不再往子 View 传递，其余都还正常；<br>当 onTouchEvent 返回 true 时，onTouchEvent 由自己处理，不再交给父级处理。</p>
+</blockquote>
+<p>由上面的分析看来已经很清晰了，有下面这些特殊情况：</p>
+<blockquote>
+<ol>
+<li>这几个事件中，ACTION_DOWN 返回 true 和整个事件返回 true 的效果一样。也就是 ACTION_DOWN 返回 true 表示之后的事件都由此处理。</li>
+<li>PS: onInterceptTouchEvent() 中有事件返回 true, 则之后的事件该方法不会再被调用，直到本次事件结束。</li>
+</ol>
+</blockquote>
 
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      <a href="/2017/10/09/MotionEvent_description/" class="archive-article-date">
-  <time datetime="2017-10-09T02:32:48.000Z" itemprop="datePublished">Oct 9</time>
-</a>
       
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/10/09/MotionEvent_description/">MotionEvent介绍</a>
-    </h1>
-  
-
-    </header>
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://hexiaosa.com/2017/11/09/event_dispatch/" data-id="cj9rv64t30001c0t4t498seah" class="article-share-link">Share</a>
+      
+      
+    </footer>
   </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2017/10/19/note/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">笔记</div>
+    </a>
+  
+</nav>
+
+  
 </article>
-  
-  
-    </div></section>
-  
 
 </section>
         
