@@ -11,7 +11,7 @@
 <meta property="og:url" content="http://hexiaosa.com/2017/11/09/event_dispatch/index.html">
 <meta property="og:site_name" content="Hexiaosa">
 <meta property="og:description" content="事件分发中设计到的几个方法：dispatchTouchEvent(), onInterceptTouchEvent(), onTouchEvent(), 这几个都有返回值 boolean 类型，默认情况下都返回 false,  若有 A(B(MyView)), 则事件的默认传递： A dispatchA onInterceptB dispatchB onInterceptMyView dispat">
-<meta property="og:updated_time" content="2017-11-09T02:40:05.261Z">
+<meta property="og:updated_time" content="2017-11-09T02:42:23.796Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="事件分发">
 <meta name="twitter:description" content="事件分发中设计到的几个方法：dispatchTouchEvent(), onInterceptTouchEvent(), onTouchEvent(), 这几个都有返回值 boolean 类型，默认情况下都返回 false,  若有 A(B(MyView)), 则事件的默认传递： A dispatchA onInterceptB dispatchB onInterceptMyView dispat">
@@ -91,14 +91,14 @@
 <p>当 dispatchTouchEvent 返回 true 时，上面的分发流程就此中止；<br>当 onInterceptTouchEvent 返回 true 时，事件不再往子 View 传递，其余都还正常；<br>当 onTouchEvent 返回 true 时，onTouchEvent 由自己处理，不再交给父级处理。</p>
 <p>由上面的分析看来已经很清晰了，有下面这些特殊情况：</p>
 <ol>
-<li>这几个事件中，ACTION_DOWN 返回 true 和整个事件返回 true 的效果一样。也就是 ACTION_DOWN 返回 true 表示之后的事件都由此处理。</li>
+<li>这几个事件中，ACTION_DOWN 返回 true 和整个事件返回 true 的效果一样。也就是该次 event 一旦返回 true 表示之后的事件都返回 true。</li>
 <li>PS: onInterceptTouchEvent() 中有事件返回 true, 则之后的事件该方法不会再被调用，直到本次事件结束。</li>
 </ol>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://hexiaosa.com/2017/11/09/event_dispatch/" data-id="cj9rv8u5x0002h0t4ho4zdnnb" class="article-share-link">Share</a>
+      <a data-url="http://hexiaosa.com/2017/11/09/event_dispatch/" data-id="cj9rxaksf0004r8t4aa7fqpz6" class="article-share-link">Share</a>
       
       
     </footer>
@@ -106,6 +106,15 @@
   
     
 <nav id="article-nav">
+  
+    <a href="/2017/11/09/about_string/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          字符串
+        
+      </div>
+    </a>
   
   
     <a href="/2017/10/19/note/" id="article-nav-older" class="article-nav-link-wrap">
@@ -145,6 +154,10 @@
     <h3 class="widget-title">Recent Posts</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2017/11/09/about_string/">字符串</a>
+          </li>
         
           <li>
             <a href="/2017/11/09/event_dispatch/">事件分发</a>

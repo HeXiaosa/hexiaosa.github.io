@@ -3,20 +3,18 @@
 <head>
   <meta charset="utf-8">
   
-  <title>MotionEvent介绍 | Hexiaosa</title>
+  <title>字符串 | Hexiaosa</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="本文主要介绍 MotionEvent 的两点，一：MotionEvent 的点击事件；二：MotionEvent 的 X, Y 等含义。 MotionEvent 的点击事件常用的有这几个：ACTION_DOWN 刚接触到屏幕执行一次ACTION_MOVE 在屏幕上滑动ACTION_UP 离开屏幕执行一次ACTION_POINTER_DOWN 已经有event 事件，又有一个手指的触摸 DOWN 事">
+  <meta name="description" content="12String s = &amp;quot;abc&amp;quot;;s += &amp;quot;d&amp;quot;; 上述代码上，编译器会自动生成更高效的 StringBuilder, 调用 append() 方法来实现。 那么是否表示可以完全信任编译器呢，再看下面代码：1234String s = &amp;quot;a&amp;quot;;for (int i = 0; i &amp;lt; 5; i++) &amp;#123;	s += &amp;q">
 <meta property="og:type" content="article">
-<meta property="og:title" content="MotionEvent介绍">
-<meta property="og:url" content="http://hexiaosa.com/2017/10/09/MotionEvent_description/index.html">
+<meta property="og:title" content="字符串">
+<meta property="og:url" content="http://hexiaosa.com/2017/11/09/about_string/index.html">
 <meta property="og:site_name" content="Hexiaosa">
-<meta property="og:description" content="本文主要介绍 MotionEvent 的两点，一：MotionEvent 的点击事件；二：MotionEvent 的 X, Y 等含义。 MotionEvent 的点击事件常用的有这几个：ACTION_DOWN 刚接触到屏幕执行一次ACTION_MOVE 在屏幕上滑动ACTION_UP 离开屏幕执行一次ACTION_POINTER_DOWN 已经有event 事件，又有一个手指的触摸 DOWN 事">
-<meta property="og:image" content="http://hexiaosa.com/image/motionevent_description1.jpg">
-<meta property="og:updated_time" content="2017-10-10T03:11:09.829Z">
+<meta property="og:description" content="12String s = &amp;quot;abc&amp;quot;;s += &amp;quot;d&amp;quot;; 上述代码上，编译器会自动生成更高效的 StringBuilder, 调用 append() 方法来实现。 那么是否表示可以完全信任编译器呢，再看下面代码：1234String s = &amp;quot;a&amp;quot;;for (int i = 0; i &amp;lt; 5; i++) &amp;#123;	s += &amp;q">
+<meta property="og:updated_time" content="2017-11-09T03:37:31.314Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="MotionEvent介绍">
-<meta name="twitter:description" content="本文主要介绍 MotionEvent 的两点，一：MotionEvent 的点击事件；二：MotionEvent 的 X, Y 等含义。 MotionEvent 的点击事件常用的有这几个：ACTION_DOWN 刚接触到屏幕执行一次ACTION_MOVE 在屏幕上滑动ACTION_UP 离开屏幕执行一次ACTION_POINTER_DOWN 已经有event 事件，又有一个手指的触摸 DOWN 事">
-<meta name="twitter:image" content="http://hexiaosa.com/image/motionevent_description1.jpg">
+<meta name="twitter:title" content="字符串">
+<meta name="twitter:description" content="12String s = &amp;quot;abc&amp;quot;;s += &amp;quot;d&amp;quot;; 上述代码上，编译器会自动生成更高效的 StringBuilder, 调用 append() 方法来实现。 那么是否表示可以完全信任编译器呢，再看下面代码：1234String s = &amp;quot;a&amp;quot;;for (int i = 0; i &amp;lt; 5; i++) &amp;#123;	s += &amp;q">
   
     <link rel="alternate" href="/atom.xml" title="Hexiaosa" type="application/atom+xml">
   
@@ -65,10 +63,10 @@
   </div>
 </header>
       <div class="outer">
-        <section id="main"><article id="post-MotionEvent_description" class="article article-type-post" itemscope itemprop="blogPost">
+        <section id="main"><article id="post-about_string" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2017/10/09/MotionEvent_description/" class="article-date">
-  <time datetime="2017-10-09T02:32:48.000Z" itemprop="datePublished">2017-10-09</time>
+    <a href="/2017/11/09/about_string/" class="article-date">
+  <time datetime="2017-11-09T03:32:48.000Z" itemprop="datePublished">2017-11-09</time>
 </a>
     
   </div>
@@ -79,7 +77,7 @@
         
   
     <h1 class="article-title" itemprop="name">
-      MotionEvent介绍
+      字符串
     </h1>
   
 
@@ -87,16 +85,17 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>本文主要介绍 MotionEvent 的两点，一：MotionEvent 的点击事件；二：MotionEvent 的 X, Y 等含义。</p>
-<h4 id="MotionEvent-的点击事件"><a href="#MotionEvent-的点击事件" class="headerlink" title="MotionEvent 的点击事件"></a>MotionEvent 的点击事件</h4><p>常用的有这几个：<br>ACTION_DOWN 刚接触到屏幕执行一次<br>ACTION_MOVE 在屏幕上滑动<br>ACTION_UP 离开屏幕执行一次<br>ACTION_POINTER_DOWN 已经有event 事件，又有一个手指的触摸 DOWN 事件发生<br>ACTION_POINTER_UP 一个手指离开屏幕，但还有其它触摸点在</p>
-<p>单指触摸事件：ACTION_DOWN -&gt; ACTION_MOVE -&gt; ACTION_UP<br>多指触摸事件：ACTION_DOWN -&gt; ACTION_MOVE -&gt; ACTION_POINTER_DOWN -&gt; ACTION_POINTER_UP -&gt; ACTION_UP</p>
-<h4 id="MotionEvent-的位置参数含义"><a href="#MotionEvent-的位置参数含义" class="headerlink" title="MotionEvent 的位置参数含义"></a>MotionEvent 的位置参数含义</h4><p>常用的主要有 getX(), getY(), getRawX(), getRawY(), 下面用一张图来展示：<br>getX : 触摸点到当前 view 左边的距离<br>getY : 触摸点到当前 view 上边的距离<br>getRawX : 触摸点到屏幕左边的距离<br>getRawY : 触摸点到屏幕上边的距离</p>
-<p><img src="/image/motionevent_description1.jpg" alt="motionevent_description1"></p>
+        <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">String s = &quot;abc&quot;;</div><div class="line">s += &quot;d&quot;;</div></pre></td></tr></table></figure>
+<p>上述代码上，编译器会自动生成更高效的 StringBuilder, 调用 append() 方法来实现。</p>
+<p>那么是否表示可以完全信任编译器呢，再看下面代码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">String s = &quot;a&quot;;</div><div class="line">for (int i = 0; i &lt; 5; i++) &#123;</div><div class="line">	s += &quot;a&quot;;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>这种形式的，编译器会在循环体内创建 StringBuilder, 像这种操作，我们应该手动创建 StringBuilder 对象，而不仅仅是依赖编译器。</p>
+<p>当然也要避免类似以下的代码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">StringBuilder s = new StringBuilder();</div><div class="line">for (int i = 0; i &lt; 10; i++) &#123;</div><div class="line">	s.append(&quot;a&quot; + i + &quot;b&quot;);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>这种代码在循环里面依然有字符串的连接，依然会创建多个 StringBuilder 对象。</p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://hexiaosa.com/2017/10/09/MotionEvent_description/" data-id="cj9rxakr90000r8t4p2s67g61" class="article-share-link">Share</a>
+      <a data-url="http://hexiaosa.com/2017/11/09/about_string/" data-id="cj9rxaks30002r8t440smtlff" class="article-share-link">Share</a>
       
       
     </footer>
@@ -105,15 +104,11 @@
     
 <nav id="article-nav">
   
-    <a href="/2017/10/11/View-Attribute-Set/" id="article-nav-newer" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Newer</strong>
-      <div class="article-nav-title">
-        
-          View 属性
-        
-      </div>
-    </a>
   
+    <a href="/2017/11/09/event_dispatch/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">事件分发</div>
+    </a>
   
 </nav>
 
