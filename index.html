@@ -83,18 +83,10 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h4 id="字符串内存分析"><a href="#字符串内存分析" class="headerlink" title="字符串内存分析"></a>字符串内存分析</h4><pre><code>String s1 = &quot;a&quot;;
-String s2 = &quot;b&quot;;
-String s3 = &quot;a&quot; + &quot;b&quot;;
-System.out.println(&quot;ab == s1+s2&quot; + (&quot;ab&quot; == s1+s2));
-System.out.println(&quot;ab == s3&quot; + (&quot;ab&quot; == s3));
-输出结果：
-false
-true
-直接用引号包裹的字符串相加产生的新对象会放到常量池中，对象相加的不会放到常量池中。
-
-
-public static final String A = &quot;ab&quot;; // 常量A
+        <ol>
+<li>字符串内存分析<br> String s1 = “a”;<br> String s2 = “b”;<br> String s3 = “a” + “b”;<br> System.out.println(“ab == s1+s2” + (“ab” == s1+s2));<br> System.out.println(“ab == s3” + (“ab” == s3));<br> 输出结果：<br> false<br> true<br> 直接用引号包裹的字符串相加产生的新对象会放到常量池中，对象相加的不会放到常量池中。</li>
+</ol>
+<pre><code>public static final String A = &quot;ab&quot;; // 常量A
 public static final String B = &quot;cd&quot;; // 常量B
 A+B 会放到常量池中，因为 A, B 都是常量，在类编译时已经确定了。
 
@@ -113,14 +105,14 @@ String hello = &quot;hello&quot;, lo = &quot;lo&quot;;
 hello == &quot;hel&quot; + &quot;lo&quot;; //true
 hello == &quot;hel&quot; + lo; //false
 hello == (&quot;hel&quot; + lo).intern();  //true
-</code></pre><h4 id="Integer-内存分析"><a href="#Integer-内存分析" class="headerlink" title="Integer 内存分析"></a>Integer 内存分析</h4><pre><code>Integer i = new Integer(23);
-使用 Integer 用以上方式创建对象时，当数值在 -128~127 之间，对象都是在存在于常量池中的，两个相同的数值 new Integer() &quot;==&quot; 比较结果是 true.
-其它范围的数值不在常量池中，每次 new Integer() 都是一个新的对象，&quot;==&quot; 比较结果是 false.
-</code></pre>
+</code></pre><ol>
+<li>Integer 内存分析<br> Integer i = new Integer(23);<br> 使用 Integer 用以上方式创建对象时，当数值在 -128~127 之间，对象都是在存在于常量池中的，两个相同的数值 new Integer() “==” 比较结果是 true.<br> 其它范围的数值不在常量池中，每次 new Integer() 都是一个新的对象，”==” 比较结果是 false.</li>
+</ol>
+
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://hexiaosa.com/2017/11/24/java_memory/" data-id="cjadm0ruz0004m4t40llh0wed" class="article-share-link">Share</a>
+      <a data-url="http://hexiaosa.com/2017/11/24/java_memory/" data-id="cjadmed0f0003j0t4z81yii03" class="article-share-link">Share</a>
       
       
     </footer>
@@ -162,7 +154,7 @@ hello == (&quot;hel&quot; + lo).intern();  //true
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://hexiaosa.com/2017/11/09/about_string/" data-id="cjadm0ruf0001m4t4dtglfh5y" class="article-share-link">Share</a>
+      <a data-url="http://hexiaosa.com/2017/11/09/about_string/" data-id="cjadmed0a0002j0t4910el6q1" class="article-share-link">Share</a>
       
       
     </footer>
@@ -207,7 +199,7 @@ hello == (&quot;hel&quot; + lo).intern();  //true
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://hexiaosa.com/2017/11/09/event_dispatch/" data-id="cjadm0rut0003m4t4n8tel4gw" class="article-share-link">Share</a>
+      <a data-url="http://hexiaosa.com/2017/11/09/event_dispatch/" data-id="cjadmed0m0004j0t4mxs2gecs" class="article-share-link">Share</a>
       
       
     </footer>
@@ -313,7 +305,7 @@ hello == (&quot;hel&quot; + lo).intern();  //true
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://hexiaosa.com/2017/10/19/note/" data-id="cjadm0rv70005m4t45iyss3r9" class="article-share-link">Share</a>
+      <a data-url="http://hexiaosa.com/2017/10/19/note/" data-id="cjadmed0t0005j0t4w3efbg2g" class="article-share-link">Share</a>
       
       
     </footer>
@@ -358,7 +350,7 @@ hello == (&quot;hel&quot; + lo).intern();  //true
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://hexiaosa.com/2017/10/11/View-Attribute-Set/" data-id="cjadm0ruo0002m4t4e0eioq9f" class="article-share-link">Share</a>
+      <a data-url="http://hexiaosa.com/2017/10/11/View-Attribute-Set/" data-id="cjadmed010001j0t47mu04m3j" class="article-share-link">Share</a>
       
       
     </footer>
@@ -399,7 +391,7 @@ hello == (&quot;hel&quot; + lo).intern();  //true
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://hexiaosa.com/2017/10/09/MotionEvent_description/" data-id="cjadm0rtv0000m4t4omjxivdk" class="article-share-link">Share</a>
+      <a data-url="http://hexiaosa.com/2017/10/09/MotionEvent_description/" data-id="cjadmeczi0000j0t40ec8aj4i" class="article-share-link">Share</a>
       
       
     </footer>
