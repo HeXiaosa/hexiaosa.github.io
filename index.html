@@ -50,7 +50,7 @@
         
           <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
         
-        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+        <a id="nav-search-btn" class="nav-icon" title="Søk"></a>
       </nav>
       <div id="search-form-wrap">
         <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://hexiaosa.com"></form>
@@ -60,6 +60,75 @@
 </header>
       <div class="outer">
         <section id="main">
+  
+    <article id="post-java_memory" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/11/24/java_memory/" class="article-date">
+  <time datetime="2017-11-24T07:32:48.000Z" itemprop="datePublished">2017-11-24</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/11/24/java_memory/">Java 内存管理部分</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="字符串内存分析"><a href="#字符串内存分析" class="headerlink" title="字符串内存分析"></a>字符串内存分析</h4><pre><code>String s1 = &quot;a&quot;;
+String s2 = &quot;b&quot;;
+String s3 = &quot;a&quot; + &quot;b&quot;;
+System.out.println(&quot;ab == s1+s2&quot; + (&quot;ab&quot; == s1+s2));
+System.out.println(&quot;ab == s3&quot; + (&quot;ab&quot; == s3));
+输出结果：
+false
+true
+直接用引号包裹的字符串相加产生的新对象会放到常量池中，对象相加的不会放到常量池中。
+
+
+public static final String A = &quot;ab&quot;; // 常量A
+public static final String B = &quot;cd&quot;; // 常量B
+A+B 会放到常量池中，因为 A, B 都是常量，在类编译时已经确定了。
+
+
+public static final A;
+public static final B;
+static {
+    A = &quot;a&quot;;
+    B = &quot;b&quot;;
+}
+A+B 不会放到常量池中，虽然被 final 修饰，但是在后来被赋值，并不是在一开始编译时就确定的。
+
+intern()方法表示，如果字符串在常量池中存在，就取常量池中的。
+
+String hello = &quot;hello&quot;, lo = &quot;lo&quot;;
+hello == &quot;hel&quot; + &quot;lo&quot;; //true
+hello == &quot;hel&quot; + lo; //false
+hello == (&quot;hel&quot; + lo).intern();  //true
+</code></pre><h4 id="Integer-内存分析"><a href="#Integer-内存分析" class="headerlink" title="Integer 内存分析"></a>Integer 内存分析</h4><pre><code>Integer i = new Integer(23);
+使用 Integer 用以上方式创建对象时，当数值在 -128~127 之间，对象都是在存在于常量池中的，两个相同的数值 new Integer() &quot;==&quot; 比较结果是 true.
+其它范围的数值不在常量池中，每次 new Integer() 都是一个新的对象，&quot;==&quot; 比较结果是 false.
+</code></pre>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://hexiaosa.com/2017/11/24/java_memory/" data-id="cjadlw5od000410t4p91zrh1i" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
   
     <article id="post-about_string" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
@@ -93,7 +162,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://hexiaosa.com/2017/11/09/about_string/" data-id="cj9rxaks30002r8t440smtlff" class="article-share-link">Share</a>
+      <a data-url="http://hexiaosa.com/2017/11/09/about_string/" data-id="cjadlw5nu000210t42v5t0wyk" class="article-share-link">Share</a>
       
       
     </footer>
@@ -138,7 +207,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://hexiaosa.com/2017/11/09/event_dispatch/" data-id="cj9rxaksf0004r8t4aa7fqpz6" class="article-share-link">Share</a>
+      <a data-url="http://hexiaosa.com/2017/11/09/event_dispatch/" data-id="cjadlw5o2000310t4brj7a5ik" class="article-share-link">Share</a>
       
       
     </footer>
@@ -244,7 +313,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://hexiaosa.com/2017/10/19/note/" data-id="cj9rxaks90003r8t4ydxgsfpt" class="article-share-link">Share</a>
+      <a data-url="http://hexiaosa.com/2017/10/19/note/" data-id="cjadlw5ok000510t4ddk9xsbl" class="article-share-link">Share</a>
       
       
     </footer>
@@ -289,7 +358,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://hexiaosa.com/2017/10/11/View-Attribute-Set/" data-id="cj9rxakrr0001r8t49bzk2v0y" class="article-share-link">Share</a>
+      <a data-url="http://hexiaosa.com/2017/10/11/View-Attribute-Set/" data-id="cjadlw5my000010t48ohdvc48" class="article-share-link">Share</a>
       
       
     </footer>
@@ -330,7 +399,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://hexiaosa.com/2017/10/09/MotionEvent_description/" data-id="cj9rxakr90000r8t4p2s67g61" class="article-share-link">Share</a>
+      <a data-url="http://hexiaosa.com/2017/10/09/MotionEvent_description/" data-id="cjadlw5ni000110t46fxnbhc5" class="article-share-link">Share</a>
       
       
     </footer>
@@ -355,7 +424,7 @@
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">Archives</h3>
+    <h3 class="widget-title">Arkiv</h3>
     <div class="widget">
       <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/11/">November 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/10/">October 2017</a></li></ul>
     </div>
@@ -365,9 +434,13 @@
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">Recent Posts</h3>
+    <h3 class="widget-title">Siste innlegg</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2017/11/24/java_memory/">Java 内存管理部分</a>
+          </li>
         
           <li>
             <a href="/2017/11/09/about_string/">字符串</a>
@@ -383,10 +456,6 @@
         
           <li>
             <a href="/2017/10/11/View-Attribute-Set/">View 属性</a>
-          </li>
-        
-          <li>
-            <a href="/2017/10/09/MotionEvent_description/">MotionEvent介绍</a>
           </li>
         
       </ul>
