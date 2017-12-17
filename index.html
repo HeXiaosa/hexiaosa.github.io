@@ -48,9 +48,9 @@
       </nav>
       <nav id="sub-nav">
         
-          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="Flux RSS"></a>
         
-        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+        <a id="nav-search-btn" class="nav-icon" title="Rechercher"></a>
       </nav>
       <div id="search-form-wrap">
         <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://hexiaosa.com"></form>
@@ -60,6 +60,129 @@
 </header>
       <div class="outer">
         <section id="main">
+  
+    <article id="post-bluetooth_details" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/12/17/bluetooth_details/" class="article-date">
+  <time datetime="2017-12-17T09:32:48.000Z" itemprop="datePublished">2017-12-17</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/12/17/bluetooth_details/">Android 蓝牙详解</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>蓝牙4.0提出了低功耗蓝牙的模式。<br>蓝牙4.0的传输分为: Single Mode 和 Dual Mode; Single Mode 只支持与 4.0 的相互传输，Dual Mode 支持与 4.0 以及 3.0, 2.1, 2.0 传输.<br>相关代码如下：</p>
+<pre><code>//获取蓝牙适配器，系统只有一个蓝牙适配器，若 adapter 为 null, 则说明系统不支持蓝牙功能
+BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+
+//表示蓝牙是否打开
+adapter.isEnabled();
+
+//获取已配对的蓝牙设备
+Set&lt;BluetoothDevice&gt; devices = adapter.getBondedDevices();
+
+BluetoothDevice device = null;
+if (devices.iterator().hasNext()) {
+    device = devices.iterator().next();
+}
+if (device == null) {
+    //没有已配对的设备
+} else {
+    //有已配对的设备，连接，发送数据
+    //4.0 的传输跟之前的版本有不同，看要连接的设备是否是4.0，是否支持4.0之前的来决定用什么代码来连接
+}
+</code></pre><p>经典蓝牙连接</p>
+<pre><code>权限：
+&lt;uses-permission android:name=&quot;android.permission.BLUETOOTH&quot; /&gt;
+&lt;uses-permission android:name=&quot;android.permission.BLUETOOTH_ADMIN&quot; /&gt;
+
+BluetoothSocket socket = adapter.createRfcommSocketToServiceRecord(NAME, MY_UUID);
+new Thread(
+    @Override
+    public void run() {
+        // 向服务端发送连接
+        socket.connect();
+        // 获取到输出流，向外写数据
+        os = clientSocket.getOutputStream();
+        // 判断是否拿到输出流
+        if (os != null) {
+            // 需要发送的信息
+            String text = &quot;open&quot;;
+            // 以utf-8的格式发送出去
+            os.write(text.getBytes(&quot;UTF-8&quot;));
+        }
+    }
+).start();
+</code></pre><p>低功耗蓝牙连接</p>
+<pre><code>权限：
+&lt;uses-permission android:name=&quot;android.permission.BLUETOOTH&quot; /&gt;
+&lt;uses-permission android:name=&quot;android.permission.BLUETOOTH_ADMIN&quot; /&gt;
+&lt;uses-permission android:name=&quot;android.permission.ACCESS_COARSE_LOCATION&quot; /&gt;
+&lt;uses-permission android:name=&quot;android.permission.ACCESS_FINE_LOCATION&quot; /&gt;
+&lt;uses-feature
+    android:name=&quot;android.hardware.bluetooth_le&quot;
+    android:required=&quot;true&quot; /&gt;
+
+BluetoothGatt gatt = device.connGatt(context, autoConnect, BluetoothGattCallback);
+//连接蓝牙，连接后将会回调到 BluetoothGattCallback 的 onConnectChanged 方法中
+@Override
+public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
+    super.onConnectionStateChange(gatt, status, newState);
+    if (newState == BluetoothProfile.STATE_CONNECTED) {
+        //即表示连接成功
+        gatt.discoverServices();//该方法之后将会调用 onServiceDiscovered() 方法中
+    }
+}
+@Override
+public void onServicesDiscovered(BluetoothGatt gatt, int status) {
+    super.onServicesDiscovered(gatt, status);
+    //开始发送数据
+    sendData();
+}
+
+//发送数据，具体怎么发送，要看设备方的要求(怎么接受)，还有需要注意的是 获取服务和获取写入数据的需要设备方提供的UUID与设备相匹配
+private void sendData() {
+    BluetoothGattService service = mBluetoothGatt.getService(RX_SERVICE_UUID);
+    BluetoothGattCharacteristic characteristic = service.getCharacteristic(RX_CHAR_UUID);
+    byte[] value = new byte[4];
+    value[0] = (byte) &apos;o&apos;;
+    value[1] = (byte) &apos;p&apos;;
+    value[2] = (byte) &apos;e&apos;;
+    value[3] = (byte) &apos;n&apos;;
+    characteristic.setValue(value);
+    Log.e(&quot;TAG&quot;, &quot;send value -&gt; &quot; + Arrays.toString(characteristic.getValue()));
+    boolean isWrite = mBluetoothGatt.writeCharacteristic(characteristic);
+    if (isWrite) {
+        Log.e(&quot;TAG&quot;, &quot;发送数据成功&quot;);
+    } else {
+        Log.e(&quot;TAG&quot;, &quot;发送数据失败&quot;);
+    }
+}
+</code></pre>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://hexiaosa.com/2017/12/17/bluetooth_details/" data-id="cjbal1ccr0003bot454xgkjxg" class="article-share-link">Partager</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
   
     <article id="post-java_memory" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
@@ -120,7 +243,7 @@ hello == (&quot;hel&quot; + lo).intern();  //true
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://hexiaosa.com/2017/11/24/java_memory/" data-id="cjadmg1es0004tkt4rx45rfnh" class="article-share-link">Share</a>
+      <a data-url="http://hexiaosa.com/2017/11/24/java_memory/" data-id="cjbal1cdf0006bot4jzujqwpj" class="article-share-link">Partager</a>
       
       
     </footer>
@@ -162,7 +285,7 @@ hello == (&quot;hel&quot; + lo).intern();  //true
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://hexiaosa.com/2017/11/09/about_string/" data-id="cjadmg1eh0002tkt4rw5hu0hg" class="article-share-link">Share</a>
+      <a data-url="http://hexiaosa.com/2017/11/09/about_string/" data-id="cjbal1ccj0002bot42djfqaod" class="article-share-link">Partager</a>
       
       
     </footer>
@@ -207,7 +330,7 @@ hello == (&quot;hel&quot; + lo).intern();  //true
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://hexiaosa.com/2017/11/09/event_dispatch/" data-id="cjadmg1em0003tkt410lzfm9f" class="article-share-link">Share</a>
+      <a data-url="http://hexiaosa.com/2017/11/09/event_dispatch/" data-id="cjbal1ccx0004bot4nptfjahu" class="article-share-link">Partager</a>
       
       
     </footer>
@@ -313,7 +436,7 @@ hello == (&quot;hel&quot; + lo).intern();  //true
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://hexiaosa.com/2017/10/19/note/" data-id="cjadmg1ez0005tkt46hwfukeu" class="article-share-link">Share</a>
+      <a data-url="http://hexiaosa.com/2017/10/19/note/" data-id="cjbal1cd60005bot48yw8wy3s" class="article-share-link">Partager</a>
       
       
     </footer>
@@ -358,7 +481,7 @@ hello == (&quot;hel&quot; + lo).intern();  //true
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://hexiaosa.com/2017/10/11/View-Attribute-Set/" data-id="cjadmg1e80001tkt4q08ecgbn" class="article-share-link">Share</a>
+      <a data-url="http://hexiaosa.com/2017/10/11/View-Attribute-Set/" data-id="cjbal1cbh0000bot4brrdpnyv" class="article-share-link">Partager</a>
       
       
     </footer>
@@ -399,7 +522,7 @@ hello == (&quot;hel&quot; + lo).intern();  //true
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://hexiaosa.com/2017/10/09/MotionEvent_description/" data-id="cjadmg1dp0000tkt4htg2ujau" class="article-share-link">Share</a>
+      <a data-url="http://hexiaosa.com/2017/10/09/MotionEvent_description/" data-id="cjbal1cc60001bot45n2o5ypb" class="article-share-link">Partager</a>
       
       
     </footer>
@@ -426,7 +549,7 @@ hello == (&quot;hel&quot; + lo).intern();  //true
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/11/">November 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/10/">October 2017</a></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/12/">December 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/11/">November 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/10/">October 2017</a></li></ul>
     </div>
   </div>
 
@@ -434,9 +557,13 @@ hello == (&quot;hel&quot; + lo).intern();  //true
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">Recent Posts</h3>
+    <h3 class="widget-title">Articles récents</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2017/12/17/bluetooth_details/">Android 蓝牙详解</a>
+          </li>
         
           <li>
             <a href="/2017/11/24/java_memory/">Java 内存管理部分</a>
@@ -454,10 +581,6 @@ hello == (&quot;hel&quot; + lo).intern();  //true
             <a href="/2017/10/19/note/">笔记</a>
           </li>
         
-          <li>
-            <a href="/2017/10/11/View-Attribute-Set/">View 属性</a>
-          </li>
-        
       </ul>
     </div>
   </div>
@@ -471,7 +594,7 @@ hello == (&quot;hel&quot; + lo).intern();  //true
   <div class="outer">
     <div id="footer-info" class="inner">
       &copy; 2017 Hexiaosa<br>
-      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+      Propulsé by <a href="http://hexo.io/" target="_blank">Hexo</a>
     </div>
   </div>
 </footer>

@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Android 蓝牙详解 | Hexiaosa</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="蓝牙4.0提出了低功耗蓝牙的模式。蓝牙4.0的传输分为: Single Mode 和 Dual Mode; Single Mode 只支持与 4.0 的相互传输，Dual Mode 支持与 4.0 以及 3.0, 2.1, 2.0 传输.相关代码如下： //获取蓝牙适配器，系统只有一个蓝牙适配器，若 adapter 为 null, 则说明系统不支持蓝牙功能 BluetoothAdapter ada">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android 蓝牙详解">
+<meta property="og:url" content="http://hexiaosa.com/2017/12/17/bluetooth_details/index.html">
+<meta property="og:site_name" content="Hexiaosa">
+<meta property="og:description" content="蓝牙4.0提出了低功耗蓝牙的模式。蓝牙4.0的传输分为: Single Mode 和 Dual Mode; Single Mode 只支持与 4.0 的相互传输，Dual Mode 支持与 4.0 以及 3.0, 2.1, 2.0 传输.相关代码如下： //获取蓝牙适配器，系统只有一个蓝牙适配器，若 adapter 为 null, 则说明系统不支持蓝牙功能 BluetoothAdapter ada">
+<meta property="og:updated_time" content="2017-12-17T09:41:08.960Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android 蓝牙详解">
+<meta name="twitter:description" content="蓝牙4.0提出了低功耗蓝牙的模式。蓝牙4.0的传输分为: Single Mode 和 Dual Mode; Single Mode 只支持与 4.0 的相互传输，Dual Mode 支持与 4.0 以及 3.0, 2.1, 2.0 传输.相关代码如下： //获取蓝牙适配器，系统只有一个蓝牙适配器，若 adapter 为 null, 则说明系统不支持蓝牙功能 BluetoothAdapter ada">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexiaosa" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexiaosa</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="Flux RSS"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Rechercher"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://hexiaosa.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-bluetooth_details" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2017/12/17/bluetooth_details/" class="article-date">
+  <time datetime="2017-12-17T09:32:48.000Z" itemprop="datePublished">2017-12-17</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Android 蓝牙详解
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>蓝牙4.0提出了低功耗蓝牙的模式。<br>蓝牙4.0的传输分为: Single Mode 和 Dual Mode; Single Mode 只支持与 4.0 的相互传输，Dual Mode 支持与 4.0 以及 3.0, 2.1, 2.0 传输.<br>相关代码如下：</p>
+<pre><code>//获取蓝牙适配器，系统只有一个蓝牙适配器，若 adapter 为 null, 则说明系统不支持蓝牙功能
+BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+
+//表示蓝牙是否打开
+adapter.isEnabled();
+
+//获取已配对的蓝牙设备
+Set&lt;BluetoothDevice&gt; devices = adapter.getBondedDevices();
+
+BluetoothDevice device = null;
+if (devices.iterator().hasNext()) {
+    device = devices.iterator().next();
+}
+if (device == null) {
+    //没有已配对的设备
+} else {
+    //有已配对的设备，连接，发送数据
+    //4.0 的传输跟之前的版本有不同，看要连接的设备是否是4.0，是否支持4.0之前的来决定用什么代码来连接
+}
+</code></pre><p>经典蓝牙连接</p>
+<pre><code>权限：
+&lt;uses-permission android:name=&quot;android.permission.BLUETOOTH&quot; /&gt;
+&lt;uses-permission android:name=&quot;android.permission.BLUETOOTH_ADMIN&quot; /&gt;
+
+BluetoothSocket socket = adapter.createRfcommSocketToServiceRecord(NAME, MY_UUID);
+new Thread(
+    @Override
+    public void run() {
+        // 向服务端发送连接
+        socket.connect();
+        // 获取到输出流，向外写数据
+        os = clientSocket.getOutputStream();
+        // 判断是否拿到输出流
+        if (os != null) {
+            // 需要发送的信息
+            String text = &quot;open&quot;;
+            // 以utf-8的格式发送出去
+            os.write(text.getBytes(&quot;UTF-8&quot;));
+        }
+    }
+).start();
+</code></pre><p>低功耗蓝牙连接</p>
+<pre><code>权限：
+&lt;uses-permission android:name=&quot;android.permission.BLUETOOTH&quot; /&gt;
+&lt;uses-permission android:name=&quot;android.permission.BLUETOOTH_ADMIN&quot; /&gt;
+&lt;uses-permission android:name=&quot;android.permission.ACCESS_COARSE_LOCATION&quot; /&gt;
+&lt;uses-permission android:name=&quot;android.permission.ACCESS_FINE_LOCATION&quot; /&gt;
+&lt;uses-feature
+    android:name=&quot;android.hardware.bluetooth_le&quot;
+    android:required=&quot;true&quot; /&gt;
+
+BluetoothGatt gatt = device.connGatt(context, autoConnect, BluetoothGattCallback);
+//连接蓝牙，连接后将会回调到 BluetoothGattCallback 的 onConnectChanged 方法中
+@Override
+public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
+    super.onConnectionStateChange(gatt, status, newState);
+    if (newState == BluetoothProfile.STATE_CONNECTED) {
+        //即表示连接成功
+        gatt.discoverServices();//该方法之后将会调用 onServiceDiscovered() 方法中
+    }
+}
+@Override
+public void onServicesDiscovered(BluetoothGatt gatt, int status) {
+    super.onServicesDiscovered(gatt, status);
+    //开始发送数据
+    sendData();
+}
+
+//发送数据，具体怎么发送，要看设备方的要求(怎么接受)，还有需要注意的是 获取服务和获取写入数据的需要设备方提供的UUID与设备相匹配
+private void sendData() {
+    BluetoothGattService service = mBluetoothGatt.getService(RX_SERVICE_UUID);
+    BluetoothGattCharacteristic characteristic = service.getCharacteristic(RX_CHAR_UUID);
+    byte[] value = new byte[4];
+    value[0] = (byte) &apos;o&apos;;
+    value[1] = (byte) &apos;p&apos;;
+    value[2] = (byte) &apos;e&apos;;
+    value[3] = (byte) &apos;n&apos;;
+    characteristic.setValue(value);
+    Log.e(&quot;TAG&quot;, &quot;send value -&gt; &quot; + Arrays.toString(characteristic.getValue()));
+    boolean isWrite = mBluetoothGatt.writeCharacteristic(characteristic);
+    if (isWrite) {
+        Log.e(&quot;TAG&quot;, &quot;发送数据成功&quot;);
+    } else {
+        Log.e(&quot;TAG&quot;, &quot;发送数据失败&quot;);
+    }
+}
+</code></pre>
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://hexiaosa.com/2017/12/17/bluetooth_details/" data-id="cjbal1ccr0003bot454xgkjxg" class="article-share-link">Partager</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2017/11/24/java_memory/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Ancien</strong>
+      <div class="article-nav-title">Java 内存管理部分</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/12/">December 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/11/">November 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/10/">October 2017</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Articles récents</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2017/12/17/bluetooth_details/">Android 蓝牙详解</a>
+          </li>
+        
+          <li>
+            <a href="/2017/11/24/java_memory/">Java 内存管理部分</a>
+          </li>
+        
+          <li>
+            <a href="/2017/11/09/about_string/">字符串</a>
+          </li>
+        
+          <li>
+            <a href="/2017/11/09/event_dispatch/">事件分发</a>
+          </li>
+        
+          <li>
+            <a href="/2017/10/19/note/">笔记</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2017 Hexiaosa<br>
+      Propulsé by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>
