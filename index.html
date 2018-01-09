@@ -48,9 +48,9 @@
       </nav>
       <nav id="sub-nav">
         
-          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="Flux RSS"></a>
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
         
-        <a id="nav-search-btn" class="nav-icon" title="Rechercher"></a>
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
       </nav>
       <div id="search-form-wrap">
         <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://hexiaosa.com"></form>
@@ -60,6 +60,55 @@
 </header>
       <div class="outer">
         <section id="main">
+  
+    <article id="post-adb" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/01/09/adb/" class="article-date">
+  <time datetime="2018-01-09T01:56:51.000Z" itemprop="datePublished">2018-01-09</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/01/09/adb/">ADB (Android Debug Bridge)</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <ol>
+<li><p>adb 命令和 adb shell 命令的区别：<br> adb 命令是 adb 程序自带的命令，adb shell 命令是 Android 程序的命令，/system/bin/下的命令</p>
+</li>
+<li><p>一些 adb 命令<br> adb devices<br> adb push local remote<br> adb pull remote local<br> adb install [文件路径]<br> adb uninstall [package name]</p>
+</li>
+<li><p>一些 adb shell 命令<br> adb shell pm … (list packages, path [package], )<br> adb shell am … (start -a android.intent.action.MAIN [包名]/[路径activity], )<br> adb shell screencap /sdcard/s.png  截屏<br> adb shell screenrecord /sdcard/s.mp4 录制视频，可以指定分辨率等参数<br> adb shell dumpsys activity 查看 activity 任务栈<br> adb shell logcat … (-f [文件路径]&lt;抓日志保存到该文件&gt;, )</p>
+</li>
+<li><p>adb 用在 android 程序中</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">Process p = Runtime.getRuntime().exec(&quot;su/sh&quot;); // su表示root, sh普通用户</div><div class="line">DataOutputStream dataStream = new DataOutputStream(p.getOutputStream());</div><div class="line">dataStream.write(&quot;&quot;.getBytes());// 主要执行的 adb shell 命令</div><div class="line">datastream.writeBytes(&quot;\n&quot;);</div><div class="line"></div><div class="line">dataStream.writeBytes(&quot;exit\n&quot;);</div><div class="line">dataStream.flush();</div><div class="line"></div><div class="line">process.waitFor();</div><div class="line"></div><div class="line">process.getInputStream(); // 成功后输出的信息会放在这里面</div><div class="line">process.getErrorStream(); // 出错后错误信息会放在这里面</div></pre></td></tr></table></figure>
+</li>
+<li><p>问题：<br> logcat 能否筛选应用?</p>
+</li>
+</ol>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://hexiaosa.com/2018/01/09/adb/" data-id="cjc77ywyx00031wt4yapqmfg8" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
   
     <article id="post-bluetooth_details" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
@@ -174,7 +223,7 @@ private void sendData() {
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://hexiaosa.com/2017/12/17/bluetooth_details/" data-id="cjbal1ccr0003bot454xgkjxg" class="article-share-link">Partager</a>
+      <a data-url="http://hexiaosa.com/2017/12/17/bluetooth_details/" data-id="cjc77ywz600041wt4uiu1z69o" class="article-share-link">Share</a>
       
       
     </footer>
@@ -243,7 +292,7 @@ hello == (&quot;hel&quot; + lo).intern();  //true
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://hexiaosa.com/2017/11/24/java_memory/" data-id="cjbal1cdf0006bot4jzujqwpj" class="article-share-link">Partager</a>
+      <a data-url="http://hexiaosa.com/2017/11/24/java_memory/" data-id="cjc77yx2000061wt486z9hz49" class="article-share-link">Share</a>
       
       
     </footer>
@@ -285,7 +334,7 @@ hello == (&quot;hel&quot; + lo).intern();  //true
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://hexiaosa.com/2017/11/09/about_string/" data-id="cjbal1ccj0002bot42djfqaod" class="article-share-link">Partager</a>
+      <a data-url="http://hexiaosa.com/2017/11/09/about_string/" data-id="cjc77ywyr00021wt4pa72lgya" class="article-share-link">Share</a>
       
       
     </footer>
@@ -330,7 +379,7 @@ hello == (&quot;hel&quot; + lo).intern();  //true
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://hexiaosa.com/2017/11/09/event_dispatch/" data-id="cjbal1ccx0004bot4nptfjahu" class="article-share-link">Partager</a>
+      <a data-url="http://hexiaosa.com/2017/11/09/event_dispatch/" data-id="cjc77ywzj00051wt4fo3qu9ut" class="article-share-link">Share</a>
       
       
     </footer>
@@ -436,7 +485,7 @@ hello == (&quot;hel&quot; + lo).intern();  //true
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://hexiaosa.com/2017/10/19/note/" data-id="cjbal1cd60005bot48yw8wy3s" class="article-share-link">Partager</a>
+      <a data-url="http://hexiaosa.com/2017/10/19/note/" data-id="cjc77yx2b00071wt4xtmz8e6c" class="article-share-link">Share</a>
       
       
     </footer>
@@ -481,7 +530,7 @@ hello == (&quot;hel&quot; + lo).intern();  //true
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://hexiaosa.com/2017/10/11/View-Attribute-Set/" data-id="cjbal1cbh0000bot4brrdpnyv" class="article-share-link">Partager</a>
+      <a data-url="http://hexiaosa.com/2017/10/11/View-Attribute-Set/" data-id="cjc77ywxb00001wt4hq8dbrlp" class="article-share-link">Share</a>
       
       
     </footer>
@@ -522,7 +571,7 @@ hello == (&quot;hel&quot; + lo).intern();  //true
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://hexiaosa.com/2017/10/09/MotionEvent_description/" data-id="cjbal1cc60001bot45n2o5ypb" class="article-share-link">Partager</a>
+      <a data-url="http://hexiaosa.com/2017/10/09/MotionEvent_description/" data-id="cjc77ywy700011wt4v25300k3" class="article-share-link">Share</a>
       
       
     </footer>
@@ -549,7 +598,7 @@ hello == (&quot;hel&quot; + lo).intern();  //true
   <div class="widget-wrap">
     <h3 class="widget-title">Archives</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/12/">December 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/11/">November 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/10/">October 2017</a></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/01/">January 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/12/">December 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/11/">November 2017</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/10/">October 2017</a></li></ul>
     </div>
   </div>
 
@@ -557,9 +606,13 @@ hello == (&quot;hel&quot; + lo).intern();  //true
   
     
   <div class="widget-wrap">
-    <h3 class="widget-title">Articles récents</h3>
+    <h3 class="widget-title">Recent Posts</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2018/01/09/adb/">ADB (Android Debug Bridge)</a>
+          </li>
         
           <li>
             <a href="/2017/12/17/bluetooth_details/">Android 蓝牙详解</a>
@@ -577,10 +630,6 @@ hello == (&quot;hel&quot; + lo).intern();  //true
             <a href="/2017/11/09/event_dispatch/">事件分发</a>
           </li>
         
-          <li>
-            <a href="/2017/10/19/note/">笔记</a>
-          </li>
-        
       </ul>
     </div>
   </div>
@@ -593,8 +642,8 @@ hello == (&quot;hel&quot; + lo).intern();  //true
   
   <div class="outer">
     <div id="footer-info" class="inner">
-      &copy; 2017 Hexiaosa<br>
-      Propulsé by <a href="http://hexo.io/" target="_blank">Hexo</a>
+      &copy; 2018 Hexiaosa<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
     </div>
   </div>
 </footer>
