@@ -79,16 +79,16 @@
 
 
 
-<meta name="description" content="字符串内存分析String s1 = &amp;quot;a&amp;quot;; String s2 = &amp;quot;b&amp;quot;; String s3 = &amp;quot;a&amp;quot; + &amp;quot;b&amp;quot;; System.out.println(&amp;quot;ab == s1+s2&amp;quot; + (&amp;quot;ab&amp;quot; == s1+s2)); System.out.println(&amp;quo">
+<meta name="description" content="1. JVM 内存JVM 会用一段空间来存储程序运行时的数据和相关信息，这段空间一般称作 Runtime Data Area. 包含 Java 堆，方法区，（和线程私有的）程序计数器，虚拟机栈，本地方法栈。Java 堆：用于存放 new 出的对象，垃圾回收也主要就是针对这一块；方法区主要存放 静态变量，常量，方法区就包含了常量池；本地方法栈存放的就是 native 方法；虚拟机栈中有一个局部变量表">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Java 内存管理部分">
 <meta property="og:url" content="http://hexiaosa.com/2017/11/24/java_memory/index.html">
 <meta property="og:site_name" content="Hexiaosa">
-<meta property="og:description" content="字符串内存分析String s1 = &amp;quot;a&amp;quot;; String s2 = &amp;quot;b&amp;quot;; String s3 = &amp;quot;a&amp;quot; + &amp;quot;b&amp;quot;; System.out.println(&amp;quot;ab == s1+s2&amp;quot; + (&amp;quot;ab&amp;quot; == s1+s2)); System.out.println(&amp;quo">
-<meta property="og:updated_time" content="2017-11-24T08:04:42.860Z">
+<meta property="og:description" content="1. JVM 内存JVM 会用一段空间来存储程序运行时的数据和相关信息，这段空间一般称作 Runtime Data Area. 包含 Java 堆，方法区，（和线程私有的）程序计数器，虚拟机栈，本地方法栈。Java 堆：用于存放 new 出的对象，垃圾回收也主要就是针对这一块；方法区主要存放 静态变量，常量，方法区就包含了常量池；本地方法栈存放的就是 native 方法；虚拟机栈中有一个局部变量表">
+<meta property="og:updated_time" content="2018-01-19T08:55:25.660Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Java 内存管理部分">
-<meta name="twitter:description" content="字符串内存分析String s1 = &amp;quot;a&amp;quot;; String s2 = &amp;quot;b&amp;quot;; String s3 = &amp;quot;a&amp;quot; + &amp;quot;b&amp;quot;; System.out.println(&amp;quot;ab == s1+s2&amp;quot; + (&amp;quot;ab&amp;quot; == s1+s2)); System.out.println(&amp;quo">
+<meta name="twitter:description" content="1. JVM 内存JVM 会用一段空间来存储程序运行时的数据和相关信息，这段空间一般称作 Runtime Data Area. 包含 Java 堆，方法区，（和线程私有的）程序计数器，虚拟机栈，本地方法栈。Java 堆：用于存放 new 出的对象，垃圾回收也主要就是针对这一块；方法区主要存放 静态变量，常量，方法区就包含了常量池；本地方法栈存放的就是 native 方法；虚拟机栈中有一个局部变量表">
 
 
 
@@ -298,40 +298,14 @@
       
 
       
-        <h4 id="字符串内存分析"><a href="#字符串内存分析" class="headerlink" title="字符串内存分析"></a>字符串内存分析</h4><pre><code>String s1 = &quot;a&quot;;
-String s2 = &quot;b&quot;;
-String s3 = &quot;a&quot; + &quot;b&quot;;
-System.out.println(&quot;ab == s1+s2&quot; + (&quot;ab&quot; == s1+s2));
-System.out.println(&quot;ab == s3&quot; + (&quot;ab&quot; == s3));
-输出结果：
-false
-true
-直接用引号包裹的字符串相加产生的新对象会放到常量池中，对象相加的不会放到常量池中。
+        <h4 id="1-JVM-内存"><a href="#1-JVM-内存" class="headerlink" title="1. JVM 内存"></a>1. JVM 内存</h4><p>JVM 会用一段空间来存储程序运行时的数据和相关信息，这段空间一般称作 Runtime Data Area. 包含 Java 堆，方法区，（和线程私有的）程序计数器，虚拟机栈，本地方法栈。<br>Java 堆：用于存放 new 出的对象，垃圾回收也主要就是针对这一块；<br>方法区主要存放 静态变量，常量，方法区就包含了常量池；<br>本地方法栈存放的就是 native 方法；<br>虚拟机栈中有一个局部变量表，存放的是基本类型和对象的引用；虚拟机栈用于存方法在执行的内存区，每个方法执行都会创建栈针，方法执行的过程，也就是虚拟机栈的入栈出栈。</p>
+<h4 id="2-字符串内存分析"><a href="#2-字符串内存分析" class="headerlink" title="2. 字符串内存分析"></a>2. 字符串内存分析</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">String s1 = &quot;a&quot;;</div><div class="line">String s2 = &quot;b&quot;;</div><div class="line">String s3 = &quot;a&quot; + &quot;b&quot;;</div><div class="line">System.out.println(&quot;ab == s1+s2&quot; + (&quot;ab&quot; == s1+s2));</div><div class="line">System.out.println(&quot;ab == s3&quot; + (&quot;ab&quot; == s3));</div></pre></td></tr></table></figure>
+<p>输出结果：<br>false<br>true<br>直接用引号包裹的字符串相加产生的新对象会放到常量池中，对象相加的不会放到常量池中。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">public static final String A = &quot;ab&quot;; // 常量A</div><div class="line">public static final String B = &quot;cd&quot;; // 常量B</div><div class="line">// A+B 会放到常量池中，因为 A, B 都是常量，在类编译时已经确定了。</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">public static final A;</div><div class="line">public static final B;</div><div class="line">static &#123;</div><div class="line">	A = &quot;a&quot;;</div><div class="line">	B = &quot;b&quot;;</div><div class="line">&#125;</div><div class="line">// A+B 不会放到常量池中，虽然被 final 修饰，但是在后来被赋值，并不是在一开始编译时就确定的。</div></pre></td></tr></table></figure>
+<p>intern()方法表示，如果字符串在常量池中存在，就取常量池中的。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">String hello = &quot;hello&quot;, lo = &quot;lo&quot;;</div><div class="line">hello == &quot;hel&quot; + &quot;lo&quot;; //true</div><div class="line">hello == &quot;hel&quot; + lo; //false</div><div class="line">hello == (&quot;hel&quot; + lo).intern();  //true</div></pre></td></tr></table></figure></p>
+<h4 id="3-Integer-内存分析"><a href="#3-Integer-内存分析" class="headerlink" title="3. Integer 内存分析"></a>3. Integer 内存分析</h4><p>Integer i = new Integer(23);<br>使用 Integer 用以上方式创建对象时，当数值在 -128~127 之间，对象都是在存在于常量池中的，两个相同的数值 new Integer() “==” 比较结果是 true.<br>其它范围的数值不在常量池中，每次 new Integer() 都是一个新的对象，”==” 比较结果是 false.</p>
 
-
-public static final String A = &quot;ab&quot;; // 常量A
-public static final String B = &quot;cd&quot;; // 常量B
-A+B 会放到常量池中，因为 A, B 都是常量，在类编译时已经确定了。
-
-
-public static final A;
-public static final B;
-static {
-    A = &quot;a&quot;;
-    B = &quot;b&quot;;
-}
-A+B 不会放到常量池中，虽然被 final 修饰，但是在后来被赋值，并不是在一开始编译时就确定的。
-
-intern()方法表示，如果字符串在常量池中存在，就取常量池中的。
-
-String hello = &quot;hello&quot;, lo = &quot;lo&quot;;
-hello == &quot;hel&quot; + &quot;lo&quot;; //true
-hello == &quot;hel&quot; + lo; //false
-hello == (&quot;hel&quot; + lo).intern();  //true
-</code></pre><h4 id="Integer-内存分析"><a href="#Integer-内存分析" class="headerlink" title="Integer 内存分析"></a>Integer 内存分析</h4><pre><code>Integer i = new Integer(23);
-使用 Integer 用以上方式创建对象时，当数值在 -128~127 之间，对象都是在存在于常量池中的，两个相同的数值 new Integer() &quot;==&quot; 比较结果是 true.
-其它范围的数值不在常量池中，每次 new Integer() 都是一个新的对象，&quot;==&quot; 比较结果是 false.
-</code></pre>
       
     </div>
     
@@ -481,7 +455,7 @@ hello == (&quot;hel&quot; + lo).intern();  //true
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#字符串内存分析"><span class="nav-number">1.</span> <span class="nav-text">字符串内存分析</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Integer-内存分析"><span class="nav-number">2.</span> <span class="nav-text">Integer 内存分析</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-JVM-内存"><span class="nav-number">1.</span> <span class="nav-text">1. JVM 内存</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-字符串内存分析"><span class="nav-number">2.</span> <span class="nav-text">2. 字符串内存分析</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-Integer-内存分析"><span class="nav-number">3.</span> <span class="nav-text">3. Integer 内存分析</span></a></li></ol></div>
             
 
           </div>
