@@ -85,7 +85,7 @@
 <meta property="og:url" content="http://hexiaosa.com/2017/11/24/java_memory/index.html">
 <meta property="og:site_name" content="Hexiaosa">
 <meta property="og:description" content="1. JVM 内存JVM 会用一段空间来存储程序运行时的数据和相关信息，这段空间一般称作 Runtime Data Area. 包含 Java 堆，方法区，（和线程私有的）程序计数器，虚拟机栈，本地方法栈。Java 堆：用于存放 new 出的对象，垃圾回收也主要就是针对这一块；方法区主要存放 静态变量，常量，方法区就包含了常量池；本地方法栈存放的就是 native 方法；虚拟机栈中有一个局部变量表">
-<meta property="og:updated_time" content="2018-01-19T09:13:41.715Z">
+<meta property="og:updated_time" content="2018-01-19T09:14:53.628Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Java 内存管理部分">
 <meta name="twitter:description" content="1. JVM 内存JVM 会用一段空间来存储程序运行时的数据和相关信息，这段空间一般称作 Runtime Data Area. 包含 Java 堆，方法区，（和线程私有的）程序计数器，虚拟机栈，本地方法栈。Java 堆：用于存放 new 出的对象，垃圾回收也主要就是针对这一块；方法区主要存放 静态变量，常量，方法区就包含了常量池；本地方法栈存放的就是 native 方法；虚拟机栈中有一个局部变量表">
@@ -184,7 +184,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
             
-            Home
+            Startseite
           </a>
         </li>
       
@@ -194,7 +194,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
             
-            Archives
+            Archiv
           </a>
         </li>
       
@@ -258,7 +258,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-11-24T15:32:48+08:00">
                 2017-11-24
@@ -307,8 +307,9 @@
 <h4 id="3-Integer-内存分析"><a href="#3-Integer-内存分析" class="headerlink" title="3. Integer 内存分析"></a>3. Integer 内存分析</h4><p>定义一个 Integer 类型，赋值方式</p>
 <ol>
 <li>Integer i = new Integer(10);</li>
-<li>Integer i = 10;<br>对于 -128~127 之间的数，使用第二种赋值方式时如果值相同，则两个变量 “==” true;<br>其它范围的数，两种赋值方式比较结果都为 false.</li>
+<li>Integer i = 10;</li>
 </ol>
+<p>对于 -128~127 之间的数，使用第二种赋值方式时如果值相同，则两个变量 “==” true;<br>其它范围的数，两种赋值方式比较结果都为 false.</p>
 <p>原因：<br>-128~127 之间的数会存储在常量池中，比较的直接就是存在在常量池中的对象，而其它数都是新建的对象。</p>
 
       
@@ -400,10 +401,10 @@
       
         <ul class="sidebar-nav motion-element">
           <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
-            Table of Contents
+            Inhaltsverzeichnis
           </li>
           <li class="sidebar-nav-overview" data-target="site-overview-wrap">
-            Overview
+            Übersicht
           </li>
         </ul>
       
@@ -424,7 +425,7 @@
                 <a href="/archives/">
               
                   <span class="site-state-item-count">9</span>
-                  <span class="site-state-item-name">posts</span>
+                  <span class="site-state-item-name">Artikel</span>
                 </a>
               </div>
             
@@ -490,7 +491,7 @@
 </div>
 
 
-  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
 
 
 
