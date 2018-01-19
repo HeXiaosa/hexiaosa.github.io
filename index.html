@@ -83,23 +83,16 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <ol>
-<li><p>作用<br>一个 ThreadLocal 对象在每个线程里面能保存一个值，同一个 ThreadLocal 保存同一个实例在不同线程中互不影响<br>为什么要用它 ——&gt; 在一个线程只需要唯一的某一类型实例</p>
-</li>
-<li><p>怎么用<br>ThreadLocal<string> local = new ThreadLocal&lt;&gt;();<br>local.set(“test”);<br>String value = local.get();</string></p>
-</li>
-<li><p>原理<br>保存数据结构 Entry {value}, 类似 key-value 保存的形式。key 就是当前的 ThreadLocal 对象, set 时如果 key 相同则覆盖 value 的值。<br>那么一个 ThreadLocal 对象是怎么保证一个线程只有一个值的呢？因为 Thread 中有一个 ThreadLocal.ThreadLocalMap 对象，每次 get/set 时都会取出这个对象进行操作。<br><img src="/image/ThreadLocal_get.png" alt="ThreadLocal_get"></p>
-</li>
-<li><p>Android 内源码使用分析<br>Looper 在每个线程中只有一个对象，原因在创建 Looper 的源码中有声明一个线程只能有一个 Looper. </p>
-</li>
-</ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">private static void prepare(boolean quitAllowed) &#123;</div><div class="line">    if (sThreadLocal.get() != null) &#123;</div><div class="line">        throw new RuntimeException(&quot;Only one Looper may be created per thread&quot;);</div><div class="line">    &#125;</div><div class="line">    sThreadLocal.set(new Looper(quitAllowed));</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+        <h4 id="1-作用"><a href="#1-作用" class="headerlink" title="1. 作用"></a>1. 作用</h4><p>一个 ThreadLocal 对象在每个线程里面能保存一个值，同一个 ThreadLocal 保存同一个实例在不同线程中互不影响<br>为什么要用它 ——&gt; 在一个线程只需要唯一的某一类型实例</p>
+<h4 id="2-怎么用"><a href="#2-怎么用" class="headerlink" title="2. 怎么用"></a>2. 怎么用</h4><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">ThreadLocal&lt;String&gt; local = new ThreadLocal&lt;&gt;();</div><div class="line">local.set(&quot;test&quot;);</div><div class="line">String value = local.get();</div></pre></td></tr></table></figure>
+</code></pre><h4 id="3-原理"><a href="#3-原理" class="headerlink" title="3. 原理"></a>3. 原理</h4><p>保存数据的类似 key-value 保存的形式。key 就是当前的 ThreadLocal 对象, set 时如果 key 相同则覆盖 value 的值。<br>那么一个 ThreadLocal 对象是怎么保证一个线程只有一个值的呢？因为 Thread 中有一个 ThreadLocal.ThreadLocalMap 对象，每次 get/set 时都会取出这个对象进行操作。<br><img src="/image/ThreadLocal_get.png" alt="ThreadLocal_get"></p>
+<h4 id="4-Android-内源码使用分析"><a href="#4-Android-内源码使用分析" class="headerlink" title="4. Android 内源码使用分析"></a>4. Android 内源码使用分析</h4><p>Looper 在每个线程中只有一个对象，原因在创建 Looper 的源码中有声明一个线程只能有一个 Looper.<br><img src="/image/Looper_prepare.png" alt="Looper_prepare"></p>
 <p>具体为什么这样设计从这张图片可能会找到一些答案，有待更进一步研究。<br><img src="/image/Handle_Looper_Message.png" alt="Handle_Looper_Message"></p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://hexiaosa.com/2018/01/19/ThreadLocal/" data-id="cjcldm1rh0001hkt44ej1l2or" class="article-share-link">Share</a>
+      <a data-url="http://hexiaosa.com/2018/01/19/ThreadLocal/" data-id="cjcldvnsa0001vgt4qy3pz3ub" class="article-share-link">Share</a>
       
       
     </footer>
@@ -148,7 +141,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://hexiaosa.com/2018/01/09/adb/" data-id="cjcldm1ss0006hkt4o020jaj5" class="article-share-link">Share</a>
+      <a data-url="http://hexiaosa.com/2018/01/09/adb/" data-id="cjcldvnt50005vgt42bcklirz" class="article-share-link">Share</a>
       
       
     </footer>
@@ -271,7 +264,7 @@ private void sendData() {
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://hexiaosa.com/2017/12/17/bluetooth_details/" data-id="cjcldm1sc0004hkt4thh98akv" class="article-share-link">Share</a>
+      <a data-url="http://hexiaosa.com/2017/12/17/bluetooth_details/" data-id="cjcldvnu00006vgt4dbbgbuek" class="article-share-link">Share</a>
       
       
     </footer>
@@ -340,7 +333,7 @@ hello == (&quot;hel&quot; + lo).intern();  //true
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://hexiaosa.com/2017/11/24/java_memory/" data-id="cjcldm1ss0007hkt4p6almqs6" class="article-share-link">Share</a>
+      <a data-url="http://hexiaosa.com/2017/11/24/java_memory/" data-id="cjcldvnu00007vgt44pwyq7qp" class="article-share-link">Share</a>
       
       
     </footer>
@@ -382,7 +375,7 @@ hello == (&quot;hel&quot; + lo).intern();  //true
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://hexiaosa.com/2017/11/09/about_string/" data-id="cjcldm1rw0003hkt4gcyihb6k" class="article-share-link">Share</a>
+      <a data-url="http://hexiaosa.com/2017/11/09/about_string/" data-id="cjcldvnt50004vgt4xdvysxry" class="article-share-link">Share</a>
       
       
     </footer>
@@ -427,7 +420,7 @@ hello == (&quot;hel&quot; + lo).intern();  //true
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://hexiaosa.com/2017/11/09/event_dispatch/" data-id="cjcldm1sc0005hkt45i91xl9t" class="article-share-link">Share</a>
+      <a data-url="http://hexiaosa.com/2017/11/09/event_dispatch/" data-id="cjcldvnsp0003vgt4nuq6zk1x" class="article-share-link">Share</a>
       
       
     </footer>
@@ -533,7 +526,7 @@ hello == (&quot;hel&quot; + lo).intern();  //true
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://hexiaosa.com/2017/10/19/note/" data-id="cjcldm1t70008hkt4pqp24900" class="article-share-link">Share</a>
+      <a data-url="http://hexiaosa.com/2017/10/19/note/" data-id="cjcldvnug0008vgt4dx6gv0i3" class="article-share-link">Share</a>
       
       
     </footer>
@@ -578,7 +571,7 @@ hello == (&quot;hel&quot; + lo).intern();  //true
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://hexiaosa.com/2017/10/11/View-Attribute-Set/" data-id="cjcldm1rw0002hkt49gkx4jfi" class="article-share-link">Share</a>
+      <a data-url="http://hexiaosa.com/2017/10/11/View-Attribute-Set/" data-id="cjcldvnsp0002vgt40du1zi4m" class="article-share-link">Share</a>
       
       
     </footer>
@@ -619,7 +612,7 @@ hello == (&quot;hel&quot; + lo).intern();  //true
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://hexiaosa.com/2017/10/09/MotionEvent_description/" data-id="cjcldm1r10000hkt491zvdo53" class="article-share-link">Share</a>
+      <a data-url="http://hexiaosa.com/2017/10/09/MotionEvent_description/" data-id="cjcldvnru0000vgt4c2my8y57" class="article-share-link">Share</a>
       
       
     </footer>
