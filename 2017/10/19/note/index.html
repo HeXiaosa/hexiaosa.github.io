@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="最近总结1. Serializable 和 ParcelableSerializable 和 Parcelable 都是用于序列化的。Serializable 是 Java 中定义的用于序列化的，使用方法是直接实现 Serializable 接口即可;使用 Parcelable 比 Serializable 快大概十倍，因为 Serializable 使用了反射是一个很慢的过程，并且会产生大量的临">
+<meta property="og:type" content="article">
+<meta property="og:title" content="笔记">
+<meta property="og:url" content="http://hexiaosa.com/2017/10/19/note/index.html">
+<meta property="og:site_name" content="Hexiaosa">
+<meta property="og:description" content="最近总结1. Serializable 和 ParcelableSerializable 和 Parcelable 都是用于序列化的。Serializable 是 Java 中定义的用于序列化的，使用方法是直接实现 Serializable 接口即可;使用 Parcelable 比 Serializable 快大概十倍，因为 Serializable 使用了反射是一个很慢的过程，并且会产生大量的临">
+<meta property="og:image" content="http://hexiaosa.com/image/valatile1.jpg">
+<meta property="og:updated_time" content="2017-10-19T05:59:34.013Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="笔记">
+<meta name="twitter:description" content="最近总结1. Serializable 和 ParcelableSerializable 和 Parcelable 都是用于序列化的。Serializable 是 Java 中定义的用于序列化的，使用方法是直接实现 Serializable 接口即可;使用 Parcelable 比 Serializable 快大概十倍，因为 Serializable 使用了反射是一个很慢的过程，并且会产生大量的临">
+<meta name="twitter:image" content="http://hexiaosa.com/image/valatile1.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://hexiaosa.com/2017/10/19/note/"/>
+
+
+
+
+
+  <title>笔记 | Hexiaosa</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Hexiaosa</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Startseite
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archiv
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2017/10/19/note/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Hexiaosa">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexiaosa">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">笔记</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-10-19T09:32:48+08:00">
+                2017-10-19
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="最近总结"><a href="#最近总结" class="headerlink" title="最近总结"></a>最近总结</h3><h4 id="1-Serializable-和-Parcelable"><a href="#1-Serializable-和-Parcelable" class="headerlink" title="1. Serializable 和 Parcelable"></a>1. Serializable 和 Parcelable</h4><p>Serializable 和 Parcelable 都是用于序列化的。<br>Serializable 是 Java 中定义的用于序列化的，使用方法是直接实现 Serializable 接口即可;<br>使用 Parcelable 比 Serializable 快大概十倍，因为 Serializable 使用了反射是一个很慢的过程，并且会产生大量的临时对象导致内存回收。</p>
+<h4 id="2-Canvas-Bitmap"><a href="#2-Canvas-Bitmap" class="headerlink" title="2. Canvas, Bitmap"></a>2. Canvas, Bitmap</h4><h4 id="3-Java内存管理"><a href="#3-Java内存管理" class="headerlink" title="3. Java内存管理"></a>3. Java内存管理</h4><p>堆：new 出的对象，<br>栈：基本变量，引用<br>方法区：方法，常量</p>
+<h4 id="4-Binder"><a href="#4-Binder" class="headerlink" title="4. Binder"></a>4. Binder</h4><p>AIDL 文件的本质是系统提供的快速生成 Binder 的工具</p>
+<h4 id="5-transient"><a href="#5-transient" class="headerlink" title="5. transient"></a>5. transient</h4><p>transient 的作用是：对于已经序列化的对象，创建实例时前面加上 transient 可以阻止序列化。</p>
+<h4 id="6-volatile"><a href="#6-volatile" class="headerlink" title="6. volatile"></a>6. volatile</h4><p>volatile 的作用：</p>
+<ol>
+<li>防止编译器优化代码，如：<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">a = 1;</div><div class="line">a = 2;</div><div class="line">a = 3;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>上面三句代码，如果没有 volatile 修饰，编译就会对其进行优化，只生成 a = 3; 这一句的机器代码，如果有 volatile 修饰，则每一句都会生成代码。</p>
+<ol>
+<li>volatile 保证不同线程操作时，对变量的修改立即可见<br><img src="/image/valatile1.jpg" alt="volatile 作用"></li>
+</ol>
+<h4 id="7-static-方法重写无效"><a href="#7-static-方法重写无效" class="headerlink" title="7. static 方法重写无效"></a>7. static 方法重写无效</h4><h4 id="8-Java-中的引用："><a href="#8-Java-中的引用：" class="headerlink" title="8. Java 中的引用："></a>8. Java 中的引用：</h4><p>强引用：new 出来的对象<br>软引用：当堆发生 OOM 时会被回收，若回收后内存仍不足，才会发生 OOM.<br>弱引用：WeakReference 只要发生 gc, 就会被回收</p>
+<h4 id="9-静态块"><a href="#9-静态块" class="headerlink" title="9. 静态块"></a>9. 静态块</h4><p>执行顺序：静态块 -&gt; 构造函数 -&gt; 调用方法<br>静态块在当前类的调用中只执行一次</p>
+<h4 id="10-fail-fast-和-fail-safe"><a href="#10-fail-fast-和-fail-safe" class="headerlink" title="10. fail-fast 和 fail-safe"></a>10. fail-fast 和 fail-safe</h4><p>fail-fast 发生条件：单线程-集合在被访问的过程中内部结构发生修改；多线程-多个线程同时修改同一个集合<br>解决方法就是用 fail-safe 机制，即可以使用 CopyOnWriteArrayList 或 ConCurrentHashMap, 它的实现机制是所有的修改都在一个复制的集合上操作</p>
+<h4 id="11-线程池"><a href="#11-线程池" class="headerlink" title="11. 线程池"></a>11. 线程池</h4><p>newCacheThreadPool, 可缓存的线程池<br>newFixedThreadPool， 创建固定数量的线程池<br>newScheduledThreadPool<br>newSingleThreadExcytor, 所有的线程单线程执行</p>
+<h4 id="12-canvas"><a href="#12-canvas" class="headerlink" title="12. canvas"></a>12. canvas</h4><p>canvas drawArc 时，paint 需要 setStyle(Paint.Style.STROKE) 才能画成弧，FILL 画成是扇形</p>
+<h4 id="13-捕获全局异常-http-www-jianshu-com-p-01b69d91a3a8"><a href="#13-捕获全局异常-http-www-jianshu-com-p-01b69d91a3a8" class="headerlink" title="13. 捕获全局异常  http://www.jianshu.com/p/01b69d91a3a8"></a>13. 捕获全局异常  <a href="http://www.jianshu.com/p/01b69d91a3a8" target="_blank" rel="external">http://www.jianshu.com/p/01b69d91a3a8</a></h4><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">private void handleUncaughtException() &#123;</div><div class="line">	new Handler(Looper.getMainLooper()).post(new Runnable() &#123;</div><div class="line">		@Override</div><div class="line">		public void run() &#123;</div><div class="line">			//主线程异常拦截</div><div class="line">			while (true) &#123;</div><div class="line">				try &#123;</div><div class="line">					Looper.loop();//主线程的异常会从这里抛出</div><div class="line">				&#125; catch (Throwable e) &#123;</div><div class="line">					Log.e(&quot;TAG&quot;, &quot;主线程异常----&quot; + e.getMessage());</div><div class="line">					if (e != null) &#123;</div><div class="line">						handleAfterUncaught();</div><div class="line">					&#125;</div><div class="line">				&#125;</div><div class="line">			&#125;</div><div class="line">		&#125;</div><div class="line">	&#125;);</div><div class="line">	//所有线程异常拦截，由于主线程的异常都被我们catch住了，所以下面的代码拦截到的都是子线程的异常</div><div class="line">	Thread.setDefaultUncaughtExceptionHandler(new MyException());</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</code></pre><h4 id="14-onDraw-使用"><a href="#14-onDraw-使用" class="headerlink" title="14. onDraw 使用"></a>14. onDraw 使用</h4><p>onDraw 不能做耗时操作，否则会导致界面卡顿。<br>原因：onDraw 引起了 Android 界面渲染，而渲染机制是：系统每 16ms 会执行一次。超过 16ms, 就开始了下次的渲染，导致界面卡顿。</p>
+<h4 id="15-this-关键字的作用"><a href="#15-this-关键字的作用" class="headerlink" title="15. this 关键字的作用"></a>15. this 关键字的作用</h4><ol>
+<li><p>上下文，当前类的引用</p>
+</li>
+<li><p>在一个构造器里面调用另一个构造器</p>
+</li>
+</ol>
+<h4 id="16-ListView"><a href="#16-ListView" class="headerlink" title="16. ListView"></a>16. ListView</h4><ol>
+<li><p>使用 ViewHolder 避免了每次都 findViewById, 据测试可以提升 50% 以上的效率</p>
+</li>
+<li><p>使用 adapter.notifyDataSetChanged() 时，list 需要是同一个对象</p>
+</li>
+</ol>
+<h4 id="17-关于-View"><a href="#17-关于-View" class="headerlink" title="17. 关于 View"></a>17. 关于 View</h4><p>setX(), setY() 和 layout() 的区别</p>
+<h4 id="18-移动-View-的方式"><a href="#18-移动-View-的方式" class="headerlink" title="18. 移动 View 的方式"></a>18. 移动 View 的方式</h4><ol>
+<li><p>setX(), setY()</p>
+</li>
+<li><p>layout()</p>
+</li>
+<li><p>offsetLeftAndRight(), offsetTopAndBottom()</p>
+</li>
+<li><p>LayoutParams</p>
+</li>
+<li><p>scrollTo(), scrollBy() 移动的是 View 的内容</p>
+</li>
+<li><p>Scroller</p>
+</li>
+<li><p>动画</p>
+</li>
+</ol>
+<h4 id="19-View-事件分发"><a href="#19-View-事件分发" class="headerlink" title="19. View 事件分发"></a>19. View 事件分发</h4><p>以下三个默认都返回 false, 一旦返回 true 就表示拦截事件。<br>若有 A(B(MyView)), 则事件的默认传递：</p>
+<p>A dispatch<br>A onIntercept<br>B dispatch<br>B onIntercept<br>MyView dispatch<br>MyView onTouch<br>B onTouch<br>A onTouch</p>
+<p>在理解以上分发流程的基础上，以下方法返回 true 代表：<br>dispatchTouchEvent : 事件到此结束，不再继续分发</p>
+<p>onInterceptTouchEvent : 拦截事件，不再往子 View 分发</p>
+<p>onTouch : 由自己完全处理，事件不再往父 View 传递</p>
+<h4 id="20-动画"><a href="#20-动画" class="headerlink" title="20. 动画"></a>20. 动画</h4><h6 id="补间动画-Animation"><a href="#补间动画-Animation" class="headerlink" title="补间动画 (Animation)"></a>补间动画 (Animation)</h6><h6 id="属性动画-Animator"><a href="#属性动画-Animator" class="headerlink" title="属性动画 (Animator)"></a>属性动画 (Animator)</h6><ol>
+<li><p>ValueAnimator 的用法</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">ValueAnimator valueAnimator = new ValueAnimator(1, 100);</div><div class="line">valueAnimator.setTarget(view);</div><div class="line">valueAnimator.setDuration(500);</div><div class="line">valueAnimator.start();</div><div class="line">valueAnimator.addUpdateListener(new AnimatorUpdateListener()&#123;</div><div class="line">	@Override</div><div class="line">	publid void onAnimationUpdate(ValueAnimator animator) &#123;</div><div class="line">	    Float value = (Float)animator.getAnimatedValue();</div><div class="line">	    //todo use the value</div><div class="line">	&#125;</div><div class="line">&#125;);</div></pre></td></tr></table></figure>
+</li>
+<li><p>PropertyValuesHolder 类似AnimatorSet, 多个动画一起执行</p>
+</li>
+<li>动画的监听，animator.addListener(), new AnimatorListener/AnimatorListenerAdapter</li>
+<li>View 的 animate<br>View 可以直接使用 animate() 方法</li>
+</ol>
+<h6 id="布局动画"><a href="#布局动画" class="headerlink" title="布局动画"></a>布局动画</h6><p>用于 ViewGroup, 用法：</p>
+<ol>
+<li>xml中在 ViewGroup 声明 animationLayoutDChanges=”true”, 但是测试时并未发现有动画效果</li>
+<li>代码中动态添加，如：<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">LinearLayout ll = (LinearLayout)findViewById(R.id.ll);</div><div class="line"></div><div class="line">ScaleAnimation sa = new ScaleAnimation(0, 1, 0, 1);</div><div class="line">sa.setDuration(500);</div><div class="line"></div><div class="line">LayoutAnimationControllor lac = new LayoutAnimationControlor(sa, 0.5f);</div><div class="line">lac.setOrder(LayoutAnimationControlor.ORDER_NORMAL);</div><div class="line"></div><div class="line">ll.setLayoutAnimationControlor(lac);</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<h4 id="21-清空任务栈"><a href="#21-清空任务栈" class="headerlink" title="21. 清空任务栈"></a>21. 清空任务栈</h4><p>AndroidManifest 中 activity 标签中的几个属性：<br>clearTaskOnLaunch : 每次初始化该 activity, 任务栈就会被清空，只有这一个实例<br>finishOnTaskLaunch : 离开任务栈，再次初始化时，如果有该 activity, 就会被 finish.<br>alwaysRetainTaskState : 给了该 activity 一个免死金牌，永远不会被清理</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/10/11/View-Attribute-Set/" rel="next" title="View 属性">
+                <i class="fa fa-chevron-left"></i> View 属性
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/11/09/event_dispatch/" rel="prev" title="事件分发">
+                事件分发 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Inhaltsverzeichnis
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Übersicht
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Hexiaosa</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">9</span>
+                  <span class="site-state-item-name">Artikel</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#最近总结"><span class="nav-number">1.</span> <span class="nav-text">最近总结</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-Serializable-和-Parcelable"><span class="nav-number">1.1.</span> <span class="nav-text">1. Serializable 和 Parcelable</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-Canvas-Bitmap"><span class="nav-number">1.2.</span> <span class="nav-text">2. Canvas, Bitmap</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-Java内存管理"><span class="nav-number">1.3.</span> <span class="nav-text">3. Java内存管理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4-Binder"><span class="nav-number">1.4.</span> <span class="nav-text">4. Binder</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5-transient"><span class="nav-number">1.5.</span> <span class="nav-text">5. transient</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#6-volatile"><span class="nav-number">1.6.</span> <span class="nav-text">6. volatile</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#7-static-方法重写无效"><span class="nav-number">1.7.</span> <span class="nav-text">7. static 方法重写无效</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#8-Java-中的引用："><span class="nav-number">1.8.</span> <span class="nav-text">8. Java 中的引用：</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#9-静态块"><span class="nav-number">1.9.</span> <span class="nav-text">9. 静态块</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#10-fail-fast-和-fail-safe"><span class="nav-number">1.10.</span> <span class="nav-text">10. fail-fast 和 fail-safe</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#11-线程池"><span class="nav-number">1.11.</span> <span class="nav-text">11. 线程池</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#12-canvas"><span class="nav-number">1.12.</span> <span class="nav-text">12. canvas</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#13-捕获全局异常-http-www-jianshu-com-p-01b69d91a3a8"><span class="nav-number">1.13.</span> <span class="nav-text">13. 捕获全局异常  http://www.jianshu.com/p/01b69d91a3a8</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#14-onDraw-使用"><span class="nav-number">1.14.</span> <span class="nav-text">14. onDraw 使用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#15-this-关键字的作用"><span class="nav-number">1.15.</span> <span class="nav-text">15. this 关键字的作用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#16-ListView"><span class="nav-number">1.16.</span> <span class="nav-text">16. ListView</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#17-关于-View"><span class="nav-number">1.17.</span> <span class="nav-text">17. 关于 View</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#18-移动-View-的方式"><span class="nav-number">1.18.</span> <span class="nav-text">18. 移动 View 的方式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#19-View-事件分发"><span class="nav-number">1.19.</span> <span class="nav-text">19. View 事件分发</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#20-动画"><span class="nav-number">1.20.</span> <span class="nav-text">20. 动画</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#补间动画-Animation"><span class="nav-number">1.20.0.1.</span> <span class="nav-text">补间动画 (Animation)</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#属性动画-Animator"><span class="nav-number">1.20.0.2.</span> <span class="nav-text">属性动画 (Animator)</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#布局动画"><span class="nav-number">1.20.0.3.</span> <span class="nav-text">布局动画</span></a></li></ol></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#21-清空任务栈"><span class="nav-number">1.21.</span> <span class="nav-text">21. 清空任务栈</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Hexiaosa</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

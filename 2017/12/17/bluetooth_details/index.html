@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="蓝牙4.0提出了低功耗蓝牙的模式。蓝牙4.0的传输分为: Single Mode 和 Dual Mode; Single Mode 只支持与 4.0 的相互传输，Dual Mode 支持与 4.0 以及 3.0, 2.1, 2.0 传输.相关代码如下： //获取蓝牙适配器，系统只有一个蓝牙适配器，若 adapter 为 null, 则说明系统不支持蓝牙功能 BluetoothAdapter ada">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android 蓝牙详解">
+<meta property="og:url" content="http://hexiaosa.com/2017/12/17/bluetooth_details/index.html">
+<meta property="og:site_name" content="Hexiaosa">
+<meta property="og:description" content="蓝牙4.0提出了低功耗蓝牙的模式。蓝牙4.0的传输分为: Single Mode 和 Dual Mode; Single Mode 只支持与 4.0 的相互传输，Dual Mode 支持与 4.0 以及 3.0, 2.1, 2.0 传输.相关代码如下： //获取蓝牙适配器，系统只有一个蓝牙适配器，若 adapter 为 null, 则说明系统不支持蓝牙功能 BluetoothAdapter ada">
+<meta property="og:updated_time" content="2017-12-17T09:41:08.960Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android 蓝牙详解">
+<meta name="twitter:description" content="蓝牙4.0提出了低功耗蓝牙的模式。蓝牙4.0的传输分为: Single Mode 和 Dual Mode; Single Mode 只支持与 4.0 的相互传输，Dual Mode 支持与 4.0 以及 3.0, 2.1, 2.0 传输.相关代码如下： //获取蓝牙适配器，系统只有一个蓝牙适配器，若 adapter 为 null, 则说明系统不支持蓝牙功能 BluetoothAdapter ada">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://hexiaosa.com/2017/12/17/bluetooth_details/"/>
+
+
+
+
+
+  <title>Android 蓝牙详解 | Hexiaosa</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Hexiaosa</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Startseite
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archiv
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2017/12/17/bluetooth_details/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Hexiaosa">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexiaosa">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Android 蓝牙详解</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-12-17T17:32:48+08:00">
+                2017-12-17
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>蓝牙4.0提出了低功耗蓝牙的模式。<br>蓝牙4.0的传输分为: Single Mode 和 Dual Mode; Single Mode 只支持与 4.0 的相互传输，Dual Mode 支持与 4.0 以及 3.0, 2.1, 2.0 传输.<br>相关代码如下：</p>
+<pre><code>//获取蓝牙适配器，系统只有一个蓝牙适配器，若 adapter 为 null, 则说明系统不支持蓝牙功能
+BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+
+//表示蓝牙是否打开
+adapter.isEnabled();
+
+//获取已配对的蓝牙设备
+Set&lt;BluetoothDevice&gt; devices = adapter.getBondedDevices();
+
+BluetoothDevice device = null;
+if (devices.iterator().hasNext()) {
+    device = devices.iterator().next();
+}
+if (device == null) {
+    //没有已配对的设备
+} else {
+    //有已配对的设备，连接，发送数据
+    //4.0 的传输跟之前的版本有不同，看要连接的设备是否是4.0，是否支持4.0之前的来决定用什么代码来连接
+}
+</code></pre><p>经典蓝牙连接</p>
+<pre><code>权限：
+&lt;uses-permission android:name=&quot;android.permission.BLUETOOTH&quot; /&gt;
+&lt;uses-permission android:name=&quot;android.permission.BLUETOOTH_ADMIN&quot; /&gt;
+
+BluetoothSocket socket = adapter.createRfcommSocketToServiceRecord(NAME, MY_UUID);
+new Thread(
+    @Override
+    public void run() {
+        // 向服务端发送连接
+        socket.connect();
+        // 获取到输出流，向外写数据
+        os = clientSocket.getOutputStream();
+        // 判断是否拿到输出流
+        if (os != null) {
+            // 需要发送的信息
+            String text = &quot;open&quot;;
+            // 以utf-8的格式发送出去
+            os.write(text.getBytes(&quot;UTF-8&quot;));
+        }
+    }
+).start();
+</code></pre><p>低功耗蓝牙连接</p>
+<pre><code>权限：
+&lt;uses-permission android:name=&quot;android.permission.BLUETOOTH&quot; /&gt;
+&lt;uses-permission android:name=&quot;android.permission.BLUETOOTH_ADMIN&quot; /&gt;
+&lt;uses-permission android:name=&quot;android.permission.ACCESS_COARSE_LOCATION&quot; /&gt;
+&lt;uses-permission android:name=&quot;android.permission.ACCESS_FINE_LOCATION&quot; /&gt;
+&lt;uses-feature
+    android:name=&quot;android.hardware.bluetooth_le&quot;
+    android:required=&quot;true&quot; /&gt;
+
+BluetoothGatt gatt = device.connGatt(context, autoConnect, BluetoothGattCallback);
+//连接蓝牙，连接后将会回调到 BluetoothGattCallback 的 onConnectChanged 方法中
+@Override
+public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
+    super.onConnectionStateChange(gatt, status, newState);
+    if (newState == BluetoothProfile.STATE_CONNECTED) {
+        //即表示连接成功
+        gatt.discoverServices();//该方法之后将会调用 onServiceDiscovered() 方法中
+    }
+}
+@Override
+public void onServicesDiscovered(BluetoothGatt gatt, int status) {
+    super.onServicesDiscovered(gatt, status);
+    //开始发送数据
+    sendData();
+}
+
+//发送数据，具体怎么发送，要看设备方的要求(怎么接受)，还有需要注意的是 获取服务和获取写入数据的需要设备方提供的UUID与设备相匹配
+private void sendData() {
+    BluetoothGattService service = mBluetoothGatt.getService(RX_SERVICE_UUID);
+    BluetoothGattCharacteristic characteristic = service.getCharacteristic(RX_CHAR_UUID);
+    byte[] value = new byte[4];
+    value[0] = (byte) &apos;o&apos;;
+    value[1] = (byte) &apos;p&apos;;
+    value[2] = (byte) &apos;e&apos;;
+    value[3] = (byte) &apos;n&apos;;
+    characteristic.setValue(value);
+    Log.e(&quot;TAG&quot;, &quot;send value -&gt; &quot; + Arrays.toString(characteristic.getValue()));
+    boolean isWrite = mBluetoothGatt.writeCharacteristic(characteristic);
+    if (isWrite) {
+        Log.e(&quot;TAG&quot;, &quot;发送数据成功&quot;);
+    } else {
+        Log.e(&quot;TAG&quot;, &quot;发送数据失败&quot;);
+    }
+}
+</code></pre>
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/11/24/java_memory/" rel="next" title="Java 内存管理部分">
+                <i class="fa fa-chevron-left"></i> Java 内存管理部分
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/01/09/adb/" rel="prev" title="ADB (Android Debug Bridge)">
+                ADB (Android Debug Bridge) <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Hexiaosa</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">9</span>
+                  <span class="site-state-item-name">Artikel</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Hexiaosa</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
