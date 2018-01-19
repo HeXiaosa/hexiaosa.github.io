@@ -3,18 +3,21 @@
 <head>
   <meta charset="utf-8">
   
-  <title>事件分发 | Hexiaosa</title>
+  <title>ThreadLocal 详解 | Hexiaosa</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="事件分发中设计到的几个方法：dispatchTouchEvent(), onInterceptTouchEvent(), onTouchEvent(), 这几个都有返回值 boolean 类型，默认情况下都返回 false,  若有 A(B(MyView)), 则事件的默认传递： A dispatchA onInterceptB dispatchB onInterceptMyView dispat">
+  <meta name="description" content="作用一个 ThreadLocal 对象在每个线程里面能保存一个值，同一个 ThreadLocal 保存同一个实例在不同线程中互不影响为什么要用它 ——&amp;gt; 在一个线程只需要唯一的某一类型实例  怎么用ThreadLocal local = new ThreadLocal&amp;lt;&amp;gt;();local.set(“test”);String value = local.get();  原理保存">
 <meta property="og:type" content="article">
-<meta property="og:title" content="事件分发">
-<meta property="og:url" content="http://hexiaosa.com/2017/11/09/event_dispatch/index.html">
+<meta property="og:title" content="ThreadLocal 详解">
+<meta property="og:url" content="http://hexiaosa.com/2018/01/19/ThreadLocal/index.html">
 <meta property="og:site_name" content="Hexiaosa">
-<meta property="og:description" content="事件分发中设计到的几个方法：dispatchTouchEvent(), onInterceptTouchEvent(), onTouchEvent(), 这几个都有返回值 boolean 类型，默认情况下都返回 false,  若有 A(B(MyView)), 则事件的默认传递： A dispatchA onInterceptB dispatchB onInterceptMyView dispat">
-<meta property="og:updated_time" content="2017-11-09T02:42:23.796Z">
+<meta property="og:description" content="作用一个 ThreadLocal 对象在每个线程里面能保存一个值，同一个 ThreadLocal 保存同一个实例在不同线程中互不影响为什么要用它 ——&amp;gt; 在一个线程只需要唯一的某一类型实例  怎么用ThreadLocal local = new ThreadLocal&amp;lt;&amp;gt;();local.set(“test”);String value = local.get();  原理保存">
+<meta property="og:image" content="http://hexiaosa.com/image/ThreadLocal_get.png">
+<meta property="og:image" content="http://hexiaosa.com/image/Handle_Looper_Message.png">
+<meta property="og:updated_time" content="2018-01-19T03:37:24.436Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="事件分发">
-<meta name="twitter:description" content="事件分发中设计到的几个方法：dispatchTouchEvent(), onInterceptTouchEvent(), onTouchEvent(), 这几个都有返回值 boolean 类型，默认情况下都返回 false,  若有 A(B(MyView)), 则事件的默认传递： A dispatchA onInterceptB dispatchB onInterceptMyView dispat">
+<meta name="twitter:title" content="ThreadLocal 详解">
+<meta name="twitter:description" content="作用一个 ThreadLocal 对象在每个线程里面能保存一个值，同一个 ThreadLocal 保存同一个实例在不同线程中互不影响为什么要用它 ——&amp;gt; 在一个线程只需要唯一的某一类型实例  怎么用ThreadLocal local = new ThreadLocal&amp;lt;&amp;gt;();local.set(“test”);String value = local.get();  原理保存">
+<meta name="twitter:image" content="http://hexiaosa.com/image/ThreadLocal_get.png">
   
     <link rel="alternate" href="/atom.xml" title="Hexiaosa" type="application/atom+xml">
   
@@ -63,10 +66,10 @@
   </div>
 </header>
       <div class="outer">
-        <section id="main"><article id="post-event_dispatch" class="article article-type-post" itemscope itemprop="blogPost">
+        <section id="main"><article id="post-ThreadLocal" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2017/11/09/event_dispatch/" class="article-date">
-  <time datetime="2017-11-09T01:32:48.000Z" itemprop="datePublished">2017-11-09</time>
+    <a href="/2018/01/19/ThreadLocal/" class="article-date">
+  <time datetime="2018-01-19T02:58:37.000Z" itemprop="datePublished">2018-01-19</time>
 </a>
     
   </div>
@@ -77,7 +80,7 @@
         
   
     <h1 class="article-title" itemprop="name">
-      事件分发
+      ThreadLocal 详解
     </h1>
   
 
@@ -85,20 +88,23 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>事件分发中设计到的几个方法：dispatchTouchEvent(), onInterceptTouchEvent(), onTouchEvent(), 这几个都有返回值 boolean 类型，默认情况下都返回 false, </p>
-<p>若有 A(B(MyView)), 则事件的默认传递：</p>
-<p>A dispatch<br>A onIntercept<br>B dispatch<br>B onIntercept<br>MyView dispatch<br>MyView onTouch<br>B onTouch<br>A onTouch</p>
-<p>当 dispatchTouchEvent 返回 true 时，上面的分发流程就此中止；<br>当 onInterceptTouchEvent 返回 true 时，事件不再往子 View 传递，其余都还正常；<br>当 onTouchEvent 返回 true 时，onTouchEvent 由自己处理，不再交给父级处理。</p>
-<p>由上面的分析看来已经很清晰了，有下面这些特殊情况：</p>
-<ol>
-<li>这几个事件中，ACTION_DOWN 返回 true 和整个事件返回 true 的效果一样。也就是该次 event 一旦返回 true 表示之后的事件都返回 true。</li>
-<li>PS: onInterceptTouchEvent() 中有事件返回 true, 则之后的事件该方法不会再被调用，直到本次事件结束。</li>
+        <ol>
+<li><p>作用<br>一个 ThreadLocal 对象在每个线程里面能保存一个值，同一个 ThreadLocal 保存同一个实例在不同线程中互不影响<br>为什么要用它 ——&gt; 在一个线程只需要唯一的某一类型实例</p>
+</li>
+<li><p>怎么用<br>ThreadLocal<string> local = new ThreadLocal&lt;&gt;();<br>local.set(“test”);<br>String value = local.get();</string></p>
+</li>
+<li><p>原理<br>保存数据结构 Entry {value}, 类似 key-value 保存的形式。key 就是当前的 ThreadLocal 对象, set 时如果 key 相同则覆盖 value 的值。<br>那么一个 ThreadLocal 对象是怎么保证一个线程只有一个值的呢？因为 Thread 中有一个 ThreadLocal.ThreadLocalMap 对象，每次 get/set 时都会取出这个对象进行操作。<br><img src="/image/ThreadLocal_get.png" alt="ThreadLocal_get"></p>
+</li>
+<li><p>Android 内源码使用分析<br>Looper 在每个线程中只有一个对象，原因在创建 Looper 的源码中有声明一个线程只能有一个 Looper. </p>
+</li>
 </ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">private static void prepare(boolean quitAllowed) &#123;</div><div class="line">    if (sThreadLocal.get() != null) &#123;</div><div class="line">        throw new RuntimeException(&quot;Only one Looper may be created per thread&quot;);</div><div class="line">    &#125;</div><div class="line">    sThreadLocal.set(new Looper(quitAllowed));</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>具体为什么这样设计从这张图片可能会找到一些答案，有待更进一步研究。<br><img src="/image/Handle_Looper_Message.png" alt="Handle_Looper_Message"></p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://hexiaosa.com/2017/11/09/event_dispatch/" data-id="cjcldm1sc0005hkt45i91xl9t" class="article-share-link">Share</a>
+      <a data-url="http://hexiaosa.com/2018/01/19/ThreadLocal/" data-id="cjcldm1rh0001hkt44ej1l2or" class="article-share-link">Share</a>
       
       
     </footer>
@@ -107,19 +113,10 @@
     
 <nav id="article-nav">
   
-    <a href="/2017/11/09/about_string/" id="article-nav-newer" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Newer</strong>
-      <div class="article-nav-title">
-        
-          字符串
-        
-      </div>
-    </a>
   
-  
-    <a href="/2017/10/19/note/" id="article-nav-older" class="article-nav-link-wrap">
+    <a href="/2018/01/09/adb/" id="article-nav-older" class="article-nav-link-wrap">
       <strong class="article-nav-caption">Older</strong>
-      <div class="article-nav-title">笔记</div>
+      <div class="article-nav-title">ADB (Android Debug Bridge)</div>
     </a>
   
 </nav>
