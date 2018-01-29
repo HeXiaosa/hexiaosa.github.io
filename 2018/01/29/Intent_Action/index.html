@@ -79,16 +79,16 @@
 
 
 
-<meta name="description" content="事件分发中设计到的几个方法：dispatchTouchEvent(), onInterceptTouchEvent(), onTouchEvent(), 这几个都有返回值 boolean 类型，默认情况下都返回 false,  若有 A(B(MyView)), 则事件的默认传递： A dispatchA onInterceptB dispatchB onInterceptMyView dispat">
+<meta name="description" content="直接对 data 中的号码拨号 : Intent.ACTION_CALL(android.intent.action.CALL)设置号码（必须）使用此功能注意权限 android.permission.CALL_PHONE 1234Intent intent = new Intent();intent.setAction(Intent.ACTION_CALL);intent.setData(Ur">
 <meta property="og:type" content="article">
-<meta property="og:title" content="事件分发">
-<meta property="og:url" content="http://hexiaosa.com/2017/11/09/event_dispatch/index.html">
+<meta property="og:title" content="Intent 的一些 Action 总结.md">
+<meta property="og:url" content="http://hexiaosa.com/2018/01/29/Intent_Action/index.html">
 <meta property="og:site_name" content="Hexiaosa">
-<meta property="og:description" content="事件分发中设计到的几个方法：dispatchTouchEvent(), onInterceptTouchEvent(), onTouchEvent(), 这几个都有返回值 boolean 类型，默认情况下都返回 false,  若有 A(B(MyView)), 则事件的默认传递： A dispatchA onInterceptB dispatchB onInterceptMyView dispat">
-<meta property="og:updated_time" content="2017-11-09T02:42:23.796Z">
+<meta property="og:description" content="直接对 data 中的号码拨号 : Intent.ACTION_CALL(android.intent.action.CALL)设置号码（必须）使用此功能注意权限 android.permission.CALL_PHONE 1234Intent intent = new Intent();intent.setAction(Intent.ACTION_CALL);intent.setData(Ur">
+<meta property="og:updated_time" content="2018-01-29T03:21:37.917Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="事件分发">
-<meta name="twitter:description" content="事件分发中设计到的几个方法：dispatchTouchEvent(), onInterceptTouchEvent(), onTouchEvent(), 这几个都有返回值 boolean 类型，默认情况下都返回 false,  若有 A(B(MyView)), 则事件的默认传递： A dispatchA onInterceptB dispatchB onInterceptMyView dispat">
+<meta name="twitter:title" content="Intent 的一些 Action 总结.md">
+<meta name="twitter:description" content="直接对 data 中的号码拨号 : Intent.ACTION_CALL(android.intent.action.CALL)设置号码（必须）使用此功能注意权限 android.permission.CALL_PHONE 1234Intent intent = new Intent();intent.setAction(Intent.ACTION_CALL);intent.setData(Ur">
 
 
 
@@ -118,13 +118,13 @@
 
 
 
-  <link rel="canonical" href="http://hexiaosa.com/2017/11/09/event_dispatch/"/>
+  <link rel="canonical" href="http://hexiaosa.com/2018/01/29/Intent_Action/"/>
 
 
 
 
 
-  <title>事件分发 | Hexiaosa</title>
+  <title>Intent 的一些 Action 总结.md | Hexiaosa</title>
   
 
 
@@ -231,7 +231,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2017/11/09/event_dispatch/">
+    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/01/29/Intent_Action/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Hexiaosa">
@@ -248,7 +248,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">事件分发</h1>
+          <h1 class="post-title" itemprop="name headline">Intent 的一些 Action 总结.md</h1>
         
 
         <div class="post-meta">
@@ -260,8 +260,8 @@
               
                 <span class="post-meta-item-text">Veröffentlicht am</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-11-09T09:32:48+08:00">
-                2017-11-09
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-29T11:20:58+08:00">
+                2018-01-29
               </time>
             
 
@@ -298,14 +298,24 @@
       
 
       
-        <p>事件分发中设计到的几个方法：dispatchTouchEvent(), onInterceptTouchEvent(), onTouchEvent(), 这几个都有返回值 boolean 类型，默认情况下都返回 false, </p>
-<p>若有 A(B(MyView)), 则事件的默认传递：</p>
-<p>A dispatch<br>A onIntercept<br>B dispatch<br>B onIntercept<br>MyView dispatch<br>MyView onTouch<br>B onTouch<br>A onTouch</p>
-<p>当 dispatchTouchEvent 返回 true 时，上面的分发流程就此中止；<br>当 onInterceptTouchEvent 返回 true 时，事件不再往子 View 传递，其余都还正常；<br>当 onTouchEvent 返回 true 时，onTouchEvent 由自己处理，不再交给父级处理。</p>
-<p>由上面的分析看来已经很清晰了，有下面这些特殊情况：</p>
-<ol>
-<li>这几个事件中，ACTION_DOWN 返回 true 和整个事件返回 true 的效果一样。也就是该次 event 一旦返回 true 表示之后的事件都返回 true。</li>
-<li>PS: onInterceptTouchEvent() 中有事件返回 true, 则之后的事件该方法不会再被调用，直到本次事件结束。</li>
+        <ol>
+<li><p>直接对 data 中的号码拨号 : Intent.ACTION_CALL(android.intent.action.CALL)<br>设置号码（必须）<br>使用此功能注意权限 android.permission.CALL_PHONE</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">Intent intent = new Intent();</div><div class="line">intent.setAction(Intent.ACTION_CALL);</div><div class="line">intent.setData(Uri.parse(&quot;tel:22222222&quot;));</div><div class="line">startActivity(intent);</div></pre></td></tr></table></figure>
+</li>
+<li><p>跳转拨号页面，并且号码是展示的 data 中的 : Intent.ACTION_DIAL(android.intent.action.DIAL)<br>设置号码（可以不设置，不设置就是跳转到拨号界面，不指定号码）</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">Intent intent = new Intent();</div><div class="line">intent.setAction(Intent.ACTION_DIAL);</div><div class="line">intent.setData(Uri.parse(&quot;tel:手机号&quot;));</div><div class="line">startActivity(intent);</div></pre></td></tr></table></figure>
+</li>
+<li><p>相当于点击拨号：Intent.ACTION_CALL_BUTTON(android.intent.action.CALL_BUTTON)，直接启动就可以，不用设置其它。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">Intent intent = new Intent();</div><div class="line">intent.setAction(Intent.ACTION_CALL_BUTTON);</div><div class="line">startActivity(intent);</div></pre></td></tr></table></figure>
+</li>
+<li><p>发送短信，Intent.ACTION_SENDTO(android.intent.action.SENDTO) 用法如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">Intent intent = new Intent();</div><div class="line">intent.setAction(Intent.ACTION_SENDTO);</div><div class="line">intent.setData(Uri.parse(&quot;smsto:收信人&quot;));</div><div class="line">intent.putExtra(&quot;sms_body&quot;, &quot;信息内容：test&quot;);</div><div class="line">startActivity(intent);</div></pre></td></tr></table></figure>
+</li>
+<li><p>调用系统相机，MediaStore.ACTION_IMAGE_CAPTURE(android.media.action.IMAGE_CAPTURE)</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">Intent intent = new Intent();</div><div class="line">intent.setAction(MediaStore.ACTION_IMAGE_CAPTURE);</div><div class="line">startActivityForResult(intent, requestCode);</div><div class="line"></div><div class="line">@Override</div><div class="line">protected void onActivityResult(int requestCode, int resultCode, Intent data) &#123;</div><div class="line">    super.onActivityResult(requestCode, resultCode, data);</div><div class="line">    // 获取到拍的照片</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+<li><p>调用安装应用</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">Intent install = new Intent(Intent.ACTION_VIEW);</div><div class="line">install.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);</div><div class="line">File apkFile = new File(Environment.getExternalStorageDirectory() + &quot;/download/&quot; + &quot;app.apk&quot;;</div><div class="line">install.setDataAndType(Uri.fromFile(apkFile)), &quot;application/vnd.android.package-archive&quot;);</div><div class="line">startActivity(install)</div></pre></td></tr></table></figure></li>
 </ol>
 
       
@@ -331,8 +341,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2017/10/19/note/" rel="next" title="笔记">
-                <i class="fa fa-chevron-left"></i> 笔记
+              <a href="/2018/01/24/java_collection/" rel="next" title="Java 集合简括">
+                <i class="fa fa-chevron-left"></i> Java 集合简括
               </a>
             
           </div>
@@ -340,10 +350,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2017/11/09/about_string/" rel="prev" title="字符串">
-                字符串 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>

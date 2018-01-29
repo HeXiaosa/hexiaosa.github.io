@@ -79,16 +79,12 @@
 
 
 
-<meta name="description" content="事件分发中设计到的几个方法：dispatchTouchEvent(), onInterceptTouchEvent(), onTouchEvent(), 这几个都有返回值 boolean 类型，默认情况下都返回 false,  若有 A(B(MyView)), 则事件的默认传递： A dispatchA onInterceptB dispatchB onInterceptMyView dispat">
-<meta property="og:type" content="article">
-<meta property="og:title" content="事件分发">
-<meta property="og:url" content="http://hexiaosa.com/2017/11/09/event_dispatch/index.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Hexiaosa">
+<meta property="og:url" content="http://hexiaosa.com/page/2/index.html">
 <meta property="og:site_name" content="Hexiaosa">
-<meta property="og:description" content="事件分发中设计到的几个方法：dispatchTouchEvent(), onInterceptTouchEvent(), onTouchEvent(), 这几个都有返回值 boolean 类型，默认情况下都返回 false,  若有 A(B(MyView)), 则事件的默认传递： A dispatchA onInterceptB dispatchB onInterceptMyView dispat">
-<meta property="og:updated_time" content="2017-11-09T02:42:23.796Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="事件分发">
-<meta name="twitter:description" content="事件分发中设计到的几个方法：dispatchTouchEvent(), onInterceptTouchEvent(), onTouchEvent(), 这几个都有返回值 boolean 类型，默认情况下都返回 false,  若有 A(B(MyView)), 则事件的默认传递： A dispatchA onInterceptB dispatchB onInterceptMyView dispat">
+<meta name="twitter:title" content="Hexiaosa">
 
 
 
@@ -118,13 +114,13 @@
 
 
 
-  <link rel="canonical" href="http://hexiaosa.com/2017/11/09/event_dispatch/"/>
+  <link rel="canonical" href="http://hexiaosa.com/page/2/"/>
 
 
 
 
 
-  <title>事件分发 | Hexiaosa</title>
+  <title>Hexiaosa</title>
   
 
 
@@ -143,7 +139,8 @@
     
   
 
-  <div class="container sidebar-position-left page-post-detail">
+  <div class="container sidebar-position-left 
+  page-home">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -216,9 +213,9 @@
         <div class="content-wrap">
           <div id="content" class="content">
             
-
-  <div id="posts" class="posts-expand">
+  <section id="posts" class="posts-expand">
     
+      
 
   
 
@@ -231,7 +228,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2017/11/09/event_dispatch/">
+    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2017/10/09/MotionEvent_description/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Hexiaosa">
@@ -248,7 +245,9 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">事件分发</h1>
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/10/09/MotionEvent_description/" itemprop="url">MotionEvent介绍</a></h1>
         
 
         <div class="post-meta">
@@ -260,8 +259,8 @@
               
                 <span class="post-meta-item-text">Veröffentlicht am</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-11-09T09:32:48+08:00">
-                2017-11-09
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-10-09T10:32:48+08:00">
+                2017-10-09
               </time>
             
 
@@ -298,16 +297,16 @@
       
 
       
-        <p>事件分发中设计到的几个方法：dispatchTouchEvent(), onInterceptTouchEvent(), onTouchEvent(), 这几个都有返回值 boolean 类型，默认情况下都返回 false, </p>
-<p>若有 A(B(MyView)), 则事件的默认传递：</p>
-<p>A dispatch<br>A onIntercept<br>B dispatch<br>B onIntercept<br>MyView dispatch<br>MyView onTouch<br>B onTouch<br>A onTouch</p>
-<p>当 dispatchTouchEvent 返回 true 时，上面的分发流程就此中止；<br>当 onInterceptTouchEvent 返回 true 时，事件不再往子 View 传递，其余都还正常；<br>当 onTouchEvent 返回 true 时，onTouchEvent 由自己处理，不再交给父级处理。</p>
-<p>由上面的分析看来已经很清晰了，有下面这些特殊情况：</p>
-<ol>
-<li>这几个事件中，ACTION_DOWN 返回 true 和整个事件返回 true 的效果一样。也就是该次 event 一旦返回 true 表示之后的事件都返回 true。</li>
-<li>PS: onInterceptTouchEvent() 中有事件返回 true, 则之后的事件该方法不会再被调用，直到本次事件结束。</li>
-</ol>
+        
+          
+            <p>本文主要介绍 MotionEvent 的两点，一：MotionEvent 的点击事件；二：MotionEvent 的 X, Y 等含义。</p>
+<h4 id="MotionEvent-的点击事件"><a href="#MotionEvent-的点击事件" class="headerlink" title="MotionEvent 的点击事件"></a>MotionEvent 的点击事件</h4><p>常用的有这几个：<br>ACTION_DOWN 刚接触到屏幕执行一次<br>ACTION_MOVE 在屏幕上滑动<br>ACTION_UP 离开屏幕执行一次<br>ACTION_POINTER_DOWN 已经有event 事件，又有一个手指的触摸 DOWN 事件发生<br>ACTION_POINTER_UP 一个手指离开屏幕，但还有其它触摸点在</p>
+<p>单指触摸事件：ACTION_DOWN -&gt; ACTION_MOVE -&gt; ACTION_UP<br>多指触摸事件：ACTION_DOWN -&gt; ACTION_MOVE -&gt; ACTION_POINTER_DOWN -&gt; ACTION_POINTER_UP -&gt; ACTION_UP</p>
+<h4 id="MotionEvent-的位置参数含义"><a href="#MotionEvent-的位置参数含义" class="headerlink" title="MotionEvent 的位置参数含义"></a>MotionEvent 的位置参数含义</h4><p>常用的主要有 getX(), getY(), getRawX(), getRawY(), 下面用一张图来展示：<br>getX : 触摸点到当前 view 左边的距离<br>getY : 触摸点到当前 view 上边的距离<br>getRawX : 触摸点到屏幕左边的距离<br>getRawY : 触摸点到屏幕上边的距离</p>
+<p><img src="/image/motionevent_description1.jpg" alt="motionevent_description1"></p>
 
+          
+        
       
     </div>
     
@@ -324,32 +323,12 @@
       
 
       
-      
+
       
 
       
-        <div class="post-nav">
-          <div class="post-nav-next post-nav-item">
-            
-              <a href="/2017/10/19/note/" rel="next" title="笔记">
-                <i class="fa fa-chevron-left"></i> 笔记
-              </a>
-            
-          </div>
-
-          <span class="post-nav-divider"></span>
-
-          <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2017/11/09/about_string/" rel="prev" title="字符串">
-                字符串 <i class="fa fa-chevron-right"></i>
-              </a>
-            
-          </div>
-        </div>
       
-
-      
+        <div class="post-eof"></div>
       
     </footer>
   </div>
@@ -359,11 +338,14 @@
   </article>
 
 
+    
+  </section>
 
-    <div class="post-spread">
-      
-    </div>
-  </div>
+  
+  <nav class="pagination">
+    <a class="extend prev" rel="prev" href="/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span>
+  </nav>
+
 
 
           </div>
@@ -371,10 +353,6 @@
 
 
           
-
-  
-
-
 
         </div>
         
@@ -571,10 +549,6 @@
   
 
   
-  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
-<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
-
-
 
   
 
