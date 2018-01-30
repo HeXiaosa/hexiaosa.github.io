@@ -79,12 +79,16 @@
 
 
 
-<meta property="og:type" content="website">
-<meta property="og:title" content="Hexiaosa">
-<meta property="og:url" content="http://hexiaosa.com/archives/2017/12/index.html">
+<meta name="description" content="1. 关于 configChanges在 AndroidManifest 文件中声明 configChanges, 那么当声明的系统配置发生变化时，Activity 不会重新执行生命周期，只会调用 onConfigurationChanged() 方法。 2. 关于启动模式AActivity 启动 BActivity, 当 B 的启动模式为 standard 或 singleTop, B 启动后会">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Activity 相关知识">
+<meta property="og:url" content="http://hexiaosa.com/2018/01/30/ActivitySection/index.html">
 <meta property="og:site_name" content="Hexiaosa">
+<meta property="og:description" content="1. 关于 configChanges在 AndroidManifest 文件中声明 configChanges, 那么当声明的系统配置发生变化时，Activity 不会重新执行生命周期，只会调用 onConfigurationChanged() 方法。 2. 关于启动模式AActivity 启动 BActivity, 当 B 的启动模式为 standard 或 singleTop, B 启动后会">
+<meta property="og:updated_time" content="2018-01-30T01:18:16.575Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Hexiaosa">
+<meta name="twitter:title" content="Activity 相关知识">
+<meta name="twitter:description" content="1. 关于 configChanges在 AndroidManifest 文件中声明 configChanges, 那么当声明的系统配置发生变化时，Activity 不会重新执行生命周期，只会调用 onConfigurationChanged() 方法。 2. 关于启动模式AActivity 启动 BActivity, 当 B 的启动模式为 standard 或 singleTop, B 启动后会">
 
 
 
@@ -114,13 +118,13 @@
 
 
 
-  <link rel="canonical" href="http://hexiaosa.com/archives/2017/12/"/>
+  <link rel="canonical" href="http://hexiaosa.com/2018/01/30/ActivitySection/"/>
 
 
 
 
 
-  <title>Archive | Hexiaosa</title>
+  <title>Activity 相关知识 | Hexiaosa</title>
   
 
 
@@ -139,7 +143,7 @@
     
   
 
-  <div class="container sidebar-position-left page-archive">
+  <div class="container sidebar-position-left page-post-detail">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -213,74 +217,143 @@
           <div id="content" class="content">
             
 
+  <div id="posts" class="posts-expand">
+    
+
+  
+
   
   
   
-  <div class="post-block archive">
-    <div id="posts" class="posts-collapse">
-      <span class="archive-move-on"></span>
-
-      <span class="archive-page-counter">
-        
-        
-        
-          
-        
-        Um..! 12 posts in total. Keep on posting.
-      </span>
-
-      
-
-        
-        
-        
-
-        
-          
-          <div class="collection-title">
-            <h1 class="archive-year" id="archive-year-2017">2017</h1>
-          </div>
-        
-        
-
-        
 
   <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-    <header class="post-header">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/01/30/ActivitySection/">
 
-      <h2 class="post-title">
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Hexiaosa">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexiaosa">
+    </span>
+
+    
+      <header class="post-header">
+
         
-            <a class="post-title-link" href="/2017/12/17/bluetooth_details/" itemprop="url">
-              
-                <span itemprop="name">Android 蓝牙详解</span>
-              
-            </a>
         
-      </h2>
+          <h1 class="post-title" itemprop="name headline">Activity 相关知识</h1>
+        
 
-      <div class="post-meta">
-        <time class="post-time" itemprop="dateCreated"
-              datetime="2017-12-17T17:32:48+08:00"
-              content="2017-12-17" >
-          12-17
-        </time>
-      </div>
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-30T09:17:37+08:00">
+                2018-01-30
+              </time>
+            
 
-    </header>
-  </article>
+            
 
+            
+          </span>
 
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
 
       
+      
 
+      
+        <h4 id="1-关于-configChanges"><a href="#1-关于-configChanges" class="headerlink" title="1. 关于 configChanges"></a>1. 关于 configChanges</h4><p>在 AndroidManifest 文件中声明 configChanges, 那么当声明的系统配置发生变化时，Activity 不会重新执行生命周期，只会调用 onConfigurationChanged() 方法。</p>
+<h4 id="2-关于启动模式"><a href="#2-关于启动模式" class="headerlink" title="2. 关于启动模式"></a>2. 关于启动模式</h4><p>AActivity 启动 BActivity, 当 B 的启动模式为 standard 或 singleTop, B 启动后会位于 A 所在的栈。所以当 context 启动 Activity 时，由于 context 不是 Activity, 也没有所位于的栈，所以启动的时候需加上标记 FLAG_ACTIVITY_NEW_TASK.<br>当 A 和 B 位于不同栈，并且 B 的启动模式为 singleInstance/singleTask 时，启动后的 B 和 A 不在同一栈内<br>另：taskAffinity 在 AndroidManifest 中声明 Activity 所在的栈，栈名必须包含 “.”</p>
+<h4 id="思：利用-singleTask-实现-singleInstance-效果的方法"><a href="#思：利用-singleTask-实现-singleInstance-效果的方法" class="headerlink" title="思：利用 singleTask 实现 singleInstance 效果的方法"></a>思：利用 singleTask 实现 singleInstance 效果的方法</h4><p>对于要实现 singleInstance 效果的那个 Activity, 在 AndroidManifest 文件中给其声明 launchMode=”singleTask”, taskAffinity=”唯一的栈名”</p>
+
+      
     </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/01/29/Intent_Action/" rel="next" title="Intent 的一些 Action 总结">
+                <i class="fa fa-chevron-left"></i> Intent 的一些 Action 总结
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
   </div>
   
   
   
+  </article>
 
-  
 
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
 
 
           </div>
@@ -288,6 +361,10 @@
 
 
           
+
+  
+
+
 
         </div>
         
@@ -308,8 +385,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -351,6 +437,22 @@
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-关于-configChanges"><span class="nav-number">1.</span> <span class="nav-text">1. 关于 configChanges</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-关于启动模式"><span class="nav-number">2.</span> <span class="nav-text">2. 关于启动模式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#思：利用-singleTask-实现-singleInstance-效果的方法"><span class="nav-number">3.</span> <span class="nav-text">思：利用 singleTask 实现 singleInstance 效果的方法</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
@@ -484,6 +586,10 @@
   
 
   
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
 
   
 
