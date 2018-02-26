@@ -299,12 +299,13 @@
       
         
           
-            <h4 id="关于-configChanges"><a href="#关于-configChanges" class="headerlink" title="关于 configChanges"></a>关于 configChanges</h4><p>在 AndroidManifest 文件中声明 configChanges, 那么当声明的系统配置发生变化时，Activity 不会重新执行生命周期，只会调用 onConfigurationChanged() 方法。</p>
+            <h3 id="关于-configChanges"><a href="#关于-configChanges" class="headerlink" title="关于 configChanges"></a>关于 configChanges</h3><p>在 AndroidManifest 文件中声明 configChanges, 那么当声明的系统配置发生变化时，Activity 不会重新执行生命周期，只会调用 onConfigurationChanged() 方法。</p>
 <h6 id="configChanges-orientation"><a href="#configChanges-orientation" class="headerlink" title="configChanges:orientation"></a>configChanges:orientation</h6><p>屏幕方向 “orientation|screenSize”，官方文档这样说</p>
 <blockquote>
 <p>Beginning with Android 3.2 (API level 13), the “screen size” also changes when the device switches between portrait and landscape orientation. Thus, if you want to prevent runtime restarts due to orientation change when developing for API level 13 or higher (as declared by the minSdkVersion and targetSdkVersion attributes), you must include the “screenSize” value in addition to the “orientation” value. However, if your application targets API level 12 or lower, then your activity always handles this configuration change itself (this configuration change does not restart your activity, even when running on an Android 3.2 or higher device).</p>
 </blockquote>
-<h4 id="关于启动模式"><a href="#关于启动模式" class="headerlink" title="关于启动模式"></a>关于启动模式</h4><p>AActivity 启动 BActivity, 当 B 的启动模式为 standard 或 singleTop, B 启动后会位于 A 所在的栈（除了 A 的启动模式是 singleInstance 外）。所以当 context 启动 Activity 时，由于 context 不是 Activity, 也没有所位于的栈，所以启动的时候需加上标记 FLAG_ACTIVITY_NEW_TASK.<br>当 A 和 B 位于不同栈，并且 B 的启动模式为 singleInstance/singleTask 时，启动后的 B 和 A 不在同一栈内<br>另：taskAffinity 在 AndroidManifest 中声明 Activity 所在的栈，栈名必须包含 “.”</p>
+<p>也就是说 API 13 以上的如果要在 configChanges 设置 orientation 时，必须要加上 screenSize 才会有效。但是这里指的 API 13 是在程序中设置的 targetApi, 如果 targetApi 是 13 以下的，那么只设置 orientation 运行在 13 以上的版本上也是可以的。 </p>
+<h3 id="关于启动模式"><a href="#关于启动模式" class="headerlink" title="关于启动模式"></a>关于启动模式</h3><p>AActivity 启动 BActivity, 当 B 的启动模式为 standard 或 singleTop, B 启动后会位于 A 所在的栈（除了 A 的启动模式是 singleInstance 外）。所以当 context 启动 Activity 时，由于 context 不是 Activity, 也没有所位于的栈，所以启动的时候需加上标记 FLAG_ACTIVITY_NEW_TASK.<br>当 A 和 B 位于不同栈，并且 B 的启动模式为 singleInstance/singleTask 时，启动后的 B 和 A 不在同一栈内<br>另：taskAffinity 在 AndroidManifest 中声明 Activity 所在的栈，栈名必须包含 “.”</p>
 
           
         
