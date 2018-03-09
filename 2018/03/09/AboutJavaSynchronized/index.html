@@ -79,16 +79,16 @@
 
 
 
-<meta name="description" content="1. JVM 内存JVM 会用一段空间来存储程序运行时的数据和相关信息，这段空间一般称作 Runtime Data Area. 包含 Java 堆，方法区，（和线程私有的）程序计数器，虚拟机栈，本地方法栈。Java 堆：用于存放 new 出的对象，垃圾回收也主要就是针对这一块；方法区主要存放 静态变量，常量，方法区就包含了常量池；本地方法栈存放的就是 native 方法；虚拟机栈中有一个局部变量表">
+<meta name="description" content="synchronized 锁的范围分类 锁方法普通方法前加 synchronized123synchronized void method() &amp;#123;	&amp;#125; 锁对象在普通方法里面加 synchronized 方法块123synchronized(对象：this/object) &amp;#123;	// 代码块&amp;#125; 锁类在普通方法里12345void method() &amp;#123;">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Java 内存管理部分">
-<meta property="og:url" content="http://hexiaosa.com/2017/11/24/java_memory/index.html">
+<meta property="og:title" content="Java 关键字 synchronized">
+<meta property="og:url" content="http://hexiaosa.com/2018/03/09/AboutJavaSynchronized/index.html">
 <meta property="og:site_name" content="Hexiaosa">
-<meta property="og:description" content="1. JVM 内存JVM 会用一段空间来存储程序运行时的数据和相关信息，这段空间一般称作 Runtime Data Area. 包含 Java 堆，方法区，（和线程私有的）程序计数器，虚拟机栈，本地方法栈。Java 堆：用于存放 new 出的对象，垃圾回收也主要就是针对这一块；方法区主要存放 静态变量，常量，方法区就包含了常量池；本地方法栈存放的就是 native 方法；虚拟机栈中有一个局部变量表">
-<meta property="og:updated_time" content="2018-01-19T09:14:53.628Z">
+<meta property="og:description" content="synchronized 锁的范围分类 锁方法普通方法前加 synchronized123synchronized void method() &amp;#123;	&amp;#125; 锁对象在普通方法里面加 synchronized 方法块123synchronized(对象：this/object) &amp;#123;	// 代码块&amp;#125; 锁类在普通方法里12345void method() &amp;#123;">
+<meta property="og:updated_time" content="2018-03-09T08:40:53.821Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Java 内存管理部分">
-<meta name="twitter:description" content="1. JVM 内存JVM 会用一段空间来存储程序运行时的数据和相关信息，这段空间一般称作 Runtime Data Area. 包含 Java 堆，方法区，（和线程私有的）程序计数器，虚拟机栈，本地方法栈。Java 堆：用于存放 new 出的对象，垃圾回收也主要就是针对这一块；方法区主要存放 静态变量，常量，方法区就包含了常量池；本地方法栈存放的就是 native 方法；虚拟机栈中有一个局部变量表">
+<meta name="twitter:title" content="Java 关键字 synchronized">
+<meta name="twitter:description" content="synchronized 锁的范围分类 锁方法普通方法前加 synchronized123synchronized void method() &amp;#123;	&amp;#125; 锁对象在普通方法里面加 synchronized 方法块123synchronized(对象：this/object) &amp;#123;	// 代码块&amp;#125; 锁类在普通方法里12345void method() &amp;#123;">
 
 
 
@@ -118,13 +118,13 @@
 
 
 
-  <link rel="canonical" href="http://hexiaosa.com/2017/11/24/java_memory/"/>
+  <link rel="canonical" href="http://hexiaosa.com/2018/03/09/AboutJavaSynchronized/"/>
 
 
 
 
 
-  <title>Java 内存管理部分 | Hexiaosa</title>
+  <title>Java 关键字 synchronized | Hexiaosa</title>
   
 
 
@@ -231,7 +231,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2017/11/24/java_memory/">
+    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/03/09/AboutJavaSynchronized/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Hexiaosa">
@@ -248,7 +248,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">Java 内存管理部分</h1>
+          <h1 class="post-title" itemprop="name headline">Java 关键字 synchronized</h1>
         
 
         <div class="post-meta">
@@ -260,8 +260,8 @@
               
                 <span class="post-meta-item-text">Posted on</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-11-24T15:32:48+08:00">
-                2017-11-24
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-03-09T16:08:23+08:00">
+                2018-03-09
               </time>
             
 
@@ -298,20 +298,11 @@
       
 
       
-        <h4 id="1-JVM-内存"><a href="#1-JVM-内存" class="headerlink" title="1. JVM 内存"></a>1. JVM 内存</h4><p>JVM 会用一段空间来存储程序运行时的数据和相关信息，这段空间一般称作 Runtime Data Area. 包含 Java 堆，方法区，（和线程私有的）程序计数器，虚拟机栈，本地方法栈。<br>Java 堆：用于存放 new 出的对象，垃圾回收也主要就是针对这一块；<br>方法区主要存放 静态变量，常量，方法区就包含了常量池；<br>本地方法栈存放的就是 native 方法；<br>虚拟机栈中有一个局部变量表，存放的是基本类型和对象的引用；虚拟机栈用于存方法在执行的内存区，每个方法执行都会创建栈针，方法执行的过程，也就是虚拟机栈的入栈出栈。</p>
-<h4 id="2-字符串内存分析"><a href="#2-字符串内存分析" class="headerlink" title="2. 字符串内存分析"></a>2. 字符串内存分析</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">String s1 = &quot;a&quot;;</div><div class="line">String s2 = &quot;b&quot;;</div><div class="line">String s3 = &quot;a&quot; + &quot;b&quot;;</div><div class="line">System.out.println(&quot;ab == s1+s2&quot; + (&quot;ab&quot; == s1+s2));</div><div class="line">System.out.println(&quot;ab == s3&quot; + (&quot;ab&quot; == s3));</div></pre></td></tr></table></figure>
-<p>输出结果：<br>false<br>true<br>直接用引号包裹的字符串相加产生的新对象会放到常量池中，对象相加的不会放到常量池中。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">public static final String A = &quot;ab&quot;; // 常量A</div><div class="line">public static final String B = &quot;cd&quot;; // 常量B</div><div class="line">// A+B 会放到常量池中，因为 A, B 都是常量，在类编译时已经确定了。</div></pre></td></tr></table></figure>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">public static final A;</div><div class="line">public static final B;</div><div class="line">static &#123;</div><div class="line">	A = &quot;a&quot;;</div><div class="line">	B = &quot;b&quot;;</div><div class="line">&#125;</div><div class="line">// A+B 不会放到常量池中，虽然被 final 修饰，但是在后来被赋值，并不是在一开始编译时就确定的。</div></pre></td></tr></table></figure>
-<p>intern()方法表示，如果字符串在常量池中存在，就取常量池中的。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">String hello = &quot;hello&quot;, lo = &quot;lo&quot;;</div><div class="line">hello == &quot;hel&quot; + &quot;lo&quot;; //true</div><div class="line">hello == &quot;hel&quot; + lo; //false</div><div class="line">hello == (&quot;hel&quot; + lo).intern();  //true</div></pre></td></tr></table></figure></p>
-<h4 id="3-Integer-内存分析"><a href="#3-Integer-内存分析" class="headerlink" title="3. Integer 内存分析"></a>3. Integer 内存分析</h4><p>定义一个 Integer 类型，赋值方式</p>
-<ol>
-<li>Integer i = new Integer(10);</li>
-<li>Integer i = 10;</li>
-</ol>
-<p>对于 -128~127 之间的数，使用第二种赋值方式时如果值相同，则两个变量 “==” true;<br>其它范围的数，两种赋值方式比较结果都为 false.</p>
-<p>原因：<br>-128~127 之间的数会存储在常量池中，比较的直接就是存在在常量池中的对象，而其它数都是新建的对象。</p>
-
+        <p>synchronized 锁的范围分类</p>
+<h4 id="锁方法"><a href="#锁方法" class="headerlink" title="锁方法"></a>锁方法</h4><p>普通方法前加 synchronized<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">synchronized void method() &#123;</div><div class="line">	</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h4 id="锁对象"><a href="#锁对象" class="headerlink" title="锁对象"></a>锁对象</h4><p>在普通方法里面加 synchronized 方法块<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">synchronized(对象：this/object) &#123;</div><div class="line">	// 代码块</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h4 id="锁类"><a href="#锁类" class="headerlink" title="锁类"></a>锁类</h4><h6 id="在普通方法里"><a href="#在普通方法里" class="headerlink" title="在普通方法里"></a>在普通方法里</h6><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">void method() &#123;</div><div class="line">	synchronized(Class.class) &#123;</div><div class="line">	    // 代码块</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h6 id="在静态方法上加锁"><a href="#在静态方法上加锁" class="headerlink" title="在静态方法上加锁"></a>在静态方法上加锁</h6><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">synchronized static void method() &#123;</div><div class="line">	</div><div class="line">&#125;</div></pre></td></tr></table></figure>
       
     </div>
     
@@ -335,8 +326,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2017/11/09/about_string/" rel="next" title="字符串">
-                <i class="fa fa-chevron-left"></i> 字符串
+              <a href="/2018/01/30/ActivitySection/" rel="next" title="Activity 相关知识">
+                <i class="fa fa-chevron-left"></i> Activity 相关知识
               </a>
             
           </div>
@@ -344,10 +335,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2017/12/17/bluetooth_details/" rel="prev" title="Android 蓝牙详解">
-                Android 蓝牙详解 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -461,7 +448,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-JVM-内存"><span class="nav-number">1.</span> <span class="nav-text">1. JVM 内存</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-字符串内存分析"><span class="nav-number">2.</span> <span class="nav-text">2. 字符串内存分析</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-Integer-内存分析"><span class="nav-number">3.</span> <span class="nav-text">3. Integer 内存分析</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#锁方法"><span class="nav-number">1.</span> <span class="nav-text">锁方法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#锁对象"><span class="nav-number">2.</span> <span class="nav-text">锁对象</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#锁类"><span class="nav-number">3.</span> <span class="nav-text">锁类</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#在普通方法里"><span class="nav-number">3.0.1.</span> <span class="nav-text">在普通方法里</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#在静态方法上加锁"><span class="nav-number">3.0.2.</span> <span class="nav-text">在静态方法上加锁</span></a></li></ol></li></ol></li></ol></div>
             
 
           </div>
