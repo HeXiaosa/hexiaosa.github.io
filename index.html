@@ -181,7 +181,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
             
-            Home
+            Startseite
           </a>
         </li>
       
@@ -191,7 +191,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
             
-            Archives
+            Archiv
           </a>
         </li>
       
@@ -228,7 +228,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/03/09/AboutJavaSynchronized/">
+    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/04/08/java-lock/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Hexiaosa">
@@ -247,7 +247,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2018/03/09/AboutJavaSynchronized/" itemprop="url">Java 关键字 synchronized</a></h1>
+                <a class="post-title-link" href="/2018/04/08/java-lock/" itemprop="url">Java 锁</a></h1>
         
 
         <div class="post-meta">
@@ -257,10 +257,10 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-03-09T16:08:23+08:00">
-                2018-03-09
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-04-08T10:09:43+08:00">
+                2018-04-08
               </time>
             
 
@@ -299,11 +299,17 @@
       
         
           
-            <p>synchronized 锁的范围分类</p>
-<h4 id="锁方法"><a href="#锁方法" class="headerlink" title="锁方法"></a>锁方法</h4><p>普通方法前加 synchronized<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">synchronized void method() &#123;</div><div class="line">	</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<h4 id="锁对象"><a href="#锁对象" class="headerlink" title="锁对象"></a>锁对象</h4><p>在普通方法里面加 synchronized 方法块<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">synchronized(对象：this/object) &#123;</div><div class="line">	// 代码块</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<h4 id="锁类"><a href="#锁类" class="headerlink" title="锁类"></a>锁类</h4><h6 id="在普通方法里"><a href="#在普通方法里" class="headerlink" title="在普通方法里"></a>在普通方法里</h6><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">void method() &#123;</div><div class="line">	synchronized(Class.class) &#123;</div><div class="line">	    // 代码块</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h6 id="在静态方法上加锁"><a href="#在静态方法上加锁" class="headerlink" title="在静态方法上加锁"></a>在静态方法上加锁</h6><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">synchronized static void method() &#123;</div><div class="line">	</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+            <h3 id="锁简介"><a href="#锁简介" class="headerlink" title="锁简介"></a>锁简介</h3><p>我们通常说的锁，就是线程锁，也就是加上锁后对当前线程有效。为什么是针对线程的呢，同一线程顺序执行也就不需要锁好吧。<br>锁是通过对同一内存的使用产生竞争来达到同一时间只能一个线程对其访问。</p>
+<h3 id="锁的使用"><a href="#锁的使用" class="headerlink" title="锁的使用"></a>锁的使用</h3><p>锁的使用方法通常有 synchronized 和 Lock 两种，下面分这两种介绍。</p>
+<h4 id="锁的使用之——-synchronized"><a href="#锁的使用之——-synchronized" class="headerlink" title="锁的使用之—— synchronized"></a>锁的使用之—— synchronized</h4><p>根据锁的范围，使用方法分为锁对象和锁类。</p>
+<h6 id="锁对象："><a href="#锁对象：" class="headerlink" title="锁对象："></a>锁对象：</h6><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">// 锁的当前实例</div><div class="line">public synchronized void method1() &#123;</div><div class="line">	</div><div class="line">&#125;</div><div class="line"></div><div class="line">// 锁的当前实例</div><div class="line">public void method2() &#123;</div><div class="line">	synchronized(this) &#123;</div><div class="line"></div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line">// 锁 s 对象，对这同一对象加锁时产生竞争</div><div class="line">String s = &quot;&quot;;</div><div class="line">public void method3() &#123;</div><div class="line">	synchronized(s) &#123;</div><div class="line"></div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h6 id="锁类"><a href="#锁类" class="headerlink" title="锁类"></a>锁类</h6><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">// 锁当前类，凡是访问关于当前类的都产生竞争</div><div class="line">public static synchronized method() &#123;</div><div class="line">	</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h4 id="锁的使用之——-Lock"><a href="#锁的使用之——-Lock" class="headerlink" title="锁的使用之—— Lock"></a>锁的使用之—— Lock</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div></pre></td><td class="code"><pre><div class="line">import java.util.concurrent.locks.ReadWriteLock;</div><div class="line">import java.util.concurrent.locks.ReentrantReadWriteLock;</div><div class="line"></div><div class="line">public class Test&#123;</div><div class="line">	</div><div class="line">	private static ReadWriteLock lock = new ReentrantReadWriteLock();</div><div class="line">	</div><div class="line">	public static void main(String[] args) &#123;</div><div class="line">		method1();</div><div class="line">		method2();</div><div class="line">		method3();</div><div class="line">	&#125;</div><div class="line">	</div><div class="line">	private static void method1() &#123;</div><div class="line">		new Thread() &#123;</div><div class="line">            @Override</div><div class="line">            public void run() &#123;</div><div class="line">                lock.writeLock().lock();</div><div class="line">                System.out.println(&quot;子线程加锁&quot; + Thread.currentThread());</div><div class="line">                try &#123;</div><div class="line">                    Thread.sleep(1000);</div><div class="line">                &#125; catch (InterruptedException e) &#123;</div><div class="line">                    e.printStackTrace();</div><div class="line">                &#125;</div><div class="line">                lock.writeLock().unlock();</div><div class="line">                System.out.println(&quot;子线程释放锁&quot; + Thread.currentThread());</div><div class="line">            &#125;</div><div class="line">        &#125;.start();</div><div class="line">    &#125;</div><div class="line">	</div><div class="line">	private static void method2() &#123;</div><div class="line">		new Thread() &#123;</div><div class="line">            @Override</div><div class="line">            public void run() &#123;</div><div class="line">                lock.writeLock().lock();</div><div class="line">                System.out.println(&quot;子线程加锁&quot; + Thread.currentThread());</div><div class="line">                try &#123;</div><div class="line">                    Thread.sleep(1000);</div><div class="line">                &#125; catch (InterruptedException e) &#123;</div><div class="line">                    e.printStackTrace();</div><div class="line">                &#125;</div><div class="line">                lock.writeLock().unlock();</div><div class="line">                System.out.println(&quot;子线程释放锁&quot; + Thread.currentThread());</div><div class="line">            &#125;</div><div class="line">        &#125;.start();</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    private static void method3() &#123;</div><div class="line">    	lock.writeLock().lock();</div><div class="line">        System.out.println(&quot;主线程加锁&quot; + Thread.currentThread());</div><div class="line">        try &#123;</div><div class="line">            Thread.sleep(1000);</div><div class="line">        &#125; catch (InterruptedException e) &#123;</div><div class="line">            e.printStackTrace();</div><div class="line">        &#125;</div><div class="line">        lock.writeLock().unlock();</div><div class="line">        System.out.println(&quot;主线程释放锁&quot; + Thread.currentThread());</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>执行结果如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">子线程加锁Thread[Thread-0,5,main]</div><div class="line">子线程释放锁Thread[Thread-0,5,main]</div><div class="line">主线程加锁Thread[main,5,main]</div><div class="line">主线程释放锁Thread[main,5,main]</div><div class="line">子线程加锁Thread[Thread-1,5,main]</div><div class="line">子线程释放锁Thread[Thread-1,5,main]</div></pre></td></tr></table></figure></p>
+<p>可以看出，一旦某个线程获得 lock 锁之后，其它线程竞争同一锁的就需要等待，直到获取到锁才能执行被锁的模块。</p>
+<p>下面再介绍一种情况并解释，不知道看过以上关于锁的介绍再看这个方法会不会很清楚地明白，看代码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">   private ReadWriteLock lock = new ReentrantReadWriteLock();</div><div class="line"></div><div class="line">public void method() &#123;</div><div class="line">    lock.writeLock().lock();</div><div class="line">       System.out.println(&quot;线程加锁&quot; + Thread.currentThread());</div><div class="line">	new Thread() &#123;</div><div class="line">           @Override</div><div class="line">           public void run() &#123;</div><div class="line">               System.out.println(&quot;开始执行&quot;);</div><div class="line">               try &#123;</div><div class="line">                   Thread.sleep(1000);</div><div class="line">               &#125; catch (InterruptedException e) &#123;</div><div class="line">                   e.printStackTrace();</div><div class="line">               &#125;</div><div class="line">           &#125;</div><div class="line">       &#125;.start();</div><div class="line">       lock.writeLock().unlock();</div><div class="line">       System.out.println(&quot;线程释放锁&quot; + Thread.currentThread());</div><div class="line">   &#125;</div></pre></td></tr></table></figure></p>
+<p>这个是我刚开始困惑的地方，明明加锁了，为什么没有锁上，还是像没加锁一样执行呢。如果能清除理解锁是针对线程的应该就很明白了。 method 中加锁是在主线程执行的，也就是锁的是主线程，所以再 new Thread 就和普通的子线程是一样的，当然是没有锁的。</p>
+
           
         
       
@@ -380,7 +386,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-30T09:17:37+08:00">
                 2018-01-30
@@ -422,7 +428,8 @@
       
         
           
-            <h3 id="关于-configChanges"><a href="#关于-configChanges" class="headerlink" title="关于 configChanges"></a>关于 configChanges</h3><p>在 AndroidManifest 文件中声明 configChanges, 那么当声明的系统配置发生变化时，Activity 不会重新执行生命周期，只会调用 onConfigurationChanged() 方法。</p>
+            <h3 id="关于生命周期"><a href="#关于生命周期" class="headerlink" title="关于生命周期"></a>关于生命周期</h3><p>两个 Activity 跳转，不管有没有执行 onNewIntent, 都会前一个 Activity 执行 onPause, onStop, 后一个 Activity 执行 onStart, onResume 方法。</p>
+<h3 id="关于-configChanges"><a href="#关于-configChanges" class="headerlink" title="关于 configChanges"></a>关于 configChanges</h3><p>在 AndroidManifest 文件中声明 configChanges, 那么当声明的系统配置发生变化时，Activity 不会重新执行生命周期，只会调用 onConfigurationChanged() 方法。</p>
 <h6 id="configChanges-orientation"><a href="#configChanges-orientation" class="headerlink" title="configChanges:orientation"></a>configChanges:orientation</h6><p>屏幕方向 “orientation|screenSize”，官方文档这样说</p>
 <blockquote>
 <p>Beginning with Android 3.2 (API level 13), the “screen size” also changes when the device switches between portrait and landscape orientation. Thus, if you want to prevent runtime restarts due to orientation change when developing for API level 13 or higher (as declared by the minSdkVersion and targetSdkVersion attributes), you must include the “screenSize” value in addition to the “orientation” value. However, if your application targets API level 12 or lower, then your activity always handles this configuration change itself (this configuration change does not restart your activity, even when running on an Android 3.2 or higher device).</p>
@@ -506,7 +513,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-29T11:20:58+08:00">
                 2018-01-29
@@ -644,7 +651,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-24T17:10:20+08:00">
                 2018-01-24
@@ -772,7 +779,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-19T10:58:37+08:00">
                 2018-01-19
@@ -896,7 +903,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-09T09:56:51+08:00">
                 2018-01-09
@@ -1028,7 +1035,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-12-17T17:32:48+08:00">
                 2017-12-17
@@ -1234,7 +1241,7 @@ private void sendData() {
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-11-24T15:32:48+08:00">
                 2017-11-24
@@ -1366,7 +1373,7 @@ private void sendData() {
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-11-09T11:32:48+08:00">
                 2017-11-09
@@ -1491,7 +1498,7 @@ private void sendData() {
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-11-09T09:32:48+08:00">
                 2017-11-09
@@ -1628,7 +1635,7 @@ private void sendData() {
                 <a href="/archives/">
               
                   <span class="site-state-item-count">13</span>
-                  <span class="site-state-item-name">posts</span>
+                  <span class="site-state-item-name">Artikel</span>
                 </a>
               </div>
             
@@ -1678,7 +1685,7 @@ private void sendData() {
 </div>
 
 
-  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
 
 
 
