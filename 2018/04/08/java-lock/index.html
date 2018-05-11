@@ -85,7 +85,7 @@
 <meta property="og:url" content="http://hexiaosa.com/2018/04/08/java-lock/index.html">
 <meta property="og:site_name" content="Hexiaosa">
 <meta property="og:description" content="锁简介我们通常说的锁，就是线程锁，也就是加上锁后对当前线程有效。为什么是针对线程的呢，同一线程顺序执行也就不需要锁好吧。锁是通过对同一内存的使用产生竞争来达到同一时间只能一个线程对其访问。 锁的使用锁的使用方法通常有 synchronized 和 Lock 两种，下面分这两种介绍。 锁的使用之—— synchronized根据锁的范围，使用方法分为锁对象和锁类。 锁对象：1234567891011">
-<meta property="og:updated_time" content="2018-04-08T02:55:42.013Z">
+<meta property="og:updated_time" content="2018-04-08T02:59:58.741Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Java 锁">
 <meta name="twitter:description" content="锁简介我们通常说的锁，就是线程锁，也就是加上锁后对当前线程有效。为什么是针对线程的呢，同一线程顺序执行也就不需要锁好吧。锁是通过对同一内存的使用产生竞争来达到同一时间只能一个线程对其访问。 锁的使用锁的使用方法通常有 synchronized 和 Lock 两种，下面分这两种介绍。 锁的使用之—— synchronized根据锁的范围，使用方法分为锁对象和锁类。 锁对象：1234567891011">
@@ -184,7 +184,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
             
-            Startseite
+            Home
           </a>
         </li>
       
@@ -194,7 +194,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
             
-            Archiv
+            Archives
           </a>
         </li>
       
@@ -258,7 +258,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-04-08T10:09:43+08:00">
                 2018-04-08
@@ -306,7 +306,7 @@
 <h4 id="锁的使用之——-Lock"><a href="#锁的使用之——-Lock" class="headerlink" title="锁的使用之—— Lock"></a>锁的使用之—— Lock</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div></pre></td><td class="code"><pre><div class="line">import java.util.concurrent.locks.ReadWriteLock;</div><div class="line">import java.util.concurrent.locks.ReentrantReadWriteLock;</div><div class="line"></div><div class="line">public class Test&#123;</div><div class="line">	</div><div class="line">	private static ReadWriteLock lock = new ReentrantReadWriteLock();</div><div class="line">	</div><div class="line">	public static void main(String[] args) &#123;</div><div class="line">		method1();</div><div class="line">		method2();</div><div class="line">		method3();</div><div class="line">	&#125;</div><div class="line">	</div><div class="line">	private static void method1() &#123;</div><div class="line">		new Thread() &#123;</div><div class="line">            @Override</div><div class="line">            public void run() &#123;</div><div class="line">                lock.writeLock().lock();</div><div class="line">                System.out.println(&quot;子线程加锁&quot; + Thread.currentThread());</div><div class="line">                try &#123;</div><div class="line">                    Thread.sleep(1000);</div><div class="line">                &#125; catch (InterruptedException e) &#123;</div><div class="line">                    e.printStackTrace();</div><div class="line">                &#125;</div><div class="line">                lock.writeLock().unlock();</div><div class="line">                System.out.println(&quot;子线程释放锁&quot; + Thread.currentThread());</div><div class="line">            &#125;</div><div class="line">        &#125;.start();</div><div class="line">    &#125;</div><div class="line">	</div><div class="line">	private static void method2() &#123;</div><div class="line">		new Thread() &#123;</div><div class="line">            @Override</div><div class="line">            public void run() &#123;</div><div class="line">                lock.writeLock().lock();</div><div class="line">                System.out.println(&quot;子线程加锁&quot; + Thread.currentThread());</div><div class="line">                try &#123;</div><div class="line">                    Thread.sleep(1000);</div><div class="line">                &#125; catch (InterruptedException e) &#123;</div><div class="line">                    e.printStackTrace();</div><div class="line">                &#125;</div><div class="line">                lock.writeLock().unlock();</div><div class="line">                System.out.println(&quot;子线程释放锁&quot; + Thread.currentThread());</div><div class="line">            &#125;</div><div class="line">        &#125;.start();</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    private static void method3() &#123;</div><div class="line">    	lock.writeLock().lock();</div><div class="line">        System.out.println(&quot;主线程加锁&quot; + Thread.currentThread());</div><div class="line">        try &#123;</div><div class="line">            Thread.sleep(1000);</div><div class="line">        &#125; catch (InterruptedException e) &#123;</div><div class="line">            e.printStackTrace();</div><div class="line">        &#125;</div><div class="line">        lock.writeLock().unlock();</div><div class="line">        System.out.println(&quot;主线程释放锁&quot; + Thread.currentThread());</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <p>执行结果如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">子线程加锁Thread[Thread-0,5,main]</div><div class="line">子线程释放锁Thread[Thread-0,5,main]</div><div class="line">主线程加锁Thread[main,5,main]</div><div class="line">主线程释放锁Thread[main,5,main]</div><div class="line">子线程加锁Thread[Thread-1,5,main]</div><div class="line">子线程释放锁Thread[Thread-1,5,main]</div></pre></td></tr></table></figure></p>
 <p>可以看出，一旦某个线程获得 lock 锁之后，其它线程竞争同一锁的就需要等待，直到获取到锁才能执行被锁的模块。</p>
-<p>下面再介绍一种情况并解释，不知道看过以上关于锁的介绍再看这个方法会不会很清楚地明白，看代码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">   private ReadWriteLock lock = new ReentrantReadWriteLock();</div><div class="line"></div><div class="line">public void method() &#123;</div><div class="line">    lock.writeLock().lock();</div><div class="line">       System.out.println(&quot;线程加锁&quot; + Thread.currentThread());</div><div class="line">	new Thread() &#123;</div><div class="line">           @Override</div><div class="line">           public void run() &#123;</div><div class="line">               System.out.println(&quot;开始执行&quot;);</div><div class="line">               try &#123;</div><div class="line">                   Thread.sleep(1000);</div><div class="line">               &#125; catch (InterruptedException e) &#123;</div><div class="line">                   e.printStackTrace();</div><div class="line">               &#125;</div><div class="line">           &#125;</div><div class="line">       &#125;.start();</div><div class="line">       lock.writeLock().unlock();</div><div class="line">       System.out.println(&quot;线程释放锁&quot; + Thread.currentThread());</div><div class="line">   &#125;</div></pre></td></tr></table></figure></p>
+<p>下面再介绍一种情况并解释，不知道看过以上关于锁的介绍再看这个方法会不会很清楚地明白，看代码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">private ReadWriteLock lock = new ReentrantReadWriteLock();</div><div class="line"></div><div class="line">public void method() &#123;</div><div class="line">    lock.writeLock().lock();</div><div class="line">    System.out.println(&quot;线程加锁&quot; + Thread.currentThread());</div><div class="line">	new Thread() &#123;</div><div class="line">        @Override</div><div class="line">        public void run() &#123;</div><div class="line">            System.out.println(&quot;开始执行&quot;);</div><div class="line">            try &#123;</div><div class="line">                Thread.sleep(1000);</div><div class="line">            &#125; catch (InterruptedException e) &#123;</div><div class="line">                e.printStackTrace();</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;.start();</div><div class="line">    lock.writeLock().unlock();</div><div class="line">    System.out.println(&quot;线程释放锁&quot; + Thread.currentThread());</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
 <p>这个是我刚开始困惑的地方，明明加锁了，为什么没有锁上，还是像没加锁一样执行呢。如果能清除理解锁是针对线程的应该就很明白了。 method 中加锁是在主线程执行的，也就是锁的是主线程，所以再 new Thread 就和普通的子线程是一样的，当然是没有锁的。</p>
 
       
@@ -394,10 +394,10 @@
       
         <ul class="sidebar-nav motion-element">
           <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
-            Inhaltsverzeichnis
+            Table of Contents
           </li>
           <li class="sidebar-nav-overview" data-target="site-overview-wrap">
-            Übersicht
+            Overview
           </li>
         </ul>
       
@@ -418,7 +418,7 @@
                 <a href="/archives/">
               
                   <span class="site-state-item-count">13</span>
-                  <span class="site-state-item-name">Artikel</span>
+                  <span class="site-state-item-name">posts</span>
                 </a>
               </div>
             
@@ -484,7 +484,7 @@
 </div>
 
 
-  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
 
 
 

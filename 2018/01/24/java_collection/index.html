@@ -86,7 +86,7 @@
 <meta property="og:site_name" content="Hexiaosa">
 <meta property="og:description" content="首先放一张全部总结的图 MapHashMap以键值对的形式保存，数据结构为数组加链表，不同的 key 所生成的 hash 可能对应的 index 是相同的。hash 地址对应的数组 index 相同的话，就用头插法将该元素放到 index 位置的链表上。同一个 key 只有一个 value, 如果对于这个 key 再 put 一个 value 的话，就覆盖掉原来的 value, 并 put 方法返">
 <meta property="og:image" content="http://hexiaosa.com/image/Java_collection_sumarize.png">
-<meta property="og:updated_time" content="2018-02-24T04:16:11.667Z">
+<meta property="og:updated_time" content="2018-05-11T02:59:29.268Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Java 集合简括">
 <meta name="twitter:description" content="首先放一张全部总结的图 MapHashMap以键值对的形式保存，数据结构为数组加链表，不同的 key 所生成的 hash 可能对应的 index 是相同的。hash 地址对应的数组 index 相同的话，就用头插法将该元素放到 index 位置的链表上。同一个 key 只有一个 value, 如果对于这个 key 再 put 一个 value 的话，就覆盖掉原来的 value, 并 put 方法返">
@@ -186,7 +186,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
             
-            Startseite
+            Home
           </a>
         </li>
       
@@ -196,7 +196,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
             
-            Archiv
+            Archives
           </a>
         </li>
       
@@ -260,7 +260,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-24T17:10:20+08:00">
                 2018-01-24
@@ -302,9 +302,10 @@
       
         <p>首先放一张全部总结的图<br><img src="/image/Java_collection_sumarize.png" alt="Java_collection_sumarize"></p>
 <h4 id="Map"><a href="#Map" class="headerlink" title="Map"></a>Map</h4><h6 id="HashMap"><a href="#HashMap" class="headerlink" title="HashMap"></a>HashMap</h6><p>以键值对的形式保存，数据结构为数组加链表，不同的 key 所生成的 hash 可能对应的 index 是相同的。<br>hash 地址对应的数组 index 相同的话，就用头插法将该元素放到 index 位置的链表上。<br>同一个 key 只有一个 value, 如果对于这个 key 再 put 一个 value 的话，就覆盖掉原来的 value, 并 put 方法返回原 value.<br>其实际存的用 HashMapEntry 对象数组。在 Java 源码中是 Node, 它们的属性和方法是一样的。<br>HashMap 的数组长度取 2 的 n 次方的原因：其二进制数是 1 后面都是零，减 1 后全是 1, 由 hash 转换 index 时拿 length-1 和 hash地址做位于操作，这样得到的就是余数。</p>
-<h6 id="HashTable"><a href="#HashTable" class="headerlink" title="HashTable"></a>HashTable</h6><p>与 HashMap 相比，支持线程同步，避免多线程同时写而造成的数据不一致，但实现线程同步需要很高的花费，因此不建议用。</p>
-<h4 id="List"><a href="#List" class="headerlink" title="List"></a>List</h4><h6 id="ArrayList"><a href="#ArrayList" class="headerlink" title="ArrayList"></a>ArrayList</h6><p>以数组形式保存，初始化时可以指定数组长度，不指定的话有默认的长度，每次 add 时检测数组长度是否够用，不够用的话即扩容。<br>查找效率高，插入，删除都需要移动该元素后面的所有元素。</p>
-<h6 id="Vector"><a href="#Vector" class="headerlink" title="Vector"></a>Vector</h6><p>与 ArrayList 相比，支持线程同步，避免多线程同时写而造成的数据不一致，但实现线程同步需要很高的花费，因此不建议用。</p>
+<h6 id="HashTable"><a href="#HashTable" class="headerlink" title="HashTable"></a>HashTable</h6><p>与 HashMap 相比，支持线程同步，避免多线程同时写而造成的数据不一致，但实现线程同步需要很高的花费，因此不建议用。<br>与 HashMap 相比，其 key, value 不可为 null</p>
+<h6 id="TreeMap"><a href="#TreeMap" class="headerlink" title="TreeMap"></a>TreeMap</h6><p>TreeMap是按 key 值有序，相同 key 重复覆盖，非线程安全，内部使用二叉树结构。</p>
+<h4 id="List"><a href="#List" class="headerlink" title="List"></a>List</h4><h6 id="ArrayList"><a href="#ArrayList" class="headerlink" title="ArrayList"></a>ArrayList</h6><p>以数组形式保存，初始化时可以指定数组长度，不指定的话有默认的长度，每次 add 时检测数组长度是否够用，不够用的话即扩容。如果现有长度是数组长度的 3/4 则开始扩容，扩容的长度是 现有长度 + （内部定义的最小长度或现有长度的 2 2倍）<br>查找效率高，插入，删除都需要移动该元素后面的所有元素。</p>
+<h6 id="Vector"><a href="#Vector" class="headerlink" title="Vector"></a>Vector</h6><p>与 ArrayList 相比，支持线程同步，避免多线程同时写而造成的数据不一致，但实现线程同步需要很高的花费，因此不建议用。<br>与 ArrayList 相比，Vector 每次扩容都是现有长度的 2 倍</p>
 <h6 id="LinkedList"><a href="#LinkedList" class="headerlink" title="LinkedList"></a>LinkedList</h6><p>以双链表形式保存，在头尾插入删除效率高；查找指定位置的会根据要查找的位置来判断从头还是尾开始查。</p>
 <h4 id="Set"><a href="#Set" class="headerlink" title="Set"></a>Set</h4><h6 id="HashSet"><a href="#HashSet" class="headerlink" title="HashSet"></a>HashSet</h6><p>无顺序，无重复元素。如果插入的元素已存在，会覆盖已存在的那个。使用的是 HashMap 的 key 来存放。</p>
 <h6 id="TreeSet"><a href="#TreeSet" class="headerlink" title="TreeSet"></a>TreeSet</h6><p>有顺序，无重复元素。如果 add 的元素已存在，会覆盖已存在的那个。实际存的就是 TreeMap 的 key.</p>
@@ -399,10 +400,10 @@
       
         <ul class="sidebar-nav motion-element">
           <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
-            Inhaltsverzeichnis
+            Table of Contents
           </li>
           <li class="sidebar-nav-overview" data-target="site-overview-wrap">
-            Übersicht
+            Overview
           </li>
         </ul>
       
@@ -423,7 +424,7 @@
                 <a href="/archives/">
               
                   <span class="site-state-item-count">13</span>
-                  <span class="site-state-item-name">Artikel</span>
+                  <span class="site-state-item-name">posts</span>
                 </a>
               </div>
             
@@ -459,7 +460,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#Map"><span class="nav-number">1.</span> <span class="nav-text">Map</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#HashMap"><span class="nav-number">1.0.1.</span> <span class="nav-text">HashMap</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#HashTable"><span class="nav-number">1.0.2.</span> <span class="nav-text">HashTable</span></a></li></ol></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#List"><span class="nav-number">2.</span> <span class="nav-text">List</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#ArrayList"><span class="nav-number">2.0.1.</span> <span class="nav-text">ArrayList</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#Vector"><span class="nav-number">2.0.2.</span> <span class="nav-text">Vector</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#LinkedList"><span class="nav-number">2.0.3.</span> <span class="nav-text">LinkedList</span></a></li></ol></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Set"><span class="nav-number">3.</span> <span class="nav-text">Set</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#HashSet"><span class="nav-number">3.0.1.</span> <span class="nav-text">HashSet</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#TreeSet"><span class="nav-number">3.0.2.</span> <span class="nav-text">TreeSet</span></a></li></ol></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Queue"><span class="nav-number">4.</span> <span class="nav-text">Queue</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#PriorityQue"><span class="nav-number">4.0.1.</span> <span class="nav-text">PriorityQue</span></a></li></ol></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#Map"><span class="nav-number">1.</span> <span class="nav-text">Map</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#HashMap"><span class="nav-number">1.0.1.</span> <span class="nav-text">HashMap</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#HashTable"><span class="nav-number">1.0.2.</span> <span class="nav-text">HashTable</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#TreeMap"><span class="nav-number">1.0.3.</span> <span class="nav-text">TreeMap</span></a></li></ol></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#List"><span class="nav-number">2.</span> <span class="nav-text">List</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#ArrayList"><span class="nav-number">2.0.1.</span> <span class="nav-text">ArrayList</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#Vector"><span class="nav-number">2.0.2.</span> <span class="nav-text">Vector</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#LinkedList"><span class="nav-number">2.0.3.</span> <span class="nav-text">LinkedList</span></a></li></ol></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Set"><span class="nav-number">3.</span> <span class="nav-text">Set</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#HashSet"><span class="nav-number">3.0.1.</span> <span class="nav-text">HashSet</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#TreeSet"><span class="nav-number">3.0.2.</span> <span class="nav-text">TreeSet</span></a></li></ol></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Queue"><span class="nav-number">4.</span> <span class="nav-text">Queue</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#PriorityQue"><span class="nav-number">4.0.1.</span> <span class="nav-text">PriorityQue</span></a></li></ol></li></ol></li></ol></div>
             
 
           </div>
@@ -489,7 +490,7 @@
 </div>
 
 
-  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
 
 
 

@@ -181,7 +181,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
             
-            Startseite
+            Home
           </a>
         </li>
       
@@ -191,7 +191,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
             
-            Archiv
+            Archives
           </a>
         </li>
       
@@ -257,7 +257,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-04-08T10:09:43+08:00">
                 2018-04-08
@@ -307,7 +307,7 @@
 <h4 id="锁的使用之——-Lock"><a href="#锁的使用之——-Lock" class="headerlink" title="锁的使用之—— Lock"></a>锁的使用之—— Lock</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div></pre></td><td class="code"><pre><div class="line">import java.util.concurrent.locks.ReadWriteLock;</div><div class="line">import java.util.concurrent.locks.ReentrantReadWriteLock;</div><div class="line"></div><div class="line">public class Test&#123;</div><div class="line">	</div><div class="line">	private static ReadWriteLock lock = new ReentrantReadWriteLock();</div><div class="line">	</div><div class="line">	public static void main(String[] args) &#123;</div><div class="line">		method1();</div><div class="line">		method2();</div><div class="line">		method3();</div><div class="line">	&#125;</div><div class="line">	</div><div class="line">	private static void method1() &#123;</div><div class="line">		new Thread() &#123;</div><div class="line">            @Override</div><div class="line">            public void run() &#123;</div><div class="line">                lock.writeLock().lock();</div><div class="line">                System.out.println(&quot;子线程加锁&quot; + Thread.currentThread());</div><div class="line">                try &#123;</div><div class="line">                    Thread.sleep(1000);</div><div class="line">                &#125; catch (InterruptedException e) &#123;</div><div class="line">                    e.printStackTrace();</div><div class="line">                &#125;</div><div class="line">                lock.writeLock().unlock();</div><div class="line">                System.out.println(&quot;子线程释放锁&quot; + Thread.currentThread());</div><div class="line">            &#125;</div><div class="line">        &#125;.start();</div><div class="line">    &#125;</div><div class="line">	</div><div class="line">	private static void method2() &#123;</div><div class="line">		new Thread() &#123;</div><div class="line">            @Override</div><div class="line">            public void run() &#123;</div><div class="line">                lock.writeLock().lock();</div><div class="line">                System.out.println(&quot;子线程加锁&quot; + Thread.currentThread());</div><div class="line">                try &#123;</div><div class="line">                    Thread.sleep(1000);</div><div class="line">                &#125; catch (InterruptedException e) &#123;</div><div class="line">                    e.printStackTrace();</div><div class="line">                &#125;</div><div class="line">                lock.writeLock().unlock();</div><div class="line">                System.out.println(&quot;子线程释放锁&quot; + Thread.currentThread());</div><div class="line">            &#125;</div><div class="line">        &#125;.start();</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    private static void method3() &#123;</div><div class="line">    	lock.writeLock().lock();</div><div class="line">        System.out.println(&quot;主线程加锁&quot; + Thread.currentThread());</div><div class="line">        try &#123;</div><div class="line">            Thread.sleep(1000);</div><div class="line">        &#125; catch (InterruptedException e) &#123;</div><div class="line">            e.printStackTrace();</div><div class="line">        &#125;</div><div class="line">        lock.writeLock().unlock();</div><div class="line">        System.out.println(&quot;主线程释放锁&quot; + Thread.currentThread());</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <p>执行结果如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">子线程加锁Thread[Thread-0,5,main]</div><div class="line">子线程释放锁Thread[Thread-0,5,main]</div><div class="line">主线程加锁Thread[main,5,main]</div><div class="line">主线程释放锁Thread[main,5,main]</div><div class="line">子线程加锁Thread[Thread-1,5,main]</div><div class="line">子线程释放锁Thread[Thread-1,5,main]</div></pre></td></tr></table></figure></p>
 <p>可以看出，一旦某个线程获得 lock 锁之后，其它线程竞争同一锁的就需要等待，直到获取到锁才能执行被锁的模块。</p>
-<p>下面再介绍一种情况并解释，不知道看过以上关于锁的介绍再看这个方法会不会很清楚地明白，看代码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">   private ReadWriteLock lock = new ReentrantReadWriteLock();</div><div class="line"></div><div class="line">public void method() &#123;</div><div class="line">    lock.writeLock().lock();</div><div class="line">       System.out.println(&quot;线程加锁&quot; + Thread.currentThread());</div><div class="line">	new Thread() &#123;</div><div class="line">           @Override</div><div class="line">           public void run() &#123;</div><div class="line">               System.out.println(&quot;开始执行&quot;);</div><div class="line">               try &#123;</div><div class="line">                   Thread.sleep(1000);</div><div class="line">               &#125; catch (InterruptedException e) &#123;</div><div class="line">                   e.printStackTrace();</div><div class="line">               &#125;</div><div class="line">           &#125;</div><div class="line">       &#125;.start();</div><div class="line">       lock.writeLock().unlock();</div><div class="line">       System.out.println(&quot;线程释放锁&quot; + Thread.currentThread());</div><div class="line">   &#125;</div></pre></td></tr></table></figure></p>
+<p>下面再介绍一种情况并解释，不知道看过以上关于锁的介绍再看这个方法会不会很清楚地明白，看代码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">private ReadWriteLock lock = new ReentrantReadWriteLock();</div><div class="line"></div><div class="line">public void method() &#123;</div><div class="line">    lock.writeLock().lock();</div><div class="line">    System.out.println(&quot;线程加锁&quot; + Thread.currentThread());</div><div class="line">	new Thread() &#123;</div><div class="line">        @Override</div><div class="line">        public void run() &#123;</div><div class="line">            System.out.println(&quot;开始执行&quot;);</div><div class="line">            try &#123;</div><div class="line">                Thread.sleep(1000);</div><div class="line">            &#125; catch (InterruptedException e) &#123;</div><div class="line">                e.printStackTrace();</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;.start();</div><div class="line">    lock.writeLock().unlock();</div><div class="line">    System.out.println(&quot;线程释放锁&quot; + Thread.currentThread());</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
 <p>这个是我刚开始困惑的地方，明明加锁了，为什么没有锁上，还是像没加锁一样执行呢。如果能清除理解锁是针对线程的应该就很明白了。 method 中加锁是在主线程执行的，也就是锁的是主线程，所以再 new Thread 就和普通的子线程是一样的，当然是没有锁的。</p>
 
           
@@ -386,7 +386,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-30T09:17:37+08:00">
                 2018-01-30
@@ -513,7 +513,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-29T11:20:58+08:00">
                 2018-01-29
@@ -651,7 +651,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-24T17:10:20+08:00">
                 2018-01-24
@@ -695,9 +695,10 @@
           
             <p>首先放一张全部总结的图<br><img src="/image/Java_collection_sumarize.png" alt="Java_collection_sumarize"></p>
 <h4 id="Map"><a href="#Map" class="headerlink" title="Map"></a>Map</h4><h6 id="HashMap"><a href="#HashMap" class="headerlink" title="HashMap"></a>HashMap</h6><p>以键值对的形式保存，数据结构为数组加链表，不同的 key 所生成的 hash 可能对应的 index 是相同的。<br>hash 地址对应的数组 index 相同的话，就用头插法将该元素放到 index 位置的链表上。<br>同一个 key 只有一个 value, 如果对于这个 key 再 put 一个 value 的话，就覆盖掉原来的 value, 并 put 方法返回原 value.<br>其实际存的用 HashMapEntry 对象数组。在 Java 源码中是 Node, 它们的属性和方法是一样的。<br>HashMap 的数组长度取 2 的 n 次方的原因：其二进制数是 1 后面都是零，减 1 后全是 1, 由 hash 转换 index 时拿 length-1 和 hash地址做位于操作，这样得到的就是余数。</p>
-<h6 id="HashTable"><a href="#HashTable" class="headerlink" title="HashTable"></a>HashTable</h6><p>与 HashMap 相比，支持线程同步，避免多线程同时写而造成的数据不一致，但实现线程同步需要很高的花费，因此不建议用。</p>
-<h4 id="List"><a href="#List" class="headerlink" title="List"></a>List</h4><h6 id="ArrayList"><a href="#ArrayList" class="headerlink" title="ArrayList"></a>ArrayList</h6><p>以数组形式保存，初始化时可以指定数组长度，不指定的话有默认的长度，每次 add 时检测数组长度是否够用，不够用的话即扩容。<br>查找效率高，插入，删除都需要移动该元素后面的所有元素。</p>
-<h6 id="Vector"><a href="#Vector" class="headerlink" title="Vector"></a>Vector</h6><p>与 ArrayList 相比，支持线程同步，避免多线程同时写而造成的数据不一致，但实现线程同步需要很高的花费，因此不建议用。</p>
+<h6 id="HashTable"><a href="#HashTable" class="headerlink" title="HashTable"></a>HashTable</h6><p>与 HashMap 相比，支持线程同步，避免多线程同时写而造成的数据不一致，但实现线程同步需要很高的花费，因此不建议用。<br>与 HashMap 相比，其 key, value 不可为 null</p>
+<h6 id="TreeMap"><a href="#TreeMap" class="headerlink" title="TreeMap"></a>TreeMap</h6><p>TreeMap是按 key 值有序，相同 key 重复覆盖，非线程安全，内部使用二叉树结构。</p>
+<h4 id="List"><a href="#List" class="headerlink" title="List"></a>List</h4><h6 id="ArrayList"><a href="#ArrayList" class="headerlink" title="ArrayList"></a>ArrayList</h6><p>以数组形式保存，初始化时可以指定数组长度，不指定的话有默认的长度，每次 add 时检测数组长度是否够用，不够用的话即扩容。如果现有长度是数组长度的 3/4 则开始扩容，扩容的长度是 现有长度 + （内部定义的最小长度或现有长度的 2 2倍）<br>查找效率高，插入，删除都需要移动该元素后面的所有元素。</p>
+<h6 id="Vector"><a href="#Vector" class="headerlink" title="Vector"></a>Vector</h6><p>与 ArrayList 相比，支持线程同步，避免多线程同时写而造成的数据不一致，但实现线程同步需要很高的花费，因此不建议用。<br>与 ArrayList 相比，Vector 每次扩容都是现有长度的 2 倍</p>
 <h6 id="LinkedList"><a href="#LinkedList" class="headerlink" title="LinkedList"></a>LinkedList</h6><p>以双链表形式保存，在头尾插入删除效率高；查找指定位置的会根据要查找的位置来判断从头还是尾开始查。</p>
 <h4 id="Set"><a href="#Set" class="headerlink" title="Set"></a>Set</h4><h6 id="HashSet"><a href="#HashSet" class="headerlink" title="HashSet"></a>HashSet</h6><p>无顺序，无重复元素。如果插入的元素已存在，会覆盖已存在的那个。使用的是 HashMap 的 key 来存放。</p>
 <h6 id="TreeSet"><a href="#TreeSet" class="headerlink" title="TreeSet"></a>TreeSet</h6><p>有顺序，无重复元素。如果 add 的元素已存在，会覆盖已存在的那个。实际存的就是 TreeMap 的 key.</p>
@@ -779,7 +780,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-19T10:58:37+08:00">
                 2018-01-19
@@ -903,7 +904,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-09T09:56:51+08:00">
                 2018-01-09
@@ -1035,7 +1036,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-12-17T17:32:48+08:00">
                 2017-12-17
@@ -1241,7 +1242,7 @@ private void sendData() {
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-11-24T15:32:48+08:00">
                 2017-11-24
@@ -1373,7 +1374,7 @@ private void sendData() {
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-11-09T11:32:48+08:00">
                 2017-11-09
@@ -1498,7 +1499,7 @@ private void sendData() {
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-11-09T09:32:48+08:00">
                 2017-11-09
@@ -1635,7 +1636,7 @@ private void sendData() {
                 <a href="/archives/">
               
                   <span class="site-state-item-count">13</span>
-                  <span class="site-state-item-name">Artikel</span>
+                  <span class="site-state-item-name">posts</span>
                 </a>
               </div>
             
@@ -1685,7 +1686,7 @@ private void sendData() {
 </div>
 
 
-  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
 
 
 
