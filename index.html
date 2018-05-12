@@ -181,7 +181,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
             
-            Startseite
+            Home
           </a>
         </li>
       
@@ -191,7 +191,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
             
-            Archiv
+            Archives
           </a>
         </li>
       
@@ -257,7 +257,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-04-08T10:09:43+08:00">
                 2018-04-08
@@ -318,6 +318,7 @@
 <h3 id="一些-Java-对象"><a href="#一些-Java-对象" class="headerlink" title="一些 Java 对象"></a>一些 Java 对象</h3><p>java.util.concurrent.atomic 包<br>AtomicInteger, AtomicLong, AtomicBoolean 等对象可以实现不同线程对 Integer, Long, Boolean 类型的安全访问，其内部是通过 sun.misc.Unsafe 对象来实现的，保证对这些值的操作都是原子操作。使用这些对象实现线程同步的性能要比加锁的性能要高。</p>
 <h4 id="AtomicInteger-介绍"><a href="#AtomicInteger-介绍" class="headerlink" title="AtomicInteger 介绍"></a>AtomicInteger 介绍</h4><p>AtomicInteger 的使用如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">AtomicInteger atomicInteger = new AtomicInteger(90);</div><div class="line">atomicInteger.incrementAndGet(); // 相当于 ++i</div><div class="line">atomicInteger.decrementAndGet(); // 相当于 --i</div><div class="line">atomicInteger.getAndIncrement(); // 相当于 i++</div><div class="line">atomicInteger.getAndDecrement(); // 相当于 i-- </div><div class="line">atomicInteger.getAndAdd(10); // 在基础值上增加 10， 返回增加前的值</div><div class="line">atomicInteger.addAndGet(10); // 在基础值上增加 10， 返回增加后的值</div></pre></td></tr></table></figure></p>
 <p>AtomicInteger 内部使用的乐观锁的概念，利用无限 for 循环一直去执行操作，直到成功为止。<br>悲观锁的概念，几个线程竞争锁，一个线程竞争到锁之后，其它线程挂起，等到锁被释放后再恢复线程重新抢占锁。这样就有可能会出现一个问题，假如一个线程获取到锁之后执行时间很短，其它竞争该锁的线程刚被挂起就有可用资源了，就需要再抢占，这样频繁的挂起恢复存在很大的开销，所以悲观锁有很大的缺点。<br>所以就有了乐观锁，乐观锁的概念是在抢占锁的过程中，如果抢占失败就一直重试，直到获取到锁为止。当数据争用不严重时，乐观锁有着更好的性能。</p>
+<h4 id="ThreadLocal-介绍"><a href="#ThreadLocal-介绍" class="headerlink" title="ThreadLocal 介绍"></a>ThreadLocal 介绍</h4><p>ThreadLocal 所达到的效果与上述的有所不同，ThreadLocal 是在每个线程都保存不同的值，在每个线程的操作时其它线程的值不受任何影响，具体可看这篇：<a href="https://hexiaosa.github.io/2018/01/19/ThreadLocal/" target="_blank" rel="external">https://hexiaosa.github.io/2018/01/19/ThreadLocal/</a></p>
 
           
         
@@ -395,7 +396,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-30T09:17:37+08:00">
                 2018-01-30
@@ -522,7 +523,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-29T11:20:58+08:00">
                 2018-01-29
@@ -660,7 +661,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-24T17:10:20+08:00">
                 2018-01-24
@@ -789,7 +790,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-19T10:58:37+08:00">
                 2018-01-19
@@ -914,7 +915,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-09T09:56:51+08:00">
                 2018-01-09
@@ -1046,7 +1047,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-12-17T17:32:48+08:00">
                 2017-12-17
@@ -1252,7 +1253,7 @@ private void sendData() {
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-11-24T15:32:48+08:00">
                 2017-11-24
@@ -1384,7 +1385,7 @@ private void sendData() {
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-11-09T11:32:48+08:00">
                 2017-11-09
@@ -1509,7 +1510,7 @@ private void sendData() {
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-11-09T09:32:48+08:00">
                 2017-11-09
@@ -1646,7 +1647,7 @@ private void sendData() {
                 <a href="/archives/">
               
                   <span class="site-state-item-count">13</span>
-                  <span class="site-state-item-name">Artikel</span>
+                  <span class="site-state-item-name">posts</span>
                 </a>
               </div>
             
@@ -1696,7 +1697,7 @@ private void sendData() {
 </div>
 
 
-  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
 
 
 

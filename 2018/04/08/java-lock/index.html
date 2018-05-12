@@ -85,7 +85,7 @@
 <meta property="og:url" content="http://hexiaosa.com/2018/04/08/java-lock/index.html">
 <meta property="og:site_name" content="Hexiaosa">
 <meta property="og:description" content="由于不同线程之间会共享一些数据，所以就可能会不同线程在同一时间对同一对象进行操作，如果操作不是原子性的，那么就可能出现不是我们预想的结果。下面将对保证线程安全的方法进行介绍，使得程序的运行达到我们预想的结果。 锁加锁是保证线程安全的最常见的方法。我们通常说的锁，就是线程锁，也就是加上锁后对当前线程有效。为什么是针对线程的呢，同一线程顺序执行也就不需要锁好吧。锁是通过对同一内存的使用产生竞争来达到同">
-<meta property="og:updated_time" content="2018-05-11T03:57:12.772Z">
+<meta property="og:updated_time" content="2018-05-12T03:07:13.435Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="保证线程安全的方法">
 <meta name="twitter:description" content="由于不同线程之间会共享一些数据，所以就可能会不同线程在同一时间对同一对象进行操作，如果操作不是原子性的，那么就可能出现不是我们预想的结果。下面将对保证线程安全的方法进行介绍，使得程序的运行达到我们预想的结果。 锁加锁是保证线程安全的最常见的方法。我们通常说的锁，就是线程锁，也就是加上锁后对当前线程有效。为什么是针对线程的呢，同一线程顺序执行也就不需要锁好吧。锁是通过对同一内存的使用产生竞争来达到同">
@@ -184,7 +184,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
             
-            Startseite
+            Home
           </a>
         </li>
       
@@ -194,7 +194,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
             
-            Archiv
+            Archives
           </a>
         </li>
       
@@ -258,7 +258,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-04-08T10:09:43+08:00">
                 2018-04-08
@@ -317,6 +317,7 @@
 <h3 id="一些-Java-对象"><a href="#一些-Java-对象" class="headerlink" title="一些 Java 对象"></a>一些 Java 对象</h3><p>java.util.concurrent.atomic 包<br>AtomicInteger, AtomicLong, AtomicBoolean 等对象可以实现不同线程对 Integer, Long, Boolean 类型的安全访问，其内部是通过 sun.misc.Unsafe 对象来实现的，保证对这些值的操作都是原子操作。使用这些对象实现线程同步的性能要比加锁的性能要高。</p>
 <h4 id="AtomicInteger-介绍"><a href="#AtomicInteger-介绍" class="headerlink" title="AtomicInteger 介绍"></a>AtomicInteger 介绍</h4><p>AtomicInteger 的使用如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">AtomicInteger atomicInteger = new AtomicInteger(90);</div><div class="line">atomicInteger.incrementAndGet(); // 相当于 ++i</div><div class="line">atomicInteger.decrementAndGet(); // 相当于 --i</div><div class="line">atomicInteger.getAndIncrement(); // 相当于 i++</div><div class="line">atomicInteger.getAndDecrement(); // 相当于 i-- </div><div class="line">atomicInteger.getAndAdd(10); // 在基础值上增加 10， 返回增加前的值</div><div class="line">atomicInteger.addAndGet(10); // 在基础值上增加 10， 返回增加后的值</div></pre></td></tr></table></figure></p>
 <p>AtomicInteger 内部使用的乐观锁的概念，利用无限 for 循环一直去执行操作，直到成功为止。<br>悲观锁的概念，几个线程竞争锁，一个线程竞争到锁之后，其它线程挂起，等到锁被释放后再恢复线程重新抢占锁。这样就有可能会出现一个问题，假如一个线程获取到锁之后执行时间很短，其它竞争该锁的线程刚被挂起就有可用资源了，就需要再抢占，这样频繁的挂起恢复存在很大的开销，所以悲观锁有很大的缺点。<br>所以就有了乐观锁，乐观锁的概念是在抢占锁的过程中，如果抢占失败就一直重试，直到获取到锁为止。当数据争用不严重时，乐观锁有着更好的性能。</p>
+<h4 id="ThreadLocal-介绍"><a href="#ThreadLocal-介绍" class="headerlink" title="ThreadLocal 介绍"></a>ThreadLocal 介绍</h4><p>ThreadLocal 所达到的效果与上述的有所不同，ThreadLocal 是在每个线程都保存不同的值，在每个线程的操作时其它线程的值不受任何影响，具体可看这篇：<a href="https://hexiaosa.github.io/2018/01/19/ThreadLocal/" target="_blank" rel="external">https://hexiaosa.github.io/2018/01/19/ThreadLocal/</a></p>
 
       
     </div>
@@ -403,10 +404,10 @@
       
         <ul class="sidebar-nav motion-element">
           <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
-            Inhaltsverzeichnis
+            Table of Contents
           </li>
           <li class="sidebar-nav-overview" data-target="site-overview-wrap">
-            Übersicht
+            Overview
           </li>
         </ul>
       
@@ -427,7 +428,7 @@
                 <a href="/archives/">
               
                   <span class="site-state-item-count">13</span>
-                  <span class="site-state-item-name">Artikel</span>
+                  <span class="site-state-item-name">posts</span>
                 </a>
               </div>
             
@@ -463,7 +464,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#锁"><span class="nav-number">1.</span> <span class="nav-text">锁</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#锁的使用之——-synchronized"><span class="nav-number">1.1.</span> <span class="nav-text">锁的使用之—— synchronized</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#锁的使用之——-Lock"><span class="nav-number">1.2.</span> <span class="nav-text">锁的使用之—— Lock</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#一些-Java-对象"><span class="nav-number">2.</span> <span class="nav-text">一些 Java 对象</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#AtomicInteger-介绍"><span class="nav-number">2.1.</span> <span class="nav-text">AtomicInteger 介绍</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#锁"><span class="nav-number">1.</span> <span class="nav-text">锁</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#锁的使用之——-synchronized"><span class="nav-number">1.1.</span> <span class="nav-text">锁的使用之—— synchronized</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#锁的使用之——-Lock"><span class="nav-number">1.2.</span> <span class="nav-text">锁的使用之—— Lock</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#一些-Java-对象"><span class="nav-number">2.</span> <span class="nav-text">一些 Java 对象</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#AtomicInteger-介绍"><span class="nav-number">2.1.</span> <span class="nav-text">AtomicInteger 介绍</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ThreadLocal-介绍"><span class="nav-number">2.2.</span> <span class="nav-text">ThreadLocal 介绍</span></a></li></ol></li></ol></div>
             
 
           </div>
@@ -493,7 +494,7 @@
 </div>
 
 
-  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
 
 
 
