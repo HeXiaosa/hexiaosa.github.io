@@ -86,7 +86,7 @@
 <meta property="og:site_name" content="Hexiaosa">
 <meta property="og:description" content="先上图 Handler sendMessage(msg) 会调用 sendMessageAtTime(msg, uptimeMillis), 在这里会调 enqueueMessage(queue, msg, uptimeMillis), 其中 queue 是 handler 的全局变量 mQueue, 在构造函数里，有这两行代码12mLooper = Looper.myLooper();mQueu">
 <meta property="og:image" content="http://hexiaosa.com/image/handler.png">
-<meta property="og:updated_time" content="2018-05-24T08:18:57.856Z">
+<meta property="og:updated_time" content="2018-05-24T09:16:46.477Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Handler 机制详解">
 <meta name="twitter:description" content="先上图 Handler sendMessage(msg) 会调用 sendMessageAtTime(msg, uptimeMillis), 在这里会调 enqueueMessage(queue, msg, uptimeMillis), 其中 queue 是 handler 的全局变量 mQueue, 在构造函数里，有这两行代码12mLooper = Looper.myLooper();mQueu">
@@ -303,7 +303,7 @@
         <p>先上图<br><img src="/image/handler.png" alt="handler"></p>
 <p>Handler sendMessage(msg) 会调用 sendMessageAtTime(msg, uptimeMillis), 在这里会调 enqueueMessage(queue, msg, uptimeMillis), 其中 queue 是 handler 的全局变量 mQueue, 在构造函数里，有这两行代码<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">mLooper = Looper.myLooper();</div><div class="line">mQueue = mLooper.mQueue;</div></pre></td></tr></table></figure></p>
 <p>最终会调用 queue.enqueueMessage(msg, uptimeMiilis), 在这个方法里会设置 msg.target = this, 然后把该 msg 插入 queue 中。</p>
-<p>Looper.loop() 方法会循环取 mQueue 中的值，由于 Looper 里面的 mQueue 对象在 handler 构造函数里赋值给 handler 的全局变量 mQueue, 所以这里循环的消息队列也就是上面插入消息的消息队列。 取到 msg 之后则会调用 msg.target.dispatchMessage(), 注意这里的 msg.target 在 handler 中插入 msg 时给其设置过 target 就是当前 handler, 所以调用就是同一个 handler 的 diapatchMessage 方法，在 dispatchMessage 方法中调用 CallBack 的实现方法或者是 handlerMessage, 这也就是我们需要实际去做的了。</p>
+<p>Looper.loop() 方法会循环取 mQueue 中的值，由于 Looper 里面的 mQueue 对象在 handler 构造函数里赋值给 handler 的全局变量 mQueue, 所以这里循环的消息队列也就是上面插入消息的消息队列。 取到 msg 之后则会调用 msg.target.dispatchMessage(), 注意这里的 msg.target 在 handler 中插入 msg 时给其设置过 target 就是当前 handler, 所以调用就是同一个 handler 的 diapatchMessage 方法，在 dispatchMessage 方法中调用 CallBack 的实现方法或者是 handlerMessage, 这也就是我们需要实际去做的了。<br>Handler 还有一种用法是直接调用 post(Runnable r)，这种会构造一个 Message 对象，且 msg.callback = r, 再将 msg 对象插入到 MessageQueue 中，后面的步骤都一样的。<br>为什么在子线程中调用 sendMessage(msg) 或 post(runnable) 会在主线程中执行我们是实现的方法呢，这是因为 ActivityThread 的入口方法中就开始执行 Looper.loop(), 所以在 loop() 方法中调 dispatchMessage() 就是在主线程中的。</p>
 <p>思考：</p>
 <ol>
 <li>在这个过程中的 Looper.myLooper() 取得就是当前线程的 Looper 对象，一个线程只能有一个 Looper 对象，那么一个线程也只有一个 MessageQueue 对象。</li>
