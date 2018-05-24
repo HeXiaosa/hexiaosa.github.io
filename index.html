@@ -181,7 +181,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
             
-            Startseite
+            Home
           </a>
         </li>
       
@@ -191,7 +191,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
             
-            Archiv
+            Archives
           </a>
         </li>
       
@@ -257,7 +257,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-04-08T10:09:43+08:00">
                 2018-04-08
@@ -396,7 +396,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-30T09:17:37+08:00">
                 2018-01-30
@@ -523,7 +523,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-29T11:20:58+08:00">
                 2018-01-29
@@ -661,7 +661,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-24T17:10:20+08:00">
                 2018-01-24
@@ -704,7 +704,13 @@
         
           
             <p>首先放一张全部总结的图<br><img src="/image/Java_collection_sumarize.png" alt="Java_collection_sumarize"></p>
-<h4 id="Map"><a href="#Map" class="headerlink" title="Map"></a>Map</h4><h6 id="HashMap"><a href="#HashMap" class="headerlink" title="HashMap"></a>HashMap</h6><p>以键值对的形式保存，数据结构为数组加链表，不同的 key 所生成的 hash 可能对应的 index 是相同的。<br>hash 地址对应的数组 index 相同的话，就用头插法将该元素放到 index 位置的链表上。<br>同一个 key 只有一个 value, 如果对于这个 key 再 put 一个 value 的话，就覆盖掉原来的 value, 并 put 方法返回原 value.<br>其实际存的用 HashMapEntry 对象数组。在 Java 源码中是 Node, 它们的属性和方法是一样的。<br>HashMap 的数组长度取 2 的 n 次方的原因：其二进制数是 1 后面都是零，减 1 后全是 1, 由 hash 转换 index 时拿 length-1 和 hash地址做位于操作，这样得到的就是余数。</p>
+<h4 id="Map"><a href="#Map" class="headerlink" title="Map"></a>Map</h4><h6 id="HashMap"><a href="#HashMap" class="headerlink" title="HashMap"></a>HashMap</h6><p>HashMap 是一个重复 key 值覆盖，键值对形式的集合。<br>HashMap 是用数组加链表的数据结构，put 时要放到数组的某个位置，这个位置的计算是 key 的 hash &amp; (length-1), put 时如果 key 在集合中存在，则直接覆盖掉旧值并返回旧值。如果 key 在集合中不存在，首先会判断是否 size 是不是已经大于数组长度的3/4, 如果是的话就进行数组扩容。然后判断要插入的位置是否已经有元素存在，是的话则使用头插法将该元素插入到该位置的链表中。<br>-&gt;</p>
+<ol>
+<li>HashMap 的长度<br>hashMap 的初始默认长度是 16, 每次扩容的长度都是原长度的 2 倍。每次的 HashMap 数组的长度都是 2 的整数幂，其原因是取 index 时会跟 length-1 做与操作，length-1 的二进制数每位都是 1, 更能降低重复率。<br>如果能在最初预估长度，最好能指定固定长度，这样就避免了扩容，因为扩容的过程会再新建一个 2 倍长度的数组，再计算位置进行复制</li>
+<li>冲突解决<br>HashMap put 时的冲突解决方法是拉链法，也就是对于冲突使用链表的形式，这样的优点的是插入快，空间不需要连续，节省空间。</li>
+<li>加载因子对性能的影响<br>加载因子默认是 0.75, 其值越大，空间效率越低，冲突越小，查找时间效率越高；其值越小，空间效率越高，冲突越大，查找时间效率越低。</li>
+<li>HashMap 是线程不安全的，想要实现线程安全可以通过 Collections.synchronizedCollection 返回 SynchronizedCollection 对象来实现线程安全，或者使用 java.util.concurrent 包下的 ConcurrentHashMap 来实现。</li>
+</ol>
 <h6 id="HashTable"><a href="#HashTable" class="headerlink" title="HashTable"></a>HashTable</h6><p>与 HashMap 相比，支持线程同步，避免多线程同时写而造成的数据不一致，但实现线程同步需要很高的花费，因此不建议用。<br>与 HashMap 相比，其 key, value 不可为 null</p>
 <h6 id="TreeMap"><a href="#TreeMap" class="headerlink" title="TreeMap"></a>TreeMap</h6><p>TreeMap是按 key 值有序，相同 key 重复覆盖，非线程安全，内部使用二叉树结构。</p>
 <h4 id="List"><a href="#List" class="headerlink" title="List"></a>List</h4><h6 id="ArrayList"><a href="#ArrayList" class="headerlink" title="ArrayList"></a>ArrayList</h6><p>以数组形式保存，初始化时可以指定数组长度，不指定的话有默认的长度，每次 add 时检测数组长度是否够用，不够用的话即扩容。如果现有长度是数组长度的 3/4 则开始扩容，扩容的长度是 现有长度 + （内部定义的最小长度或现有长度的 2 2倍）<br>查找效率高，插入，删除都需要移动该元素后面的所有元素。</p>
@@ -790,7 +796,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-19T10:58:37+08:00">
                 2018-01-19
@@ -915,7 +921,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-09T09:56:51+08:00">
                 2018-01-09
@@ -1047,7 +1053,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-12-17T17:32:48+08:00">
                 2017-12-17
@@ -1253,7 +1259,7 @@ private void sendData() {
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-11-24T15:32:48+08:00">
                 2017-11-24
@@ -1385,7 +1391,7 @@ private void sendData() {
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-11-09T11:32:48+08:00">
                 2017-11-09
@@ -1510,7 +1516,7 @@ private void sendData() {
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-11-09T09:32:48+08:00">
                 2017-11-09
@@ -1647,7 +1653,7 @@ private void sendData() {
                 <a href="/archives/">
               
                   <span class="site-state-item-count">13</span>
-                  <span class="site-state-item-name">Artikel</span>
+                  <span class="site-state-item-name">posts</span>
                 </a>
               </div>
             
@@ -1697,7 +1703,7 @@ private void sendData() {
 </div>
 
 
-  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
 
 
 
