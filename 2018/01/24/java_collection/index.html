@@ -86,7 +86,7 @@
 <meta property="og:site_name" content="Hexiaosa">
 <meta property="og:description" content="首先放一张全部总结的图 MapHashMapHashMap 是一个重复 key 值覆盖，键值对形式的集合。HashMap 是用数组加链表的数据结构，put 时要放到数组的某个位置，这个位置的计算是 key 的 hash &amp;amp; (length-1), put 时如果 key 在集合中存在，则直接覆盖掉旧值并返回旧值。如果 key 在集合中不存在，首先会判断是否 size 是不是已经大于数组长度">
 <meta property="og:image" content="http://hexiaosa.com/image/Java_collection_sumarize.png">
-<meta property="og:updated_time" content="2018-05-24T06:38:07.757Z">
+<meta property="og:updated_time" content="2018-05-24T06:42:17.757Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Java 集合简括">
 <meta name="twitter:description" content="首先放一张全部总结的图 MapHashMapHashMap 是一个重复 key 值覆盖，键值对形式的集合。HashMap 是用数组加链表的数据结构，put 时要放到数组的某个位置，这个位置的计算是 key 的 hash &amp;amp; (length-1), put 时如果 key 在集合中存在，则直接覆盖掉旧值并返回旧值。如果 key 在集合中不存在，首先会判断是否 size 是不是已经大于数组长度">
@@ -186,7 +186,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
             
-            Home
+            Startseite
           </a>
         </li>
       
@@ -196,7 +196,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
             
-            Archives
+            Archiv
           </a>
         </li>
       
@@ -260,7 +260,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-24T17:10:20+08:00">
                 2018-01-24
@@ -301,7 +301,7 @@
 
       
         <p>首先放一张全部总结的图<br><img src="/image/Java_collection_sumarize.png" alt="Java_collection_sumarize"></p>
-<h4 id="Map"><a href="#Map" class="headerlink" title="Map"></a>Map</h4><h6 id="HashMap"><a href="#HashMap" class="headerlink" title="HashMap"></a>HashMap</h6><p>HashMap 是一个重复 key 值覆盖，键值对形式的集合。<br>HashMap 是用数组加链表的数据结构，put 时要放到数组的某个位置，这个位置的计算是 key 的 hash &amp; (length-1), put 时如果 key 在集合中存在，则直接覆盖掉旧值并返回旧值。如果 key 在集合中不存在，首先会判断是否 size 是不是已经大于数组长度的3/4, 如果是的话就进行数组扩容。然后判断要插入的位置是否已经有元素存在，是的话则使用头插法将该元素插入到该位置的链表中。<br>-&gt;</p>
+<h4 id="Map"><a href="#Map" class="headerlink" title="Map"></a>Map</h4><h6 id="HashMap"><a href="#HashMap" class="headerlink" title="HashMap"></a>HashMap</h6><p>HashMap 是一个重复 key 值覆盖，键值对形式的集合。<br>HashMap 是用数组加链表的数据结构，put 时要放到数组的某个位置，这个位置的计算是 key 的 hash &amp; (length-1), put 时如果 key 在集合中存在，则直接覆盖掉旧值并返回旧值。如果 key 在集合中不存在，首先会判断是否 size 是不是已经大于数组长度的3/4, 如果是的话就进行数组扩容。然后判断要插入的位置是否已经有元素存在，是的话则使用头插法将该元素插入到该位置的链表中。<br>&gt;</p>
 <ol>
 <li>HashMap 的长度<br>hashMap 的初始默认长度是 16, 每次扩容的长度都是原长度的 2 倍。每次的 HashMap 数组的长度都是 2 的整数幂，其原因是取 index 时会跟 length-1 做与操作，length-1 的二进制数每位都是 1, 更能降低重复率。<br>如果能在最初预估长度，最好能指定固定长度，这样就避免了扩容，因为扩容的过程会再新建一个 2 倍长度的数组，再计算位置进行复制</li>
 <li>冲突解决<br>HashMap put 时的冲突解决方法是拉链法，也就是对于冲突使用链表的形式，这样的优点的是插入快，空间不需要连续，节省空间。</li>
@@ -406,10 +406,10 @@
       
         <ul class="sidebar-nav motion-element">
           <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
-            Table of Contents
+            Inhaltsverzeichnis
           </li>
           <li class="sidebar-nav-overview" data-target="site-overview-wrap">
-            Overview
+            Übersicht
           </li>
         </ul>
       
@@ -430,7 +430,7 @@
                 <a href="/archives/">
               
                   <span class="site-state-item-count">13</span>
-                  <span class="site-state-item-name">posts</span>
+                  <span class="site-state-item-name">Artikel</span>
                 </a>
               </div>
             
@@ -496,7 +496,7 @@
 </div>
 
 
-  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
 
 
 
