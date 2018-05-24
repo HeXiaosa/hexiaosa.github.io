@@ -228,6 +228,134 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/05/24/Handler/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Hexiaosa">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexiaosa">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/05/24/Handler/" itemprop="url">Handler 机制详解</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-05-24T16:13:41+08:00">
+                2018-05-24
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>先上图<br><img src="/image/handler.png" alt="handler"></p>
+<p>Handler sendMessage(msg) 会调用 sendMessageAtTime(msg, uptimeMillis), 在这里会调 enqueueMessage(queue, msg, uptimeMillis), 其中 queue 是 handler 的全局变量 mQueue, 在构造函数里，有这两行代码<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">mLooper = Looper.myLooper();</div><div class="line">mQueue = mLooper.mQueue;</div></pre></td></tr></table></figure></p>
+<p>最终会调用 queue.enqueueMessage(msg, uptimeMiilis), 在这个方法里会设置 msg.target = this, 然后把该 msg 插入 queue 中。</p>
+<p>Looper.loop() 方法会循环取 mQueue 中的值，由于 Looper 里面的 mQueue 对象在 handler 构造函数里赋值给 handler 的全局变量 mQueue, 所以这里循环的消息队列也就是上面插入消息的消息队列。 取到 msg 之后则会调用 msg.target.dispatchMessage(), 注意这里的 msg.target 在 handler 中插入 msg 时给其设置过 target 就是当前 handler, 所以调用就是同一个 handler 的 diapatchMessage 方法，在 dispatchMessage 方法中调用 CallBack 的实现方法或者是 handlerMessage, 这也就是我们需要实际去做的了。</p>
+<p>思考：</p>
+<ol>
+<li>在这个过程中的 Looper.myLooper() 取得就是当前线程的 Looper 对象，一个线程只能有一个 Looper 对象，那么一个线程也只有一个 MessageQueue 对象。</li>
+<li>一个线程只能有一个 Looper 对象是由 ThreadLocal 实现的，Looper 的构造参数是私有的，在 Looper.prepare() 的时候给当前线程设置 Looper 对象。</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/04/08/java-lock/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1476,134 +1604,6 @@ private void sendData() {
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2017/11/09/event_dispatch/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Hexiaosa">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexiaosa">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/11/09/event_dispatch/" itemprop="url">事件分发</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Veröffentlicht am</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-11-09T09:32:48+08:00">
-                2017-11-09
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>事件分发中设计到的几个方法：dispatchTouchEvent(), onInterceptTouchEvent(), onTouchEvent(), 这几个都有返回值 boolean 类型，默认情况下都返回 false, </p>
-<p>若有 A(B(MyView)), 则事件的默认传递：</p>
-<p>A dispatch<br>A onIntercept<br>B dispatch<br>B onIntercept<br>MyView dispatch<br>MyView onTouch<br>B onTouch<br>A onTouch</p>
-<p>当 dispatchTouchEvent 返回 true 时，上面的分发流程就此中止；<br>当 onInterceptTouchEvent 返回 true 时，事件不再往子 View 传递，其余都还正常；<br>当 onTouchEvent 返回 true 时，onTouchEvent 由自己处理，不再交给父级处理。</p>
-<p>由上面的分析看来已经很清晰了，有下面这些特殊情况：</p>
-<ol>
-<li>这几个事件中，ACTION_DOWN 返回 true 和整个事件返回 true 的效果一样。也就是该次 event 一旦返回 true 表示之后的事件都返回 true。</li>
-<li>PS: onInterceptTouchEvent() 中有事件返回 true, 则之后的事件该方法不会再被调用，直到本次事件结束。</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -1654,7 +1654,7 @@ private void sendData() {
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-count">14</span>
                   <span class="site-state-item-name">Artikel</span>
                 </a>
               </div>

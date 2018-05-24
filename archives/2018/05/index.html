@@ -79,16 +79,12 @@
 
 
 
-<meta name="description" content="adb 命令和 adb shell 命令的区别： adb 命令是 adb 程序自带的命令，adb shell 命令是 Android 程序的命令，/system/bin/下的命令  一些 adb 命令 adb devices adb push local remote adb pull remote local adb install [文件路径] adb uninstall [package">
-<meta property="og:type" content="article">
-<meta property="og:title" content="ADB (Android Debug Bridge)">
-<meta property="og:url" content="http://hexiaosa.com/2018/01/09/adb/index.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Hexiaosa">
+<meta property="og:url" content="http://hexiaosa.com/archives/2018/05/index.html">
 <meta property="og:site_name" content="Hexiaosa">
-<meta property="og:description" content="adb 命令和 adb shell 命令的区别： adb 命令是 adb 程序自带的命令，adb shell 命令是 Android 程序的命令，/system/bin/下的命令  一些 adb 命令 adb devices adb push local remote adb pull remote local adb install [文件路径] adb uninstall [package">
-<meta property="og:updated_time" content="2018-01-09T02:48:04.272Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="ADB (Android Debug Bridge)">
-<meta name="twitter:description" content="adb 命令和 adb shell 命令的区别： adb 命令是 adb 程序自带的命令，adb shell 命令是 Android 程序的命令，/system/bin/下的命令  一些 adb 命令 adb devices adb push local remote adb pull remote local adb install [文件路径] adb uninstall [package">
+<meta name="twitter:title" content="Hexiaosa">
 
 
 
@@ -118,13 +114,13 @@
 
 
 
-  <link rel="canonical" href="http://hexiaosa.com/2018/01/09/adb/"/>
+  <link rel="canonical" href="http://hexiaosa.com/archives/2018/05/"/>
 
 
 
 
 
-  <title>ADB (Android Debug Bridge) | Hexiaosa</title>
+  <title>Archiv | Hexiaosa</title>
   
 
 
@@ -143,7 +139,7 @@
     
   
 
-  <div class="container sidebar-position-left page-post-detail">
+  <div class="container sidebar-position-left page-archive">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -217,157 +213,74 @@
           <div id="content" class="content">
             
 
-  <div id="posts" class="posts-expand">
-    
+  
+  
+  
+  <div class="post-block archive">
+    <div id="posts" class="posts-collapse">
+      <span class="archive-move-on"></span>
 
-  
+      <span class="archive-page-counter">
+        
+        
+        
+          
+        
+        Öhm..! Insgesamt 14 Artikel. Bleib dran.
+      </span>
 
-  
-  
-  
+      
+
+        
+        
+        
+
+        
+          
+          <div class="collection-title">
+            <h1 class="archive-year" id="archive-year-2018">2018</h1>
+          </div>
+        
+        
+
+        
 
   <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/01/09/adb/">
+    <header class="post-header">
 
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Hexiaosa">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexiaosa">
-    </span>
-
-    
-      <header class="post-header">
-
+      <h2 class="post-title">
         
-        
-          <h1 class="post-title" itemprop="name headline">ADB (Android Debug Bridge)</h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
+            <a class="post-title-link" href="/2018/05/24/Handler/" itemprop="url">
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span itemprop="name">Handler 机制详解</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-09T09:56:51+08:00">
-                2018-01-09
-              </time>
-            
+            </a>
+        
+      </h2>
 
-            
+      <div class="post-meta">
+        <time class="post-time" itemprop="dateCreated"
+              datetime="2018-05-24T16:13:41+08:00"
+              content="2018-05-24" >
+          05-24
+        </time>
+      </div>
 
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        <ol>
-<li><p>adb 命令和 adb shell 命令的区别：<br> adb 命令是 adb 程序自带的命令，adb shell 命令是 Android 程序的命令，/system/bin/下的命令</p>
-</li>
-<li><p>一些 adb 命令<br> adb devices<br> adb push local remote<br> adb pull remote local<br> adb install [文件路径]<br> adb uninstall [package name]</p>
-</li>
-<li><p>一些 adb shell 命令<br> adb shell pm … (list packages, path [package], )<br> adb shell am … (start -a android.intent.action.MAIN [包名]/[路径activity], )<br> adb shell screencap /sdcard/s.png  截屏<br> adb shell screenrecord /sdcard/s.mp4 录制视频，可以指定分辨率等参数<br> adb shell dumpsys activity 查看 activity 任务栈<br> adb shell logcat … (-f [文件路径]&lt;抓日志保存到该文件&gt;, )</p>
-</li>
-<li><p>adb 用在 android 程序中</p>
- <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">Process p = Runtime.getRuntime().exec(&quot;su/sh&quot;); // su表示root, sh普通用户</div><div class="line">DataOutputStream dataStream = new DataOutputStream(p.getOutputStream());</div><div class="line">dataStream.write(&quot;&quot;.getBytes());// 主要执行的 adb shell 命令</div><div class="line">datastream.writeBytes(&quot;\n&quot;);</div><div class="line"></div><div class="line">dataStream.writeBytes(&quot;exit\n&quot;);</div><div class="line">dataStream.flush();</div><div class="line"></div><div class="line">process.waitFor();</div><div class="line"></div><div class="line">process.getInputStream(); // 成功后输出的信息会放在这里面</div><div class="line">process.getErrorStream(); // 出错后错误信息会放在这里面</div></pre></td></tr></table></figure>
-</li>
-<li><p>问题：<br> logcat 能否筛选应用?</p>
-</li>
-</ol>
-
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-      
-      
-
-      
-        <div class="post-nav">
-          <div class="post-nav-next post-nav-item">
-            
-              <a href="/2017/12/17/bluetooth_details/" rel="next" title="Android 蓝牙详解">
-                <i class="fa fa-chevron-left"></i> Android 蓝牙详解
-              </a>
-            
-          </div>
-
-          <span class="post-nav-divider"></span>
-
-          <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2018/01/19/ThreadLocal/" rel="prev" title="ThreadLocal 详解">
-                ThreadLocal 详解 <i class="fa fa-chevron-right"></i>
-              </a>
-            
-          </div>
-        </div>
-      
-
-      
-      
-    </footer>
-  </div>
-  
-  
-  
+    </header>
   </article>
 
 
 
-    <div class="post-spread">
       
+
     </div>
   </div>
+  
+  
+  
+
+  
+
 
 
           </div>
@@ -375,10 +288,6 @@
 
 
           
-
-  
-
-
 
         </div>
         
@@ -575,10 +484,6 @@
   
 
   
-  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
-<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
-
-
 
   
 
