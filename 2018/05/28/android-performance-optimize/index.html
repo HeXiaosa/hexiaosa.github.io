@@ -79,16 +79,16 @@
 
 
 
-<meta name="description" content="下面将从布局优化、绘制优化、Bitmap、内存泄漏几个方面讲解 Android 性能优化。 Android 中布局优化 加载可能性小的布局使用 ViewStub, 在需要使用的时候再动态加载，因为 ViewStub 默认是 VISIBLE_GONE, 不去加载布局，在主动调用 inflate() 或 setVisible() 方法时才会渲染布局。  尽可能减少布局的层级，比如一般情况下使用 Rel">
+<meta name="description" content="下面将从布局优化、绘制优化、Bitmap、内存泄漏几个方面讲解 Android 性能优化。 Android 中布局优化 加载可能性小的布局使用 ViewStub, 在需要使用的时候再动态加载，因为 ViewStub 默认是 VISIBLE_GONE, 不去加载布局，在主动调用 inflate() 或 setVisible() 方法时才会渲染布局。 尽可能减少布局的层级，比如一般情况下使用 Rela">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Android 性能优化">
 <meta property="og:url" content="http://hexiaosa.com/2018/05/28/android-performance-optimize/index.html">
 <meta property="og:site_name" content="Hexiaosa">
-<meta property="og:description" content="下面将从布局优化、绘制优化、Bitmap、内存泄漏几个方面讲解 Android 性能优化。 Android 中布局优化 加载可能性小的布局使用 ViewStub, 在需要使用的时候再动态加载，因为 ViewStub 默认是 VISIBLE_GONE, 不去加载布局，在主动调用 inflate() 或 setVisible() 方法时才会渲染布局。  尽可能减少布局的层级，比如一般情况下使用 Rel">
-<meta property="og:updated_time" content="2018-05-28T09:42:44.803Z">
+<meta property="og:description" content="下面将从布局优化、绘制优化、Bitmap、内存泄漏几个方面讲解 Android 性能优化。 Android 中布局优化 加载可能性小的布局使用 ViewStub, 在需要使用的时候再动态加载，因为 ViewStub 默认是 VISIBLE_GONE, 不去加载布局，在主动调用 inflate() 或 setVisible() 方法时才会渲染布局。 尽可能减少布局的层级，比如一般情况下使用 Rela">
+<meta property="og:updated_time" content="2018-05-28T09:58:47.852Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Android 性能优化">
-<meta name="twitter:description" content="下面将从布局优化、绘制优化、Bitmap、内存泄漏几个方面讲解 Android 性能优化。 Android 中布局优化 加载可能性小的布局使用 ViewStub, 在需要使用的时候再动态加载，因为 ViewStub 默认是 VISIBLE_GONE, 不去加载布局，在主动调用 inflate() 或 setVisible() 方法时才会渲染布局。  尽可能减少布局的层级，比如一般情况下使用 Rel">
+<meta name="twitter:description" content="下面将从布局优化、绘制优化、Bitmap、内存泄漏几个方面讲解 Android 性能优化。 Android 中布局优化 加载可能性小的布局使用 ViewStub, 在需要使用的时候再动态加载，因为 ViewStub 默认是 VISIBLE_GONE, 不去加载布局，在主动调用 inflate() 或 setVisible() 方法时才会渲染布局。 尽可能减少布局的层级，比如一般情况下使用 Rela">
 
 
 
@@ -300,22 +300,17 @@
       
         <p>下面将从布局优化、绘制优化、Bitmap、内存泄漏几个方面讲解 Android 性能优化。</p>
 <h4 id="Android-中布局优化"><a href="#Android-中布局优化" class="headerlink" title="Android 中布局优化"></a>Android 中布局优化</h4><ol>
-<li><p>加载可能性小的布局使用 ViewStub, 在需要使用的时候再动态加载，因为 ViewStub 默认是 VISIBLE_GONE, 不去加载布局，在主动调用 inflate() 或 setVisible() 方法时才会渲染布局。</p>
-</li>
-<li><p>尽可能减少布局的层级，比如一般情况下使用 RelativeLayout 可减少层级，在可使用的时候使用 merge 减少层级</p>
-</li>
-<li><p>尽可能复用布局，比如 title 布局，使复用性提高</p>
-</li>
-<li><p>在适当情况下复用 style, dimen, color 等，以方便维护</p>
-</li>
-<li><p>自定义 View 不在 onDraw() 方法中做耗时操作，不得超过 16ms, 系统的每次渲染时间是 16ms, onDraw() 方法超过这个时间，则会导致该 View 没有完全画完。</p>
-</li>
+<li>加载可能性小的布局使用 ViewStub, 在需要使用的时候再动态加载，因为 ViewStub 默认是 VISIBLE_GONE, 不去加载布局，在主动调用 inflate() 或 setVisible() 方法时才会渲染布局。</li>
+<li>尽可能减少布局的层级，比如一般情况下使用 RelativeLayout 可减少层级，在可使用的时候使用 merge 减少层级</li>
+<li>尽可能复用布局，比如 title 布局，使复用性提高</li>
+<li>在适当情况下复用 style, dimen, color 等，以方便维护</li>
+<li>自定义 View 不在 onDraw() 方法中做耗时操作，不得超过 16ms, 系统的每次渲染时间是 16ms, onDraw() 方法超过这个时间，则会导致该 View 没有完全画完。</li>
 </ol>
 <h4 id="Bitmap-高效加载"><a href="#Bitmap-高效加载" class="headerlink" title="Bitmap 高效加载"></a>Bitmap 高效加载</h4><p>如果一个图片过大，直接加载可能就会导致 OOM, 那么有什么方法来使图片加载更加高效呢，比较常用的就是设置 Options.inSampleSize.<br>BitmapFactory.decode… 方法可以将资源文件，本地文件，指定的二进制流，文件流加载成 Bitmap, 在加载的过程中有一个参数 Options, 可以通过设置 inSampleSize 对图片进行压缩。</p>
 <blockquote>
 <p>规定 inSampleSize 需要是 2 的整数幂，如果不是，将会自动向下取整，且 inSampleSize 需大于 1, 如果不是，则修改为 1。<br>若 inSampleSize 设置为 2, 加载后的 Bitmap 宽高是原图的 1/2, 以此类推。</p>
 </blockquote>
-<p>计算 inSampleSize 的方法：<br>Options 还有一个参数 inJustDecodeBounds, 设置为 true 调用 BitmapFactory.decode…方法不会加载 Bitmap, 且返回值为 null, 只会解析 Bitmap 的宽高并赋值给 Options 的 outWidth 和 outHeight 参数，然后将 Options.inJustDecodeBounds 设为 false, 再根据需要设置 inSampleSize, 然后再加载图片。</p>
+<p>计算 inSampleSize 的方法：<br>Options 还有一个参数 inJustDecodeBounds, 设置为 true 调用 BitmapFactory.decode…方法不会加载 Bitmap, 且返回值为 null, 只会解析 Bitmap 的宽高并赋值给 Options 的 outWidth 和 outHeight 参数，然后将 Options.inJustDecodeBounds 设为 false, 再根据需要设置 inSampleSize, 然后再加载图片。示例代码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">BitmapFactory.Options opt = new BitmapFactory.Options();</div><div class="line">opt.inJustDecodeBounds = true;</div><div class="line">BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher, opt);</div><div class="line">Log.e(&quot;TAG&quot;, &quot;outWidth:&quot; + opt.outWidth + &quot;, outHeight:&quot; + opt.outHeight);</div><div class="line">opt.inJustDecodeBounds = false;</div><div class="line">// 根据实际需要计算</div><div class="line">opt.inSampleSize = 4;</div><div class="line">Bitmap bitmapScale = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher, opt);</div></pre></td></tr></table></figure></p>
 <p>完善中</p>
 
       
