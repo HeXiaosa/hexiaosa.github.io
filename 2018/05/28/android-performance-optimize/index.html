@@ -79,18 +79,16 @@
 
 
 
-<meta name="description" content="先上图 Handler sendMessage(msg) 会调用 sendMessageAtTime(msg, uptimeMillis), 在这里会调 enqueueMessage(queue, msg, uptimeMillis), 其中 queue 是 handler 的全局变量 mQueue, 在构造函数里，有这两行代码12mLooper = Looper.myLooper();mQueu">
+<meta name="description" content="下面将从布局优化、绘制优化、Bitmap、内存泄漏几个方面讲解 Android 性能优化。 Android 中布局优化 加载可能性小的布局使用 ViewStub, 在需要使用的时候再动态加载，因为 ViewStub 默认是 VISIBLE_GONE, 不去加载布局，在主动调用 inflate() 或 setVisible() 方法时才会渲染布局。  尽可能减少布局的层级，比如一般情况下使用 Rel">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Handler 机制详解">
-<meta property="og:url" content="http://hexiaosa.com/2018/05/24/Handler/index.html">
+<meta property="og:title" content="Android 性能优化">
+<meta property="og:url" content="http://hexiaosa.com/2018/05/28/android-performance-optimize/index.html">
 <meta property="og:site_name" content="Hexiaosa">
-<meta property="og:description" content="先上图 Handler sendMessage(msg) 会调用 sendMessageAtTime(msg, uptimeMillis), 在这里会调 enqueueMessage(queue, msg, uptimeMillis), 其中 queue 是 handler 的全局变量 mQueue, 在构造函数里，有这两行代码12mLooper = Looper.myLooper();mQueu">
-<meta property="og:image" content="http://hexiaosa.com/image/handler.png">
-<meta property="og:updated_time" content="2018-05-24T09:19:32.112Z">
+<meta property="og:description" content="下面将从布局优化、绘制优化、Bitmap、内存泄漏几个方面讲解 Android 性能优化。 Android 中布局优化 加载可能性小的布局使用 ViewStub, 在需要使用的时候再动态加载，因为 ViewStub 默认是 VISIBLE_GONE, 不去加载布局，在主动调用 inflate() 或 setVisible() 方法时才会渲染布局。  尽可能减少布局的层级，比如一般情况下使用 Rel">
+<meta property="og:updated_time" content="2018-05-28T09:42:44.803Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Handler 机制详解">
-<meta name="twitter:description" content="先上图 Handler sendMessage(msg) 会调用 sendMessageAtTime(msg, uptimeMillis), 在这里会调 enqueueMessage(queue, msg, uptimeMillis), 其中 queue 是 handler 的全局变量 mQueue, 在构造函数里，有这两行代码12mLooper = Looper.myLooper();mQueu">
-<meta name="twitter:image" content="http://hexiaosa.com/image/handler.png">
+<meta name="twitter:title" content="Android 性能优化">
+<meta name="twitter:description" content="下面将从布局优化、绘制优化、Bitmap、内存泄漏几个方面讲解 Android 性能优化。 Android 中布局优化 加载可能性小的布局使用 ViewStub, 在需要使用的时候再动态加载，因为 ViewStub 默认是 VISIBLE_GONE, 不去加载布局，在主动调用 inflate() 或 setVisible() 方法时才会渲染布局。  尽可能减少布局的层级，比如一般情况下使用 Rel">
 
 
 
@@ -120,13 +118,13 @@
 
 
 
-  <link rel="canonical" href="http://hexiaosa.com/2018/05/24/Handler/"/>
+  <link rel="canonical" href="http://hexiaosa.com/2018/05/28/android-performance-optimize/"/>
 
 
 
 
 
-  <title>Handler 机制详解 | Hexiaosa</title>
+  <title>Android 性能优化 | Hexiaosa</title>
   
 
 
@@ -233,7 +231,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/05/24/Handler/">
+    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/05/28/android-performance-optimize/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Hexiaosa">
@@ -250,7 +248,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">Handler 机制详解</h1>
+          <h1 class="post-title" itemprop="name headline">Android 性能优化</h1>
         
 
         <div class="post-meta">
@@ -262,8 +260,8 @@
               
                 <span class="post-meta-item-text">Veröffentlicht am</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-05-24T16:13:41+08:00">
-                2018-05-24
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-05-28T17:37:05+08:00">
+                2018-05-28
               </time>
             
 
@@ -300,16 +298,25 @@
       
 
       
-        <p>先上图<br><img src="/image/handler.png" alt="handler"></p>
-<p>Handler sendMessage(msg) 会调用 sendMessageAtTime(msg, uptimeMillis), 在这里会调 enqueueMessage(queue, msg, uptimeMillis), 其中 queue 是 handler 的全局变量 mQueue, 在构造函数里，有这两行代码<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">mLooper = Looper.myLooper();</div><div class="line">mQueue = mLooper.mQueue;</div></pre></td></tr></table></figure></p>
-<p>最终会调用 queue.enqueueMessage(msg, uptimeMiilis), 在这个方法里会设置 msg.target = this, 然后把该 msg 插入 queue 中。</p>
-<p>Looper.loop() 方法会循环取 mQueue 中的值，由于 Looper 里面的 mQueue 对象在 handler 构造函数里赋值给 handler 的全局变量 mQueue, 所以这里循环的消息队列也就是上面插入消息的消息队列。 取到 msg 之后则会调用 msg.target.dispatchMessage(), 注意这里的 msg.target 在 handler 中插入 msg 时给其设置过 target 就是当前 handler, 所以调用就是同一个 handler 的 diapatchMessage 方法，在 dispatchMessage 方法中调用 CallBack 的实现方法或者是 handlerMessage, 这也就是我们需要实际去做的了。<br>Handler 还有一种用法是直接调用 post(Runnable r)，这种会构造一个 Message 对象，且 msg.callback = r, 再将 msg 对象插入到 MessageQueue 中，后面的步骤都一样的。</p>
-<p>思考：</p>
-<ol>
-<li>为什么在子线程中调用 sendMessage(msg) 或 post(runnable) 会在主线程中执行我们是实现的方法呢，这是因为 ActivityThread 的入口方法中就开始执行 Looper.loop(), 所以在 loop() 方法中调 dispatchMessage() 就是在主线程中的。</li>
-<li>在这个过程中的 Looper.myLooper() 取得就是当前线程的 Looper 对象，一个线程只能有一个 Looper 对象，那么一个线程也只有一个 MessageQueue 对象。</li>
-<li>一个线程只能有一个 Looper 对象是由 ThreadLocal 实现的，Looper 的构造参数是私有的，在 Looper.prepare() 的时候给当前线程设置 Looper 对象。</li>
+        <p>下面将从布局优化、绘制优化、Bitmap、内存泄漏几个方面讲解 Android 性能优化。</p>
+<h4 id="Android-中布局优化"><a href="#Android-中布局优化" class="headerlink" title="Android 中布局优化"></a>Android 中布局优化</h4><ol>
+<li><p>加载可能性小的布局使用 ViewStub, 在需要使用的时候再动态加载，因为 ViewStub 默认是 VISIBLE_GONE, 不去加载布局，在主动调用 inflate() 或 setVisible() 方法时才会渲染布局。</p>
+</li>
+<li><p>尽可能减少布局的层级，比如一般情况下使用 RelativeLayout 可减少层级，在可使用的时候使用 merge 减少层级</p>
+</li>
+<li><p>尽可能复用布局，比如 title 布局，使复用性提高</p>
+</li>
+<li><p>在适当情况下复用 style, dimen, color 等，以方便维护</p>
+</li>
+<li><p>自定义 View 不在 onDraw() 方法中做耗时操作，不得超过 16ms, 系统的每次渲染时间是 16ms, onDraw() 方法超过这个时间，则会导致该 View 没有完全画完。</p>
+</li>
 </ol>
+<h4 id="Bitmap-高效加载"><a href="#Bitmap-高效加载" class="headerlink" title="Bitmap 高效加载"></a>Bitmap 高效加载</h4><p>如果一个图片过大，直接加载可能就会导致 OOM, 那么有什么方法来使图片加载更加高效呢，比较常用的就是设置 Options.inSampleSize.<br>BitmapFactory.decode… 方法可以将资源文件，本地文件，指定的二进制流，文件流加载成 Bitmap, 在加载的过程中有一个参数 Options, 可以通过设置 inSampleSize 对图片进行压缩。</p>
+<blockquote>
+<p>规定 inSampleSize 需要是 2 的整数幂，如果不是，将会自动向下取整，且 inSampleSize 需大于 1, 如果不是，则修改为 1。<br>若 inSampleSize 设置为 2, 加载后的 Bitmap 宽高是原图的 1/2, 以此类推。</p>
+</blockquote>
+<p>计算 inSampleSize 的方法：<br>Options 还有一个参数 inJustDecodeBounds, 设置为 true 调用 BitmapFactory.decode…方法不会加载 Bitmap, 且返回值为 null, 只会解析 Bitmap 的宽高并赋值给 Options 的 outWidth 和 outHeight 参数，然后将 Options.inJustDecodeBounds 设为 false, 再根据需要设置 inSampleSize, 然后再加载图片。</p>
+<p>完善中</p>
 
       
     </div>
@@ -334,8 +341,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2018/04/08/java-lock/" rel="next" title="保证线程安全的方法">
-                <i class="fa fa-chevron-left"></i> 保证线程安全的方法
+              <a href="/2018/05/24/Handler/" rel="next" title="Handler 机制详解">
+                <i class="fa fa-chevron-left"></i> Handler 机制详解
               </a>
             
           </div>
@@ -343,10 +350,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2018/05/28/android-performance-optimize/" rel="prev" title="Android 性能优化">
-                Android 性能优化 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -398,8 +401,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Inhaltsverzeichnis
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Übersicht
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -441,6 +453,22 @@
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#Android-中布局优化"><span class="nav-number">1.</span> <span class="nav-text">Android 中布局优化</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Bitmap-高效加载"><span class="nav-number">2.</span> <span class="nav-text">Bitmap 高效加载</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
