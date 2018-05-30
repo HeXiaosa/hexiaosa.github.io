@@ -181,7 +181,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
             
-            Startseite
+            Home
           </a>
         </li>
       
@@ -191,7 +191,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
             
-            Archiv
+            Archives
           </a>
         </li>
       
@@ -214,6 +214,139 @@
           <div id="content" class="content">
             
   <section id="posts" class="posts-expand">
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/05/30/about-thread-safe/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Hexiaosa">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexiaosa">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/05/30/about-thread-safe/" itemprop="url">线程安全</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-05-30T17:25:53+08:00">
+                2018-05-30
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h4 id="线程不安全的原因"><a href="#线程不安全的原因" class="headerlink" title="线程不安全的原因"></a>线程不安全的原因</h4><p>正是有了多线程，才会出现线程不安全。线程不安全的原因就是多个线程某段代码不具备原子性、可见性或有序性导致的。</p>
+<ol>
+<li>原子性是指一个操作是不可被其它线程打断的，加锁就是保证了原子性。</li>
+<li>可见性是一个线程修改了某个共享值，其它线程能立即可知，不会出现一个线程修改了某个值，另一个线程读到旧值的情况。使用 volatile 就可以保证可见性。</li>
+<li>有序性是由于编译器会进行指令重排序，当不同线程间可进行指令重排的存在先后依赖时，就会破坏了其有序性，使用 volatile 可保证有序性。</li>
+</ol>
+<h4 id="线程安全的实现方法"><a href="#线程安全的实现方法" class="headerlink" title="线程安全的实现方法"></a>线程安全的实现方法</h4><h5 id="阻塞同步（互斥同步）"><a href="#阻塞同步（互斥同步）" class="headerlink" title="阻塞同步（互斥同步）"></a>阻塞同步（互斥同步）</h5><p>顾名思义，就是通过阻塞线程来达到同步的目的，保证同一时间只有一个线程对其访问。实现形式就是加锁，通过 synchronized 关键字或 ReenTrantLock 对象，比较两者的特点：<br>&gt;</p>
+<blockquote>
+<p>synchronized:<br>synchronized 关键字进行编译后，会在代码块前后加上 monitorenter 和 monitorexit 指令，线程的阻塞和唤醒表现在原生系统上，涉及到线程状态的转换，这会牺牲掉一些性能。<br>可重入；不会产生死锁，如遇异常则会释放锁；</p>
+<p>ReenTrantLock:<br>与 synchronized 一样都具有可重入性，不一样的是它是在 api 层面的互斥，且在使用时需要加 try-finally 块以防止发生异常时产生死锁，因为 ReenTrantLock 在遇到异常是不会释放锁的。另外还增加了三个新特性：等待中断，公平锁，一个锁可绑定多个条件</p>
+</blockquote>
+<p>JDK 1.6 之后, synchronized 在性能方面已经和 ReenTrantLock 没有什么区别了，所以在选择锁的时候，除非要用到 ReenTrantLock 的三个新特性，否则就优先选择 synchronized.</p>
+<h5 id="非阻塞同步"><a href="#非阻塞同步" class="headerlink" title="非阻塞同步"></a>非阻塞同步</h5><p>非阻塞同步，就是不用通过阻塞线程来实现同步的目的。阻塞同步，就是悲观锁的概念，先进行加载，其它线程获取不到锁就阻塞等待。这样就有可能会出现一个问题，假如一个线程获取到锁之后执行时间很短，其它竞争该锁的线程刚被挂起就有可用资源了，就需要再抢占，这样频繁的挂起恢复存在很大的开销。<br>而非阻塞同步采用的是乐观锁，先操作，操作若是成功的，则执行完毕，操作若是不成功的则放弃本次操作，再重新开始操作。<br>如 CAS(Compare And Swap), 通过 sun.misc.Unsafe 中的 compareAndSwapInt, compareAndSwapLong 等方法来实现，这几个方法是原子操作。<br>但 CAS 中会有一个经典的 ABA 问题，如：先从线程 1 取 value(值为 A) 赋值给 current, 然后从线程 2 取 value(值为 B) 赋值给 current, 再在线程 2 中把 value 修改为 A, 进行 CAS 操作时看上去是成功的，但实际上中间有发生过变化，具体案例可看这里面一个链表的例子, <a href="https://www.cnblogs.com/549294286/p/3766717.html" target="_blank" rel="external">https://www.cnblogs.com/549294286/p/3766717.html</a>, 为解决这类问题一般会给对象加上 version 之类的标记。</p>
+<h5 id="非同步方案"><a href="#非同步方案" class="headerlink" title="非同步方案"></a>非同步方案</h5><p>在 Java 中就是使用 ThreadLocal, 它实际是每个线程都有一个对象，不涉及到多个线程操作同一对象，通过这样的方法来保证线程安全。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
     
       
 
@@ -257,7 +390,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-05-28T17:37:05+08:00">
                 2018-05-28
@@ -306,6 +439,13 @@
 <li>尽可能复用布局，比如 title 布局，使复用性提高</li>
 <li>在适当情况下复用 style, dimen, color 等，以方便维护</li>
 <li>自定义 View 不在 onDraw() 方法中做耗时操作，不得超过 16ms, 系统的每次渲染时间是 16ms, onDraw() 方法超过这个时间，则会导致该 View 没有完全画完。</li>
+</ol>
+<h4 id="内存泄漏"><a href="#内存泄漏" class="headerlink" title="内存泄漏"></a>内存泄漏</h4><p>内存泄漏的原因：忘记释放内存，持有已不再使用对象的强引用，导致结果是不再使用的内存回收不掉，严重则会导致 OOM.</p>
+<ol>
+<li><p>忘记释放内存<br>比如使用完 cursor 没有调 close(), 使用完 BroadcastReceiver 没有调 unregisterReceiver().</p>
+</li>
+<li><p>持有已不再使用对象的强引用<br>这种问题一般都是在 Activity 里使用非静态内部类或匿名内部类导致的，因为非静态内部类持有外部类的强引用，当 Activity 被销毁后，还被内部类引用，导致 Activitiy 不能被回收，解决方法就是使用静态内部类来替代。<br>比如使用 Handler 导致的，会 new 一个匿名内部类，解决方法就是把 Handler 对象改成静态的。<br>比如使用动画时在 onDestroy() 方法中没有取消动画，导致 View 一直引用着 Actvitiy, 解决方法是在 onDestroy() 方法中取消动画。</p>
+</li>
 </ol>
 <h4 id="Bitmap-高效加载"><a href="#Bitmap-高效加载" class="headerlink" title="Bitmap 高效加载"></a>Bitmap 高效加载</h4><p>如果一个图片过大，直接加载可能就会导致 OOM, 那么有什么方法来使图片加载更加高效呢，比较常用的就是设置 Options.inSampleSize.<br>BitmapFactory.decode… 方法可以将资源文件，本地文件，指定的二进制流，文件流加载成 Bitmap, 在加载的过程中有一个参数 Options, 可以通过设置 inSampleSize 对图片进行压缩。</p>
 <blockquote>
@@ -390,7 +530,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-05-24T16:13:41+08:00">
                 2018-05-24
@@ -490,145 +630,6 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/04/08/java-lock/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Hexiaosa">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexiaosa">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/04/08/java-lock/" itemprop="url">保证线程安全的方法</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Veröffentlicht am</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-04-08T10:09:43+08:00">
-                2018-04-08
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>由于不同线程之间会共享一些数据，所以就可能会不同线程在同一时间对同一对象进行操作，如果操作不是原子性的，那么就可能出现不是我们预想的结果。下面将对保证线程安全的方法进行介绍，使得程序的运行达到我们预想的结果。</p>
-<h3 id="锁"><a href="#锁" class="headerlink" title="锁"></a>锁</h3><p>加锁是保证线程安全的最常见的方法。我们通常说的锁，就是线程锁，也就是加上锁后对当前线程有效。为什么是针对线程的呢，同一线程顺序执行也就不需要锁好吧。<br>锁是通过对同一内存的使用产生竞争来达到同一时间只能一个线程对其访问。<br>锁的使用方法通常有 synchronized 和 Lock 两种，下面分这两种介绍。</p>
-<h4 id="锁的使用之——-synchronized"><a href="#锁的使用之——-synchronized" class="headerlink" title="锁的使用之—— synchronized"></a>锁的使用之—— synchronized</h4><p>根据锁的范围，使用方法分为锁对象和锁类。</p>
-<ol>
-<li><p>锁对象：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">// 锁的当前实例</div><div class="line">public synchronized void method1() &#123;</div><div class="line">	</div><div class="line">&#125;</div><div class="line"></div><div class="line">// 锁的当前实例</div><div class="line">public void method2() &#123;</div><div class="line">	synchronized(this) &#123;</div><div class="line"></div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line">// 锁 s 对象，对这同一对象加锁时产生竞争</div><div class="line">String s = &quot;&quot;;</div><div class="line">public void method3() &#123;</div><div class="line">	synchronized(s) &#123;</div><div class="line"></div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-</li>
-<li><p>锁类</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">// 锁当前类，凡是访问关于当前类的都产生竞争</div><div class="line">public static synchronized method() &#123;</div><div class="line">	</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-</li>
-</ol>
-<h4 id="锁的使用之——-Lock"><a href="#锁的使用之——-Lock" class="headerlink" title="锁的使用之—— Lock"></a>锁的使用之—— Lock</h4><p>使用 Lock 加锁的时候最好用 try 块，最后在 finally 里面释放锁，因为 synchronized 遇到异常会自动释放锁，而 Lock 不会，如果遇到异常没有手动释放锁，那么就会造成死锁的现象。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div></pre></td><td class="code"><pre><div class="line">import java.util.concurrent.locks.ReadWriteLock;</div><div class="line">import java.util.concurrent.locks.ReentrantReadWriteLock;</div><div class="line"></div><div class="line">public class Test&#123;</div><div class="line">	</div><div class="line">	private static ReadWriteLock lock = new ReentrantReadWriteLock();</div><div class="line">	</div><div class="line">	public static void main(String[] args) &#123;</div><div class="line">		method1();</div><div class="line">		method2();</div><div class="line">		method3();</div><div class="line">	&#125;</div><div class="line">	</div><div class="line">	private static void method1() &#123;</div><div class="line">		new Thread() &#123;</div><div class="line">            @Override</div><div class="line">            public void run() &#123;</div><div class="line">                lock.writeLock().lock();</div><div class="line">                System.out.println(&quot;子线程加锁&quot; + Thread.currentThread());</div><div class="line">                try &#123;</div><div class="line">                    Thread.sleep(1000);</div><div class="line">                &#125; catch (InterruptedException e) &#123;</div><div class="line">                    e.printStackTrace();</div><div class="line">                &#125;</div><div class="line">                lock.writeLock().unlock();</div><div class="line">                System.out.println(&quot;子线程释放锁&quot; + Thread.currentThread());</div><div class="line">            &#125;</div><div class="line">        &#125;.start();</div><div class="line">    &#125;</div><div class="line">	</div><div class="line">	private static void method2() &#123;</div><div class="line">		new Thread() &#123;</div><div class="line">            @Override</div><div class="line">            public void run() &#123;</div><div class="line">                lock.writeLock().lock();</div><div class="line">                System.out.println(&quot;子线程加锁&quot; + Thread.currentThread());</div><div class="line">                try &#123;</div><div class="line">                    Thread.sleep(1000);</div><div class="line">                &#125; catch (InterruptedException e) &#123;</div><div class="line">                    e.printStackTrace();</div><div class="line">                &#125;</div><div class="line">                lock.writeLock().unlock();</div><div class="line">                System.out.println(&quot;子线程释放锁&quot; + Thread.currentThread());</div><div class="line">            &#125;</div><div class="line">        &#125;.start();</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    private static void method3() &#123;</div><div class="line">    	lock.writeLock().lock();</div><div class="line">        System.out.println(&quot;主线程加锁&quot; + Thread.currentThread());</div><div class="line">        try &#123;</div><div class="line">            Thread.sleep(1000);</div><div class="line">        &#125; catch (InterruptedException e) &#123;</div><div class="line">            e.printStackTrace();</div><div class="line">        &#125;</div><div class="line">        lock.writeLock().unlock();</div><div class="line">        System.out.println(&quot;主线程释放锁&quot; + Thread.currentThread());</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>执行结果如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">子线程加锁Thread[Thread-0,5,main]</div><div class="line">子线程释放锁Thread[Thread-0,5,main]</div><div class="line">主线程加锁Thread[main,5,main]</div><div class="line">主线程释放锁Thread[main,5,main]</div><div class="line">子线程加锁Thread[Thread-1,5,main]</div><div class="line">子线程释放锁Thread[Thread-1,5,main]</div></pre></td></tr></table></figure></p>
-<p>可以看出，一旦某个线程获得 lock 锁之后，其它线程竞争同一锁的就需要等待，直到获取到锁才能执行被锁的模块。</p>
-<p>下面再介绍一种情况并解释，不知道看过以上关于锁的介绍再看这个方法会不会很清楚地明白，看代码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">private ReadWriteLock lock = new ReentrantReadWriteLock();</div><div class="line"></div><div class="line">public void method() &#123;</div><div class="line">    lock.writeLock().lock();</div><div class="line">    System.out.println(&quot;线程加锁&quot; + Thread.currentThread());</div><div class="line">	new Thread() &#123;</div><div class="line">        @Override</div><div class="line">        public void run() &#123;</div><div class="line">            System.out.println(&quot;开始执行&quot;);</div><div class="line">            try &#123;</div><div class="line">                Thread.sleep(1000);</div><div class="line">            &#125; catch (InterruptedException e) &#123;</div><div class="line">                e.printStackTrace();</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;.start();</div><div class="line">    lock.writeLock().unlock();</div><div class="line">    System.out.println(&quot;线程释放锁&quot; + Thread.currentThread());</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>这个是我刚开始困惑的地方，明明加锁了，为什么没有锁上，还是像没加锁一样执行呢。如果能清除理解锁是针对线程的应该就很明白了。 method 中加锁是在主线程执行的，也就是锁的是主线程，所以再 new Thread 就和普通的子线程是一样的，当然是没有锁的。</p>
-<h3 id="一些-Java-对象"><a href="#一些-Java-对象" class="headerlink" title="一些 Java 对象"></a>一些 Java 对象</h3><p>java.util.concurrent.atomic 包<br>AtomicInteger, AtomicLong, AtomicBoolean 等对象可以实现不同线程对 Integer, Long, Boolean 类型的安全访问，其内部是通过 sun.misc.Unsafe 对象来实现的，保证对这些值的操作都是原子操作。使用这些对象实现线程同步的性能要比加锁的性能要高。</p>
-<h4 id="AtomicInteger-介绍"><a href="#AtomicInteger-介绍" class="headerlink" title="AtomicInteger 介绍"></a>AtomicInteger 介绍</h4><p>AtomicInteger 的使用如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">AtomicInteger atomicInteger = new AtomicInteger(90);</div><div class="line">atomicInteger.incrementAndGet(); // 相当于 ++i</div><div class="line">atomicInteger.decrementAndGet(); // 相当于 --i</div><div class="line">atomicInteger.getAndIncrement(); // 相当于 i++</div><div class="line">atomicInteger.getAndDecrement(); // 相当于 i-- </div><div class="line">atomicInteger.getAndAdd(10); // 在基础值上增加 10， 返回增加前的值</div><div class="line">atomicInteger.addAndGet(10); // 在基础值上增加 10， 返回增加后的值</div></pre></td></tr></table></figure></p>
-<p>AtomicInteger 内部使用的乐观锁的概念，利用无限 for 循环一直去执行操作，直到成功为止。<br>悲观锁的概念，几个线程竞争锁，一个线程竞争到锁之后，其它线程挂起，等到锁被释放后再恢复线程重新抢占锁。这样就有可能会出现一个问题，假如一个线程获取到锁之后执行时间很短，其它竞争该锁的线程刚被挂起就有可用资源了，就需要再抢占，这样频繁的挂起恢复存在很大的开销，所以悲观锁有很大的缺点。<br>所以就有了乐观锁，乐观锁的概念是在抢占锁的过程中，如果抢占失败就一直重试，直到获取到锁为止。当数据争用不严重时，乐观锁有着更好的性能。</p>
-<h4 id="ThreadLocal-介绍"><a href="#ThreadLocal-介绍" class="headerlink" title="ThreadLocal 介绍"></a>ThreadLocal 介绍</h4><p>ThreadLocal 所达到的效果与上述的有所不同，ThreadLocal 是在每个线程都保存不同的值，在每个线程的操作时其它线程的值不受任何影响，具体可看这篇：<a href="https://hexiaosa.github.io/2018/01/19/ThreadLocal/" target="_blank" rel="external">https://hexiaosa.github.io/2018/01/19/ThreadLocal/</a></p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/01/30/ActivitySection/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -658,7 +659,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-30T09:17:37+08:00">
                 2018-01-30
@@ -785,7 +786,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-29T11:20:58+08:00">
                 2018-01-29
@@ -923,7 +924,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-24T17:10:20+08:00">
                 2018-01-24
@@ -1060,7 +1061,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-19T10:58:37+08:00">
                 2018-01-19
@@ -1185,7 +1186,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-09T09:56:51+08:00">
                 2018-01-09
@@ -1317,7 +1318,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-12-17T17:32:48+08:00">
                 2017-12-17
@@ -1523,7 +1524,7 @@ private void sendData() {
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-11-24T15:32:48+08:00">
                 2017-11-24
@@ -1664,7 +1665,7 @@ private void sendData() {
                 <a href="/archives/">
               
                   <span class="site-state-item-count">15</span>
-                  <span class="site-state-item-name">Artikel</span>
+                  <span class="site-state-item-name">posts</span>
                 </a>
               </div>
             
@@ -1714,7 +1715,7 @@ private void sendData() {
 </div>
 
 
-  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
 
 
 
