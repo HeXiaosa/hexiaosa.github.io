@@ -85,10 +85,12 @@
 <meta property="og:url" content="http://hexiaosa.com/2018/05/30/about-thread-safe/index.html">
 <meta property="og:site_name" content="Hexiaosa">
 <meta property="og:description" content="线程不安全的原因正是有了多线程，才会出现线程不安全。线程不安全的原因就是多个线程某段代码不具备原子性、可见性或有序性导致的。  原子性是指一个操作是不可被其它线程打断的，加锁就是保证了原子性。 可见性是一个线程修改了某个共享值，其它线程能立即可知，不会出现一个线程修改了某个值，另一个线程读到旧值的情况。使用 volatile 就可以保证可见性。 有序性是由于编译器会进行指令重排序，当不同线程间可进">
-<meta property="og:updated_time" content="2018-05-30T09:35:47.620Z">
+<meta property="og:image" content="http://hexiaosa.com/image/java_memory.png">
+<meta property="og:updated_time" content="2018-06-07T09:04:30.652Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="线程安全相关">
 <meta name="twitter:description" content="线程不安全的原因正是有了多线程，才会出现线程不安全。线程不安全的原因就是多个线程某段代码不具备原子性、可见性或有序性导致的。  原子性是指一个操作是不可被其它线程打断的，加锁就是保证了原子性。 可见性是一个线程修改了某个共享值，其它线程能立即可知，不会出现一个线程修改了某个值，另一个线程读到旧值的情况。使用 volatile 就可以保证可见性。 有序性是由于编译器会进行指令重排序，当不同线程间可进">
+<meta name="twitter:image" content="http://hexiaosa.com/image/java_memory.png">
 
 
 
@@ -184,7 +186,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
             
-            Startseite
+            Home
           </a>
         </li>
       
@@ -194,7 +196,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
             
-            Archiv
+            Archives
           </a>
         </li>
       
@@ -258,7 +260,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-05-30T17:25:53+08:00">
                 2018-05-30
@@ -312,6 +314,11 @@
 <p>JDK 1.6 之后, synchronized 在性能方面已经和 ReenTrantLock 没有什么区别了，所以在选择锁的时候，除非要用到 ReenTrantLock 的三个新特性，否则就优先选择 synchronized.</p>
 <h5 id="非阻塞同步"><a href="#非阻塞同步" class="headerlink" title="非阻塞同步"></a>非阻塞同步</h5><p>非阻塞同步，就是不用通过阻塞线程来实现同步的目的。阻塞同步，就是悲观锁的概念，先进行加载，其它线程获取不到锁就阻塞等待。这样就有可能会出现一个问题，假如一个线程获取到锁之后执行时间很短，其它竞争该锁的线程刚被挂起就有可用资源了，就需要再抢占，这样频繁的挂起恢复存在很大的开销。<br>而非阻塞同步采用的是乐观锁，先操作，操作若是成功的，则执行完毕，操作若是不成功的则放弃本次操作，再重新开始操作。<br>如 CAS(Compare And Swap), 通过 sun.misc.Unsafe 中的 compareAndSwapInt, compareAndSwapLong 等方法来实现，这几个方法是原子操作。<br>但 CAS 中会有一个经典的 ABA 问题，如：先从线程 1 取 value(值为 A) 赋值给 current, 然后从线程 2 取 value(值为 B) 赋值给 current, 再在线程 2 中把 value 修改为 A, 进行 CAS 操作时看上去是成功的，但实际上中间有发生过变化，具体案例可看这里面一个链表的例子, <a href="https://www.cnblogs.com/549294286/p/3766717.html" target="_blank" rel="external">https://www.cnblogs.com/549294286/p/3766717.html</a>, 为解决这类问题一般会给对象加上 version 之类的标记。</p>
 <h5 id="非同步方案"><a href="#非同步方案" class="headerlink" title="非同步方案"></a>非同步方案</h5><p>在 Java 中就是使用 ThreadLocal, 它实际是每个线程都有一个对象，不涉及到多个线程操作同一对象，通过这样的方法来保证线程安全。</p>
+<h4 id="Java-内存模型与线程"><a href="#Java-内存模型与线程" class="headerlink" title="Java 内存模型与线程"></a>Java 内存模型与线程</h4><p>分析一下 Java 的内存模型，从这里面可以看到导致线程不安全的根本原因。仅用于自己的学习和理解。<br>在主内存中有一份数据，这块内存所有的线程都可以访问，每个线程访问的时候，会在自己的工作内存保存自己的一份数据，这块内存是仅该线程可访问的。对一个数据的操作过程：从主内存读数据到工作内存，然后对其进行操作，操作完成后再写回主内存。<br>Java 内存模型中定义了以下 8 中操作：</p>
+<blockquote>
+<p>lock(加锁), 作用于主内存，在主内存中给数据加标记线程独占<br>unlock(解锁)，作用于主内存，在主内存中给数据去掉线程独占的标记<br>read(读取)，作用于主内存，从主内存中读取数据到工作内存<br>load(载入)，作用于工作内存，将 read 的数据保存到工作内存中<br>use(使用)，作用于工作内存，在工作内存中使用数据<br>assign(赋值)，作用于工作内存，在工作内存中给数据赋值<br>store(存储)，作用于工作内存，从工作内存保存到主内存<br>write(写入)，作用主内存，把工作内存传过来的值写入到主内存</p>
+</blockquote>
+<p>其中 read 和 load 需要一起使用，store 和 write 需要一起使用。<br>线程不安全的场景分析如下图：<br><img src="/image/java_memory.png" alt="java_memory"></p>
 
       
     </div>
@@ -402,10 +409,10 @@
       
         <ul class="sidebar-nav motion-element">
           <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
-            Inhaltsverzeichnis
+            Table of Contents
           </li>
           <li class="sidebar-nav-overview" data-target="site-overview-wrap">
-            Übersicht
+            Overview
           </li>
         </ul>
       
@@ -426,7 +433,7 @@
                 <a href="/archives/">
               
                   <span class="site-state-item-count">17</span>
-                  <span class="site-state-item-name">Artikel</span>
+                  <span class="site-state-item-name">posts</span>
                 </a>
               </div>
             
@@ -462,7 +469,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#线程不安全的原因"><span class="nav-number">1.</span> <span class="nav-text">线程不安全的原因</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#线程安全的实现方法"><span class="nav-number">2.</span> <span class="nav-text">线程安全的实现方法</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#阻塞同步（互斥同步）"><span class="nav-number">2.1.</span> <span class="nav-text">阻塞同步（互斥同步）</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#非阻塞同步"><span class="nav-number">2.2.</span> <span class="nav-text">非阻塞同步</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#非同步方案"><span class="nav-number">2.3.</span> <span class="nav-text">非同步方案</span></a></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#线程不安全的原因"><span class="nav-number">1.</span> <span class="nav-text">线程不安全的原因</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#线程安全的实现方法"><span class="nav-number">2.</span> <span class="nav-text">线程安全的实现方法</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#阻塞同步（互斥同步）"><span class="nav-number">2.1.</span> <span class="nav-text">阻塞同步（互斥同步）</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#非阻塞同步"><span class="nav-number">2.2.</span> <span class="nav-text">非阻塞同步</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#非同步方案"><span class="nav-number">2.3.</span> <span class="nav-text">非同步方案</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Java-内存模型与线程"><span class="nav-number">3.</span> <span class="nav-text">Java 内存模型与线程</span></a></li></ol></div>
             
 
           </div>
@@ -492,7 +499,7 @@
 </div>
 
 
-  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
 
 
 
