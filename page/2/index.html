@@ -181,7 +181,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
             
-            Home
+            Startseite
           </a>
         </li>
       
@@ -191,7 +191,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
             
-            Archives
+            Archiv
           </a>
         </li>
       
@@ -214,6 +214,344 @@
           <div id="content" class="content">
             
   <section id="posts" class="posts-expand">
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2017/12/17/bluetooth_details/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Hexiaosa">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexiaosa">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/12/17/bluetooth_details/" itemprop="url">Android 蓝牙详解</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-12-17T17:32:48+08:00">
+                2017-12-17
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>蓝牙4.0提出了低功耗蓝牙的模式。<br>蓝牙4.0的传输分为: Single Mode 和 Dual Mode; Single Mode 只支持与 4.0 的相互传输，Dual Mode 支持与 4.0 以及 3.0, 2.1, 2.0 传输.<br>相关代码如下：</p>
+<pre><code>//获取蓝牙适配器，系统只有一个蓝牙适配器，若 adapter 为 null, 则说明系统不支持蓝牙功能
+BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
+
+//表示蓝牙是否打开
+adapter.isEnabled();
+
+//获取已配对的蓝牙设备
+Set&lt;BluetoothDevice&gt; devices = adapter.getBondedDevices();
+
+BluetoothDevice device = null;
+if (devices.iterator().hasNext()) {
+    device = devices.iterator().next();
+}
+if (device == null) {
+    //没有已配对的设备
+} else {
+    //有已配对的设备，连接，发送数据
+    //4.0 的传输跟之前的版本有不同，看要连接的设备是否是4.0，是否支持4.0之前的来决定用什么代码来连接
+}
+</code></pre><p>经典蓝牙连接</p>
+<pre><code>权限：
+&lt;uses-permission android:name=&quot;android.permission.BLUETOOTH&quot; /&gt;
+&lt;uses-permission android:name=&quot;android.permission.BLUETOOTH_ADMIN&quot; /&gt;
+
+BluetoothSocket socket = adapter.createRfcommSocketToServiceRecord(NAME, MY_UUID);
+new Thread(
+    @Override
+    public void run() {
+        // 向服务端发送连接
+        socket.connect();
+        // 获取到输出流，向外写数据
+        os = clientSocket.getOutputStream();
+        // 判断是否拿到输出流
+        if (os != null) {
+            // 需要发送的信息
+            String text = &quot;open&quot;;
+            // 以utf-8的格式发送出去
+            os.write(text.getBytes(&quot;UTF-8&quot;));
+        }
+    }
+).start();
+</code></pre><p>低功耗蓝牙连接</p>
+<pre><code>权限：
+&lt;uses-permission android:name=&quot;android.permission.BLUETOOTH&quot; /&gt;
+&lt;uses-permission android:name=&quot;android.permission.BLUETOOTH_ADMIN&quot; /&gt;
+&lt;uses-permission android:name=&quot;android.permission.ACCESS_COARSE_LOCATION&quot; /&gt;
+&lt;uses-permission android:name=&quot;android.permission.ACCESS_FINE_LOCATION&quot; /&gt;
+&lt;uses-feature
+    android:name=&quot;android.hardware.bluetooth_le&quot;
+    android:required=&quot;true&quot; /&gt;
+
+BluetoothGatt gatt = device.connGatt(context, autoConnect, BluetoothGattCallback);
+//连接蓝牙，连接后将会回调到 BluetoothGattCallback 的 onConnectChanged 方法中
+@Override
+public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
+    super.onConnectionStateChange(gatt, status, newState);
+    if (newState == BluetoothProfile.STATE_CONNECTED) {
+        //即表示连接成功
+        gatt.discoverServices();//该方法之后将会调用 onServiceDiscovered() 方法中
+    }
+}
+@Override
+public void onServicesDiscovered(BluetoothGatt gatt, int status) {
+    super.onServicesDiscovered(gatt, status);
+    //开始发送数据
+    sendData();
+}
+
+//发送数据，具体怎么发送，要看设备方的要求(怎么接受)，还有需要注意的是 获取服务和获取写入数据的需要设备方提供的UUID与设备相匹配
+private void sendData() {
+    BluetoothGattService service = mBluetoothGatt.getService(RX_SERVICE_UUID);
+    BluetoothGattCharacteristic characteristic = service.getCharacteristic(RX_CHAR_UUID);
+    byte[] value = new byte[4];
+    value[0] = (byte) &apos;o&apos;;
+    value[1] = (byte) &apos;p&apos;;
+    value[2] = (byte) &apos;e&apos;;
+    value[3] = (byte) &apos;n&apos;;
+    characteristic.setValue(value);
+    Log.e(&quot;TAG&quot;, &quot;send value -&gt; &quot; + Arrays.toString(characteristic.getValue()));
+    boolean isWrite = mBluetoothGatt.writeCharacteristic(characteristic);
+    if (isWrite) {
+        Log.e(&quot;TAG&quot;, &quot;发送数据成功&quot;);
+    } else {
+        Log.e(&quot;TAG&quot;, &quot;发送数据失败&quot;);
+    }
+}
+</code></pre>
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2017/11/24/java_memory/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Hexiaosa">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexiaosa">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/11/24/java_memory/" itemprop="url">Java 内存管理部分</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-11-24T15:32:48+08:00">
+                2017-11-24
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h4 id="1-JVM-内存"><a href="#1-JVM-内存" class="headerlink" title="1. JVM 内存"></a>1. JVM 内存</h4><p>JVM 会用一段空间来存储程序运行时的数据和相关信息，这段空间一般称作 Runtime Data Area. 包含 Java 堆，方法区，（和线程私有的）程序计数器，虚拟机栈，本地方法栈。<br>Java 堆：用于存放 new 出的对象，垃圾回收也主要就是针对这一块；<br>方法区主要存放 静态变量，常量，方法区就包含了常量池；<br>本地方法栈存放的就是 native 方法；<br>虚拟机栈中有一个局部变量表，存放的是基本类型和对象的引用；虚拟机栈用于存方法在执行的内存区，每个方法执行都会创建栈针，方法执行的过程，也就是虚拟机栈的入栈出栈。</p>
+<h4 id="2-字符串内存分析"><a href="#2-字符串内存分析" class="headerlink" title="2. 字符串内存分析"></a>2. 字符串内存分析</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">String s1 = &quot;a&quot;;</div><div class="line">String s2 = &quot;b&quot;;</div><div class="line">String s3 = &quot;a&quot; + &quot;b&quot;;</div><div class="line">System.out.println(&quot;ab == s1+s2&quot; + (&quot;ab&quot; == s1+s2));</div><div class="line">System.out.println(&quot;ab == s3&quot; + (&quot;ab&quot; == s3));</div></pre></td></tr></table></figure>
+<p>输出结果：<br>false<br>true<br>直接用引号包裹的字符串相加产生的新对象会放到常量池中，对象相加的不会放到常量池中。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">public static final String A = &quot;ab&quot;; // 常量A</div><div class="line">public static final String B = &quot;cd&quot;; // 常量B</div><div class="line">// A+B 会放到常量池中，因为 A, B 都是常量，在类编译时已经确定了。</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">public static final A;</div><div class="line">public static final B;</div><div class="line">static &#123;</div><div class="line">	A = &quot;a&quot;;</div><div class="line">	B = &quot;b&quot;;</div><div class="line">&#125;</div><div class="line">// A+B 不会放到常量池中，虽然被 final 修饰，但是在后来被赋值，并不是在一开始编译时就确定的。</div></pre></td></tr></table></figure>
+<p>intern()方法表示，如果字符串在常量池中存在，就取常量池中的。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">String hello = &quot;hello&quot;, lo = &quot;lo&quot;;</div><div class="line">hello == &quot;hel&quot; + &quot;lo&quot;; //true</div><div class="line">hello == &quot;hel&quot; + lo; //false</div><div class="line">hello == (&quot;hel&quot; + lo).intern();  //true</div></pre></td></tr></table></figure></p>
+<h4 id="3-Integer-内存分析"><a href="#3-Integer-内存分析" class="headerlink" title="3. Integer 内存分析"></a>3. Integer 内存分析</h4><p>定义一个 Integer 类型，赋值方式</p>
+<ol>
+<li>Integer i = new Integer(10);</li>
+<li>Integer i = 10;</li>
+</ol>
+<p>对于 -128~127 之间的数，使用第二种赋值方式时如果值相同，则两个变量 “==” true;<br>其它范围的数，两种赋值方式比较结果都为 false.</p>
+<p>原因：<br>-128~127 之间的数会存储在常量池中，比较的直接就是存在在常量池中的对象，而其它数都是新建的对象。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
     
       
 
@@ -257,7 +595,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-11-09T11:32:48+08:00">
                 2017-11-09
@@ -382,7 +720,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-11-09T09:32:48+08:00">
                 2017-11-09
@@ -510,7 +848,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-10-19T09:32:48+08:00">
                 2017-10-19
@@ -699,7 +1037,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-10-11T16:56:51+08:00">
                 2017-10-11
@@ -827,7 +1165,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-10-09T10:32:48+08:00">
                 2017-10-09
@@ -959,8 +1297,8 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">15</span>
-                  <span class="site-state-item-name">posts</span>
+                  <span class="site-state-item-count">17</span>
+                  <span class="site-state-item-name">Artikel</span>
                 </a>
               </div>
             
@@ -1010,7 +1348,7 @@
 </div>
 
 
-  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
 
 
 

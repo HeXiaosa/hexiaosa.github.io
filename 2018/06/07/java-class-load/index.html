@@ -79,16 +79,16 @@
 
 
 
-<meta name="description" content="12String s = &amp;quot;abc&amp;quot;;s += &amp;quot;d&amp;quot;; 上述代码上，编译器会自动生成更高效的 StringBuilder, 调用 append() 方法来实现。 那么是否表示可以完全信任编译器呢，再看下面代码：1234String s = &amp;quot;a&amp;quot;;for (int i = 0; i &amp;lt; 5; i++) &amp;#123;	s += &amp;q">
+<meta name="description" content="更新中…… 类的加载过程加载由于计算机可以识别的是二进制码，加载过程就是把 .java 文件加载为二进制形式的 .class文件 验证验证过程是为了防止恶意代码破坏虚拟机，进行一系列的队代码，字节码进行验证的过程 准备准备过程是对类变量设置初值，实例变量是在对象初始化时设置初值。类变量和静态常量设置的初始值是不同的12private static int a = 12; // 这里面给类变量 a">
 <meta property="og:type" content="article">
-<meta property="og:title" content="字符串">
-<meta property="og:url" content="http://hexiaosa.com/2017/11/09/about_string/index.html">
+<meta property="og:title" content="类的加载">
+<meta property="og:url" content="http://hexiaosa.com/2018/06/07/java-class-load/index.html">
 <meta property="og:site_name" content="Hexiaosa">
-<meta property="og:description" content="12String s = &amp;quot;abc&amp;quot;;s += &amp;quot;d&amp;quot;; 上述代码上，编译器会自动生成更高效的 StringBuilder, 调用 append() 方法来实现。 那么是否表示可以完全信任编译器呢，再看下面代码：1234String s = &amp;quot;a&amp;quot;;for (int i = 0; i &amp;lt; 5; i++) &amp;#123;	s += &amp;q">
-<meta property="og:updated_time" content="2017-11-09T03:37:31.314Z">
+<meta property="og:description" content="更新中…… 类的加载过程加载由于计算机可以识别的是二进制码，加载过程就是把 .java 文件加载为二进制形式的 .class文件 验证验证过程是为了防止恶意代码破坏虚拟机，进行一系列的队代码，字节码进行验证的过程 准备准备过程是对类变量设置初值，实例变量是在对象初始化时设置初值。类变量和静态常量设置的初始值是不同的12private static int a = 12; // 这里面给类变量 a">
+<meta property="og:updated_time" content="2018-06-07T02:15:22.954Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="字符串">
-<meta name="twitter:description" content="12String s = &amp;quot;abc&amp;quot;;s += &amp;quot;d&amp;quot;; 上述代码上，编译器会自动生成更高效的 StringBuilder, 调用 append() 方法来实现。 那么是否表示可以完全信任编译器呢，再看下面代码：1234String s = &amp;quot;a&amp;quot;;for (int i = 0; i &amp;lt; 5; i++) &amp;#123;	s += &amp;q">
+<meta name="twitter:title" content="类的加载">
+<meta name="twitter:description" content="更新中…… 类的加载过程加载由于计算机可以识别的是二进制码，加载过程就是把 .java 文件加载为二进制形式的 .class文件 验证验证过程是为了防止恶意代码破坏虚拟机，进行一系列的队代码，字节码进行验证的过程 准备准备过程是对类变量设置初值，实例变量是在对象初始化时设置初值。类变量和静态常量设置的初始值是不同的12private static int a = 12; // 这里面给类变量 a">
 
 
 
@@ -118,13 +118,13 @@
 
 
 
-  <link rel="canonical" href="http://hexiaosa.com/2017/11/09/about_string/"/>
+  <link rel="canonical" href="http://hexiaosa.com/2018/06/07/java-class-load/"/>
 
 
 
 
 
-  <title>字符串 | Hexiaosa</title>
+  <title>类的加载 | Hexiaosa</title>
   
 
 
@@ -231,7 +231,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2017/11/09/about_string/">
+    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/06/07/java-class-load/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Hexiaosa">
@@ -248,7 +248,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">字符串</h1>
+          <h1 class="post-title" itemprop="name headline">类的加载</h1>
         
 
         <div class="post-meta">
@@ -260,8 +260,8 @@
               
                 <span class="post-meta-item-text">Veröffentlicht am</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-11-09T11:32:48+08:00">
-                2017-11-09
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-06-07T10:14:00+08:00">
+                2018-06-07
               </time>
             
 
@@ -298,13 +298,19 @@
       
 
       
-        <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">String s = &quot;abc&quot;;</div><div class="line">s += &quot;d&quot;;</div></pre></td></tr></table></figure>
-<p>上述代码上，编译器会自动生成更高效的 StringBuilder, 调用 append() 方法来实现。</p>
-<p>那么是否表示可以完全信任编译器呢，再看下面代码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">String s = &quot;a&quot;;</div><div class="line">for (int i = 0; i &lt; 5; i++) &#123;</div><div class="line">	s += &quot;a&quot;;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>这种形式的，编译器会在循环体内创建 StringBuilder, 像这种操作，我们应该手动创建 StringBuilder 对象，而不仅仅是依赖编译器。</p>
-<p>当然也要避免类似以下的代码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">StringBuilder s = new StringBuilder();</div><div class="line">for (int i = 0; i &lt; 10; i++) &#123;</div><div class="line">	s.append(&quot;a&quot; + i + &quot;b&quot;);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>这种代码在循环里面依然有字符串的连接，依然会创建多个 StringBuilder 对象。</p>
-
+        <p>更新中……</p>
+<h3 id="类的加载过程"><a href="#类的加载过程" class="headerlink" title="类的加载过程"></a>类的加载过程</h3><h4 id="加载"><a href="#加载" class="headerlink" title="加载"></a>加载</h4><p>由于计算机可以识别的是二进制码，加载过程就是把 .java 文件加载为二进制形式的 .class文件</p>
+<h4 id="验证"><a href="#验证" class="headerlink" title="验证"></a>验证</h4><p>验证过程是为了防止恶意代码破坏虚拟机，进行一系列的队代码，字节码进行验证的过程</p>
+<h4 id="准备"><a href="#准备" class="headerlink" title="准备"></a>准备</h4><p>准备过程是对类变量设置初值，实例变量是在对象初始化时设置初值。类变量和静态常量设置的初始值是不同的<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">private static int a = 12; // 这里面给类变量 a 设置的初始值是 0</div><div class="line">private static final int a = 12; // 这里给静态常量 a 设置的初始值是 12</div></pre></td></tr></table></figure></p>
+<h4 id="解析"><a href="#解析" class="headerlink" title="解析"></a>解析</h4><p>解析是将符号引用转换为直接引用的过程。</p>
+<h4 id="初始化"><a href="#初始化" class="headerlink" title="初始化"></a>初始化</h4><p>初始化的条件：</p>
+<ol>
+<li>遇到 new, putStatic, getStatic, invokeStatic 时对当前类进行初始化</li>
+<li>初始化子类时，如果父类没有初始化，则对父类进行初始化</li>
+<li>对该类进行反射操作时</li>
+<li>调用该类的静态方法时，如果还没有进行初始化，则对该类进行初始化<br>不会初始化的情况：调用子类的静态方法，不会初始化父类；调用常量，不会初始化常量所在的类，因为常量会保存在使用类的常量池；</li>
+</ol>
+<h3 id="类的卸载"><a href="#类的卸载" class="headerlink" title="类的卸载"></a>类的卸载</h3><h3 id="类加载器"><a href="#类加载器" class="headerlink" title="类加载器"></a>类加载器</h3>
       
     </div>
     
@@ -328,8 +334,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2017/11/09/event_dispatch/" rel="next" title="事件分发">
-                <i class="fa fa-chevron-left"></i> 事件分发
+              <a href="/2018/06/05/JVM-GC/" rel="next" title="JVM 垃圾回收">
+                <i class="fa fa-chevron-left"></i> JVM 垃圾回收
               </a>
             
           </div>
@@ -337,10 +343,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2017/11/24/java_memory/" rel="prev" title="Java 内存管理部分">
-                Java 内存管理部分 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -392,8 +394,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Inhaltsverzeichnis
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Übersicht
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -435,6 +446,22 @@
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#类的加载过程"><span class="nav-number">1.</span> <span class="nav-text">类的加载过程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#加载"><span class="nav-number">1.1.</span> <span class="nav-text">加载</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#验证"><span class="nav-number">1.2.</span> <span class="nav-text">验证</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#准备"><span class="nav-number">1.3.</span> <span class="nav-text">准备</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#解析"><span class="nav-number">1.4.</span> <span class="nav-text">解析</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#初始化"><span class="nav-number">1.5.</span> <span class="nav-text">初始化</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#类的卸载"><span class="nav-number">2.</span> <span class="nav-text">类的卸载</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#类加载器"><span class="nav-number">3.</span> <span class="nav-text">类加载器</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       

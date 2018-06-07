@@ -79,16 +79,16 @@
 
 
 
-<meta name="description" content="12String s = &amp;quot;abc&amp;quot;;s += &amp;quot;d&amp;quot;; 上述代码上，编译器会自动生成更高效的 StringBuilder, 调用 append() 方法来实现。 那么是否表示可以完全信任编译器呢，再看下面代码：1234String s = &amp;quot;a&amp;quot;;for (int i = 0; i &amp;lt; 5; i++) &amp;#123;	s += &amp;q">
+<meta name="description" content="更新中…… Java 内存模型Java 内存模型分为 5 个部分，程序计数器，虚拟机栈，本地方法栈，堆，方法区 程序计数器：线程私有，每个线程都有自己的程序计数器，指向正在执行的字节码地址。这个内存区也是 Java 内存模型中唯一一个不会发生内存溢出的区域。 虚拟机栈：线程私有，方法的执行都会涉及到虚拟机栈的入栈出栈操作。包含局部变量表、操作数栈、动态连接栈，局部变量表保存方法参数和方法内部变量，">
 <meta property="og:type" content="article">
-<meta property="og:title" content="字符串">
-<meta property="og:url" content="http://hexiaosa.com/2017/11/09/about_string/index.html">
+<meta property="og:title" content="JVM 垃圾回收">
+<meta property="og:url" content="http://hexiaosa.com/2018/06/05/JVM-GC/index.html">
 <meta property="og:site_name" content="Hexiaosa">
-<meta property="og:description" content="12String s = &amp;quot;abc&amp;quot;;s += &amp;quot;d&amp;quot;; 上述代码上，编译器会自动生成更高效的 StringBuilder, 调用 append() 方法来实现。 那么是否表示可以完全信任编译器呢，再看下面代码：1234String s = &amp;quot;a&amp;quot;;for (int i = 0; i &amp;lt; 5; i++) &amp;#123;	s += &amp;q">
-<meta property="og:updated_time" content="2017-11-09T03:37:31.314Z">
+<meta property="og:description" content="更新中…… Java 内存模型Java 内存模型分为 5 个部分，程序计数器，虚拟机栈，本地方法栈，堆，方法区 程序计数器：线程私有，每个线程都有自己的程序计数器，指向正在执行的字节码地址。这个内存区也是 Java 内存模型中唯一一个不会发生内存溢出的区域。 虚拟机栈：线程私有，方法的执行都会涉及到虚拟机栈的入栈出栈操作。包含局部变量表、操作数栈、动态连接栈，局部变量表保存方法参数和方法内部变量，">
+<meta property="og:updated_time" content="2018-06-05T06:15:11.571Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="字符串">
-<meta name="twitter:description" content="12String s = &amp;quot;abc&amp;quot;;s += &amp;quot;d&amp;quot;; 上述代码上，编译器会自动生成更高效的 StringBuilder, 调用 append() 方法来实现。 那么是否表示可以完全信任编译器呢，再看下面代码：1234String s = &amp;quot;a&amp;quot;;for (int i = 0; i &amp;lt; 5; i++) &amp;#123;	s += &amp;q">
+<meta name="twitter:title" content="JVM 垃圾回收">
+<meta name="twitter:description" content="更新中…… Java 内存模型Java 内存模型分为 5 个部分，程序计数器，虚拟机栈，本地方法栈，堆，方法区 程序计数器：线程私有，每个线程都有自己的程序计数器，指向正在执行的字节码地址。这个内存区也是 Java 内存模型中唯一一个不会发生内存溢出的区域。 虚拟机栈：线程私有，方法的执行都会涉及到虚拟机栈的入栈出栈操作。包含局部变量表、操作数栈、动态连接栈，局部变量表保存方法参数和方法内部变量，">
 
 
 
@@ -118,13 +118,13 @@
 
 
 
-  <link rel="canonical" href="http://hexiaosa.com/2017/11/09/about_string/"/>
+  <link rel="canonical" href="http://hexiaosa.com/2018/06/05/JVM-GC/"/>
 
 
 
 
 
-  <title>字符串 | Hexiaosa</title>
+  <title>JVM 垃圾回收 | Hexiaosa</title>
   
 
 
@@ -231,7 +231,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2017/11/09/about_string/">
+    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/06/05/JVM-GC/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Hexiaosa">
@@ -248,7 +248,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">字符串</h1>
+          <h1 class="post-title" itemprop="name headline">JVM 垃圾回收</h1>
         
 
         <div class="post-meta">
@@ -260,8 +260,8 @@
               
                 <span class="post-meta-item-text">Veröffentlicht am</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-11-09T11:32:48+08:00">
-                2017-11-09
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-06-05T11:10:33+08:00">
+                2018-06-05
               </time>
             
 
@@ -298,12 +298,44 @@
       
 
       
-        <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">String s = &quot;abc&quot;;</div><div class="line">s += &quot;d&quot;;</div></pre></td></tr></table></figure>
-<p>上述代码上，编译器会自动生成更高效的 StringBuilder, 调用 append() 方法来实现。</p>
-<p>那么是否表示可以完全信任编译器呢，再看下面代码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">String s = &quot;a&quot;;</div><div class="line">for (int i = 0; i &lt; 5; i++) &#123;</div><div class="line">	s += &quot;a&quot;;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>这种形式的，编译器会在循环体内创建 StringBuilder, 像这种操作，我们应该手动创建 StringBuilder 对象，而不仅仅是依赖编译器。</p>
-<p>当然也要避免类似以下的代码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">StringBuilder s = new StringBuilder();</div><div class="line">for (int i = 0; i &lt; 10; i++) &#123;</div><div class="line">	s.append(&quot;a&quot; + i + &quot;b&quot;);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>这种代码在循环里面依然有字符串的连接，依然会创建多个 StringBuilder 对象。</p>
+        <p>更新中……</p>
+<h4 id="Java-内存模型"><a href="#Java-内存模型" class="headerlink" title="Java 内存模型"></a>Java 内存模型</h4><p>Java 内存模型分为 5 个部分，程序计数器，虚拟机栈，本地方法栈，堆，方法区</p>
+<p>程序计数器：线程私有，每个线程都有自己的程序计数器，指向正在执行的字节码地址。这个内存区也是 Java 内存模型中唯一一个不会发生内存溢出的区域。</p>
+<p>虚拟机栈：线程私有，方法的执行都会涉及到虚拟机栈的入栈出栈操作。包含局部变量表、操作数栈、动态连接栈，局部变量表保存方法参数和方法内部变量，对于实例方法来说，局部变量表还保存着当前类的引用 this. 动态连接表，是用于指向常量池的。</p>
+<p>本地方法栈：线程私有，保存 native 方法的信息。</p>
+<p>堆：线程共享，保存 new 出的对象实例和数组，该区域也是垃圾回收的主要对象。</p>
+<p>方法区：线程共享，保存的是类信息，常量，静态变量等数据，该区域也会进行垃圾回收，属于长久代的内存区域。运行时常量池就是方法区的一部分，保存编译期间的常量，不过并不只是编译器可以保存，在运行期也可以保存，比如 String 的 intern() 方法，如果常量池不存在该字符串常量，则将该字符串常量放入常量池。</p>
+<h4 id="JVM-内存分配策略"><a href="#JVM-内存分配策略" class="headerlink" title="JVM 内存分配策略"></a>JVM 内存分配策略</h4><h4 id="怎样判断垃圾需要回收"><a href="#怎样判断垃圾需要回收" class="headerlink" title="怎样判断垃圾需要回收"></a>怎样判断垃圾需要回收</h4><ol>
+<li>引用计数<br>引用计数是给每个对象一个标记，每增加一个引用，标记就加 1, 在垃圾回收时标记是 0 则对其进行回收。<br>这样的算法有一个缺点就是假如有下面这样的代码<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">String a = new String(&quot;123&quot;);</div><div class="line">String b = a + &quot;ab&quot;;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>这之后就没有再引用 a, b 的地方了，但是由于 a 的标记值为 1, 所以一直不能被回收。</p>
+<ol>
+<li><p>可达性分析</p>
+</li>
+<li><p>方法区回收的判断<br>常量：没有再被引用<br>类：<br>1) 该类的所有的实例都已经被回收<br>2) 该类的类加载器已经被回收<br>3) 没有任何对该类的引用，也没有对该类的反射</p>
+</li>
+</ol>
+<h4 id="垃圾回收算法"><a href="#垃圾回收算法" class="headerlink" title="垃圾回收算法"></a>垃圾回收算法</h4><ol>
+<li><p>标记清除算法<br>标记清除分为标记阶段和清除阶段，标记可回收的对象，在清除阶段对其进行回收，这样的算法缺点就是会产生空间碎片较多，若给大对象分配内存空间时，就有可能提前触发 GC.</p>
+</li>
+<li><p>复制算法<br>复制算法把内存空间分为两块，垃圾回收时就将仍存活的对象复制到另一块未使用的内存块上。</p>
+</li>
+<li><p>标记整理算法</p>
+</li>
+<li><p>分代收集</p>
+</li>
+</ol>
+<h4 id="垃圾回收器"><a href="#垃圾回收器" class="headerlink" title="垃圾回收器"></a>垃圾回收器</h4><h4 id="四种引用"><a href="#四种引用" class="headerlink" title="四种引用"></a>四种引用</h4><ol>
+<li><p>强引用<br>强引用就是我们平时使用的最常见直接 new 处的对象。强引用的对象只有在不可达时才会被回收。</p>
+</li>
+<li><p>软引用<br>软引用是在内存不足时才会被回收，内存够用的时候不会被回收</p>
+</li>
+<li><p>弱引用<br>弱引用是每次发生 GC 时就会被回收，不管内存是否够用</p>
+</li>
+<li><p>虚引用<br>虚引用随时都有可能会被回收，主要用于跟踪对象被垃圾回收时的活动</p>
+</li>
+</ol>
 
       
     </div>
@@ -328,8 +360,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2017/11/09/event_dispatch/" rel="next" title="事件分发">
-                <i class="fa fa-chevron-left"></i> 事件分发
+              <a href="/2018/05/30/about-thread-safe/" rel="next" title="线程安全相关">
+                <i class="fa fa-chevron-left"></i> 线程安全相关
               </a>
             
           </div>
@@ -338,8 +370,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2017/11/24/java_memory/" rel="prev" title="Java 内存管理部分">
-                Java 内存管理部分 <i class="fa fa-chevron-right"></i>
+              <a href="/2018/06/07/java-class-load/" rel="prev" title="类的加载">
+                类的加载 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -392,8 +424,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Inhaltsverzeichnis
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Übersicht
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -435,6 +476,22 @@
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#Java-内存模型"><span class="nav-number">1.</span> <span class="nav-text">Java 内存模型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#JVM-内存分配策略"><span class="nav-number">2.</span> <span class="nav-text">JVM 内存分配策略</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#怎样判断垃圾需要回收"><span class="nav-number">3.</span> <span class="nav-text">怎样判断垃圾需要回收</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#垃圾回收算法"><span class="nav-number">4.</span> <span class="nav-text">垃圾回收算法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#垃圾回收器"><span class="nav-number">5.</span> <span class="nav-text">垃圾回收器</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#四种引用"><span class="nav-number">6.</span> <span class="nav-text">四种引用</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
