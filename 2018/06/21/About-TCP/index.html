@@ -79,16 +79,16 @@
 
 
 
-<meta name="description" content="关于生命周期两个 Activity 跳转，不管有没有执行 onNewIntent, 都会前一个 Activity 执行 onPause, onStop, 后一个 Activity 执行 onStart, onResume 方法。 关于 configChanges在 AndroidManifest 文件中声明 configChanges, 那么当声明的系统配置发生变化时，Activity 不会重新执">
+<meta name="description" content="TCP三次握手 客户端向服务端发送连接请求SYN 服务端收到请求后，向客户端发送确认和连接请求ACK+SYN，分配连接资源 客户端收到请求后，向服务端发送确认和连接请求ACK+SYN，开始分配资源建立连接，到此连接已建立  TCP四次挥手 客户端向服务端发送关闭连接请求FIN，告诉服务端我已经没有数据要发了 服务端收到请求之后向客户端发送确认ACK，告诉客户端我已经收到关闭请求，可能服务端还要需要">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Activity 相关知识">
-<meta property="og:url" content="http://hexiaosa.com/2018/01/30/ActivitySection/index.html">
+<meta property="og:title" content="TCP 的三次握手和四次挥手">
+<meta property="og:url" content="http://hexiaosa.com/2018/06/21/About-TCP/index.html">
 <meta property="og:site_name" content="Hexiaosa">
-<meta property="og:description" content="关于生命周期两个 Activity 跳转，不管有没有执行 onNewIntent, 都会前一个 Activity 执行 onPause, onStop, 后一个 Activity 执行 onStart, onResume 方法。 关于 configChanges在 AndroidManifest 文件中声明 configChanges, 那么当声明的系统配置发生变化时，Activity 不会重新执">
-<meta property="og:updated_time" content="2018-03-20T08:28:57.804Z">
+<meta property="og:description" content="TCP三次握手 客户端向服务端发送连接请求SYN 服务端收到请求后，向客户端发送确认和连接请求ACK+SYN，分配连接资源 客户端收到请求后，向服务端发送确认和连接请求ACK+SYN，开始分配资源建立连接，到此连接已建立  TCP四次挥手 客户端向服务端发送关闭连接请求FIN，告诉服务端我已经没有数据要发了 服务端收到请求之后向客户端发送确认ACK，告诉客户端我已经收到关闭请求，可能服务端还要需要">
+<meta property="og:updated_time" content="2018-06-21T08:01:09.101Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Activity 相关知识">
-<meta name="twitter:description" content="关于生命周期两个 Activity 跳转，不管有没有执行 onNewIntent, 都会前一个 Activity 执行 onPause, onStop, 后一个 Activity 执行 onStart, onResume 方法。 关于 configChanges在 AndroidManifest 文件中声明 configChanges, 那么当声明的系统配置发生变化时，Activity 不会重新执">
+<meta name="twitter:title" content="TCP 的三次握手和四次挥手">
+<meta name="twitter:description" content="TCP三次握手 客户端向服务端发送连接请求SYN 服务端收到请求后，向客户端发送确认和连接请求ACK+SYN，分配连接资源 客户端收到请求后，向服务端发送确认和连接请求ACK+SYN，开始分配资源建立连接，到此连接已建立  TCP四次挥手 客户端向服务端发送关闭连接请求FIN，告诉服务端我已经没有数据要发了 服务端收到请求之后向客户端发送确认ACK，告诉客户端我已经收到关闭请求，可能服务端还要需要">
 
 
 
@@ -118,13 +118,13 @@
 
 
 
-  <link rel="canonical" href="http://hexiaosa.com/2018/01/30/ActivitySection/"/>
+  <link rel="canonical" href="http://hexiaosa.com/2018/06/21/About-TCP/"/>
 
 
 
 
 
-  <title>Activity 相关知识 | Hexiaosa</title>
+  <title>TCP 的三次握手和四次挥手 | Hexiaosa</title>
   
 
 
@@ -231,7 +231,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/01/30/ActivitySection/">
+    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/06/21/About-TCP/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Hexiaosa">
@@ -248,7 +248,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">Activity 相关知识</h1>
+          <h1 class="post-title" itemprop="name headline">TCP 的三次握手和四次挥手</h1>
         
 
         <div class="post-meta">
@@ -260,8 +260,8 @@
               
                 <span class="post-meta-item-text">Veröffentlicht am</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-30T09:17:37+08:00">
-                2018-01-30
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-06-21T15:58:20+08:00">
+                2018-06-21
               </time>
             
 
@@ -298,14 +298,19 @@
       
 
       
-        <h3 id="关于生命周期"><a href="#关于生命周期" class="headerlink" title="关于生命周期"></a>关于生命周期</h3><p>两个 Activity 跳转，不管有没有执行 onNewIntent, 都会前一个 Activity 执行 onPause, onStop, 后一个 Activity 执行 onStart, onResume 方法。</p>
-<h3 id="关于-configChanges"><a href="#关于-configChanges" class="headerlink" title="关于 configChanges"></a>关于 configChanges</h3><p>在 AndroidManifest 文件中声明 configChanges, 那么当声明的系统配置发生变化时，Activity 不会重新执行生命周期，只会调用 onConfigurationChanged() 方法。</p>
-<h6 id="configChanges-orientation"><a href="#configChanges-orientation" class="headerlink" title="configChanges:orientation"></a>configChanges:orientation</h6><p>屏幕方向 “orientation|screenSize”，官方文档这样说</p>
-<blockquote>
-<p>Beginning with Android 3.2 (API level 13), the “screen size” also changes when the device switches between portrait and landscape orientation. Thus, if you want to prevent runtime restarts due to orientation change when developing for API level 13 or higher (as declared by the minSdkVersion and targetSdkVersion attributes), you must include the “screenSize” value in addition to the “orientation” value. However, if your application targets API level 12 or lower, then your activity always handles this configuration change itself (this configuration change does not restart your activity, even when running on an Android 3.2 or higher device).</p>
-</blockquote>
-<p>也就是说 API 13 以上的如果要在 configChanges 设置 orientation 时，必须要加上 screenSize 才会有效。但是这里指的 API 13 是在程序中设置的 targetApi, 如果 targetApi 是 13 以下的，那么只设置 orientation 运行在 13 以上的版本上也是可以的。 </p>
-<h3 id="关于启动模式"><a href="#关于启动模式" class="headerlink" title="关于启动模式"></a>关于启动模式</h3><p>AActivity 启动 BActivity, 当 B 的启动模式为 standard 或 singleTop, B 启动后会位于 A 所在的栈（除了 A 的启动模式是 singleInstance 外）。所以当 context 启动 Activity 时，由于 context 不是 Activity, 也没有所位于的栈，所以启动的时候需加上标记 FLAG_ACTIVITY_NEW_TASK.<br>当 A 和 B 位于不同栈，并且 B 的启动模式为 singleInstance/singleTask 时，启动后的 B 和 A 不在同一栈内<br>另：taskAffinity 在 AndroidManifest 中声明 Activity 所在的栈，栈名必须包含 “.”</p>
+        <h4 id="TCP三次握手"><a href="#TCP三次握手" class="headerlink" title="TCP三次握手"></a>TCP三次握手</h4><ol>
+<li>客户端向服务端发送连接请求SYN</li>
+<li>服务端收到请求后，向客户端发送确认和连接请求ACK+SYN，分配连接资源</li>
+<li>客户端收到请求后，向服务端发送确认和连接请求ACK+SYN，开始分配资源建立连接，到此连接已建立</li>
+</ol>
+<h4 id="TCP四次挥手"><a href="#TCP四次挥手" class="headerlink" title="TCP四次挥手"></a>TCP四次挥手</h4><ol>
+<li>客户端向服务端发送关闭连接请求FIN，告诉服务端我已经没有数据要发了</li>
+<li>服务端收到请求之后向客户端发送确认ACK，告诉客户端我已经收到关闭请求，可能服务端还要需要发的数据，客户端进入等待关闭连接的通知状态</li>
+<li>服务端向客户端发送关闭连接请求FIN，告诉客户端我已经准备好关闭了</li>
+<li>客户端收到服务端的关闭请求后向服务端发送确认ACK，客户端便进入等待状态，等待2MSL后还没有收到回复就默认关闭成功，客户端也关闭了</li>
+</ol>
+<h4 id="为什么关闭连接需要四次挥手而不是三次"><a href="#为什么关闭连接需要四次挥手而不是三次" class="headerlink" title="为什么关闭连接需要四次挥手而不是三次"></a>为什么关闭连接需要四次挥手而不是三次</h4><p>因为关闭连接的时候服务端可能还有没有发完的数据，不能同时发送确认ACK和关闭请求FIN</p>
+<p>参考文章：<a href="https://blog.csdn.net/whuslei/article/details/6667471/" target="_blank" rel="external">https://blog.csdn.net/whuslei/article/details/6667471/</a></p>
 
       
     </div>
@@ -330,8 +335,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2018/01/29/Intent_Action/" rel="next" title="Intent 的一些 Action 总结">
-                <i class="fa fa-chevron-left"></i> Intent 的一些 Action 总结
+              <a href="/2018/06/07/java-class-load/" rel="next" title="类的加载">
+                <i class="fa fa-chevron-left"></i> 类的加载
               </a>
             
           </div>
@@ -339,10 +344,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2018/05/24/Handler/" rel="prev" title="Handler 机制详解">
-                Handler 机制详解 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -456,7 +457,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#关于生命周期"><span class="nav-number">1.</span> <span class="nav-text">关于生命周期</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#关于-configChanges"><span class="nav-number">2.</span> <span class="nav-text">关于 configChanges</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#configChanges-orientation"><span class="nav-number">2.0.0.1.</span> <span class="nav-text">configChanges:orientation</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#关于启动模式"><span class="nav-number">3.</span> <span class="nav-text">关于启动模式</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#TCP三次握手"><span class="nav-number">1.</span> <span class="nav-text">TCP三次握手</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#TCP四次挥手"><span class="nav-number">2.</span> <span class="nav-text">TCP四次挥手</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#为什么关闭连接需要四次挥手而不是三次"><span class="nav-number">3.</span> <span class="nav-text">为什么关闭连接需要四次挥手而不是三次</span></a></li></ol></div>
             
 
           </div>
