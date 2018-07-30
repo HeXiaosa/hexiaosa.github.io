@@ -86,7 +86,7 @@
 <meta property="og:site_name" content="Hexiaosa">
 <meta property="og:description" content="线程不安全的原因正是有了多线程，才会出现线程不安全。线程不安全的原因就是多个线程某段代码不具备原子性、可见性或有序性导致的。  原子性是指一个操作是不可被其它线程打断的，加锁就是保证了原子性。 可见性是一个线程修改了某个共享值，其它线程能立即可知，不会出现一个线程修改了某个值，另一个线程读到旧值的情况。使用 volatile 就可以保证可见性。 有序性是由于编译器会进行指令重排序，当不同线程间可进">
 <meta property="og:image" content="http://hexiaosa.com/image/java_memory.png">
-<meta property="og:updated_time" content="2018-06-07T09:04:30.652Z">
+<meta property="og:updated_time" content="2018-07-30T03:48:43.160Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="线程安全相关">
 <meta name="twitter:description" content="线程不安全的原因正是有了多线程，才会出现线程不安全。线程不安全的原因就是多个线程某段代码不具备原子性、可见性或有序性导致的。  原子性是指一个操作是不可被其它线程打断的，加锁就是保证了原子性。 可见性是一个线程修改了某个共享值，其它线程能立即可知，不会出现一个线程修改了某个值，另一个线程读到旧值的情况。使用 volatile 就可以保证可见性。 有序性是由于编译器会进行指令重排序，当不同线程间可进">
@@ -311,7 +311,7 @@
 <p>synchronized:<br>synchronized 关键字进行编译后，会在代码块前后加上 monitorenter 和 monitorexit 指令，线程的阻塞和唤醒表现在原生系统上，涉及到线程状态的转换，这会牺牲掉一些性能。<br>可重入；不会产生死锁，如遇异常则会释放锁；</p>
 <p>ReenTrantLock:<br>与 synchronized 一样都具有可重入性，不一样的是它是在 api 层面的互斥，且在使用时需要加 try-finally 块以防止发生异常时产生死锁，因为 ReenTrantLock 在遇到异常是不会释放锁的。另外还增加了三个新特性：等待中断，公平锁，一个锁可绑定多个条件</p>
 </blockquote>
-<p>JDK 1.6 之后, synchronized 在性能方面已经和 ReenTrantLock 没有什么区别了，所以在选择锁的时候，除非要用到 ReenTrantLock 的三个新特性，否则就优先选择 synchronized.</p>
+<p>JDK 1.6 之后, synchronized 在性能方面已经和 ReenTrantLock 没有什么区别了，所以在选择锁的时候，除非要用到 ReenTrantLock 的三个新特性，否则就优先选择 synchronized.<br>synchronized 锁优化的点：自旋锁（自适应自旋），消除锁，粗化锁，轻量级锁，偏向锁</p>
 <h5 id="非阻塞同步"><a href="#非阻塞同步" class="headerlink" title="非阻塞同步"></a>非阻塞同步</h5><p>非阻塞同步，就是不用通过阻塞线程来实现同步的目的。阻塞同步，就是悲观锁的概念，先进行加载，其它线程获取不到锁就阻塞等待。这样就有可能会出现一个问题，假如一个线程获取到锁之后执行时间很短，其它竞争该锁的线程刚被挂起就有可用资源了，就需要再抢占，这样频繁的挂起恢复存在很大的开销。<br>而非阻塞同步采用的是乐观锁，先操作，操作若是成功的，则执行完毕，操作若是不成功的则放弃本次操作，再重新开始操作。<br>如 CAS(Compare And Swap), 通过 sun.misc.Unsafe 中的 compareAndSwapInt, compareAndSwapLong 等方法来实现，这几个方法是原子操作。<br>但 CAS 中会有一个经典的 ABA 问题，如：先从线程 1 取 value(值为 A) 赋值给 current, 然后从线程 2 取 value(值为 B) 赋值给 current, 再在线程 2 中把 value 修改为 A, 进行 CAS 操作时看上去是成功的，但实际上中间有发生过变化，具体案例可看这里面一个链表的例子, <a href="https://www.cnblogs.com/549294286/p/3766717.html" target="_blank" rel="external">https://www.cnblogs.com/549294286/p/3766717.html</a>, 为解决这类问题一般会给对象加上 version 之类的标记。</p>
 <h5 id="非同步方案"><a href="#非同步方案" class="headerlink" title="非同步方案"></a>非同步方案</h5><p>在 Java 中就是使用 ThreadLocal, 它实际是每个线程都有一个对象，不涉及到多个线程操作同一对象，通过这样的方法来保证线程安全。</p>
 <h4 id="Java-内存模型与线程"><a href="#Java-内存模型与线程" class="headerlink" title="Java 内存模型与线程"></a>Java 内存模型与线程</h4><p>分析一下 Java 的内存模型，从这里面可以看到导致线程不安全的根本原因。仅用于自己的学习和理解。<br>在主内存中有一份数据，这块内存所有的线程都可以访问，每个线程访问的时候，会在自己的工作内存保存自己的一份数据，这块内存是仅该线程可访问的。对一个数据的操作过程：从主内存读数据到工作内存，然后对其进行操作，操作完成后再写回主内存。<br>Java 内存模型中定义了以下 8 中操作：</p>
