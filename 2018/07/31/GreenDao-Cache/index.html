@@ -79,16 +79,16 @@
 
 
 
-<meta name="description" content="更新中…… 类的加载过程加载由于计算机可以识别的是二进制码，加载过程就是把 .java 文件加载为二进制形式的 .class文件 验证验证过程是为了防止恶意代码破坏虚拟机，进行一系列的队代码，字节码进行验证的过程 准备准备过程是对类变量设置初值，实例变量是在对象初始化时设置初值。类变量和静态常量设置的初始值是不同的12private static int a = 12; // 这里面给类变量 a">
+<meta name="description" content="在项目中遇到这样的问题，数据库使用的 GreenDao, 两个 Activity, 分别添加同一个 Fragment, 查本地数据库，实体类中有一个是否选中状态的字段是不保存到数据库的，@transient 标记的，发现会出现这样的现象：在 Activity1 中的 Fragment 查出来，第一个位置选中，到 Activity2 中的 Fragment 查出来的第一个位置也是选中的，what?">
 <meta property="og:type" content="article">
-<meta property="og:title" content="类的加载">
-<meta property="og:url" content="http://hexiaosa.com/2018/06/07/java-class-load/index.html">
+<meta property="og:title" content="GreenDao 缓存">
+<meta property="og:url" content="http://hexiaosa.com/2018/07/31/GreenDao-Cache/index.html">
 <meta property="og:site_name" content="Hexiaosa">
-<meta property="og:description" content="更新中…… 类的加载过程加载由于计算机可以识别的是二进制码，加载过程就是把 .java 文件加载为二进制形式的 .class文件 验证验证过程是为了防止恶意代码破坏虚拟机，进行一系列的队代码，字节码进行验证的过程 准备准备过程是对类变量设置初值，实例变量是在对象初始化时设置初值。类变量和静态常量设置的初始值是不同的12private static int a = 12; // 这里面给类变量 a">
-<meta property="og:updated_time" content="2018-06-21T08:41:21.693Z">
+<meta property="og:description" content="在项目中遇到这样的问题，数据库使用的 GreenDao, 两个 Activity, 分别添加同一个 Fragment, 查本地数据库，实体类中有一个是否选中状态的字段是不保存到数据库的，@transient 标记的，发现会出现这样的现象：在 Activity1 中的 Fragment 查出来，第一个位置选中，到 Activity2 中的 Fragment 查出来的第一个位置也是选中的，what?">
+<meta property="og:updated_time" content="2018-07-31T04:00:19.462Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="类的加载">
-<meta name="twitter:description" content="更新中…… 类的加载过程加载由于计算机可以识别的是二进制码，加载过程就是把 .java 文件加载为二进制形式的 .class文件 验证验证过程是为了防止恶意代码破坏虚拟机，进行一系列的队代码，字节码进行验证的过程 准备准备过程是对类变量设置初值，实例变量是在对象初始化时设置初值。类变量和静态常量设置的初始值是不同的12private static int a = 12; // 这里面给类变量 a">
+<meta name="twitter:title" content="GreenDao 缓存">
+<meta name="twitter:description" content="在项目中遇到这样的问题，数据库使用的 GreenDao, 两个 Activity, 分别添加同一个 Fragment, 查本地数据库，实体类中有一个是否选中状态的字段是不保存到数据库的，@transient 标记的，发现会出现这样的现象：在 Activity1 中的 Fragment 查出来，第一个位置选中，到 Activity2 中的 Fragment 查出来的第一个位置也是选中的，what?">
 
 
 
@@ -118,13 +118,13 @@
 
 
 
-  <link rel="canonical" href="http://hexiaosa.com/2018/06/07/java-class-load/"/>
+  <link rel="canonical" href="http://hexiaosa.com/2018/07/31/GreenDao-Cache/"/>
 
 
 
 
 
-  <title>类的加载 | Hexiaosa</title>
+  <title>GreenDao 缓存 | Hexiaosa</title>
   
 
 
@@ -231,7 +231,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/06/07/java-class-load/">
+    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/07/31/GreenDao-Cache/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Hexiaosa">
@@ -248,7 +248,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">类的加载</h1>
+          <h1 class="post-title" itemprop="name headline">GreenDao 缓存</h1>
         
 
         <div class="post-meta">
@@ -260,8 +260,8 @@
               
                 <span class="post-meta-item-text">Posted on</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-06-07T10:14:00+08:00">
-                2018-06-07
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-07-31T11:34:33+08:00">
+                2018-07-31
               </time>
             
 
@@ -298,25 +298,16 @@
       
 
       
-        <p>更新中……</p>
-<h3 id="类的加载过程"><a href="#类的加载过程" class="headerlink" title="类的加载过程"></a>类的加载过程</h3><h4 id="加载"><a href="#加载" class="headerlink" title="加载"></a>加载</h4><p>由于计算机可以识别的是二进制码，加载过程就是把 .java 文件加载为二进制形式的 .class文件</p>
-<h4 id="验证"><a href="#验证" class="headerlink" title="验证"></a>验证</h4><p>验证过程是为了防止恶意代码破坏虚拟机，进行一系列的队代码，字节码进行验证的过程</p>
-<h4 id="准备"><a href="#准备" class="headerlink" title="准备"></a>准备</h4><p>准备过程是对类变量设置初值，实例变量是在对象初始化时设置初值。类变量和静态常量设置的初始值是不同的<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">private static int a = 12; // 这里面给类变量 a 设置的初始值是 0</div><div class="line">private static final int a = 12; // 这里给静态常量 a 设置的初始值是 12</div></pre></td></tr></table></figure></p>
-<h4 id="解析"><a href="#解析" class="headerlink" title="解析"></a>解析</h4><p>解析是将符号引用转换为直接引用的过程。</p>
-<h4 id="初始化"><a href="#初始化" class="headerlink" title="初始化"></a>初始化</h4><p>初始化的条件：</p>
-<ol>
-<li>遇到 new, putStatic, getStatic, invokeStatic 时对当前类进行初始化</li>
-<li>初始化子类时，如果父类没有初始化，则对父类进行初始化</li>
-<li>对该类进行反射操作时</li>
-<li>调用该类的静态方法时，如果还没有进行初始化，则对该类进行初始化<br>不会初始化的情况：调用子类的静态方法，不会初始化父类；调用常量，不会初始化常量所在的类，因为常量会保存在使用类的常量池；</li>
-</ol>
-<h3 id="类的卸载"><a href="#类的卸载" class="headerlink" title="类的卸载"></a>类的卸载</h3><p>类的卸载，即清除类在方法区的信息<br>类卸载的触发条件：</p>
-<ol>
-<li>该类的实例都已被回收</li>
-<li>没有对该类反射</li>
-<li>加载该类的类加载器都已被回收</li>
-</ol>
-<h3 id="类加载器"><a href="#类加载器" class="headerlink" title="类加载器"></a>类加载器</h3><h5 id="三种类加载器"><a href="#三种类加载器" class="headerlink" title="三种类加载器"></a>三种类加载器</h5><h5 id="双亲委派机制"><a href="#双亲委派机制" class="headerlink" title="双亲委派机制"></a>双亲委派机制</h5><p>每个类加载器在 loadClass 时先交给父类加载器，如果父类加载器处理不了才自己处理。这里的父类加载器是用组合实现的，而不是直接继承。</p>
+        <blockquote>
+<p>在项目中遇到这样的问题，数据库使用的 GreenDao, 两个 Activity, 分别添加同一个 Fragment, 查本地数据库，实体类中有一个是否选中状态的字段是不保存到数据库的，@transient 标记的，发现会出现这样的现象：在 Activity1 中的 Fragment 查出来，第一个位置选中，到 Activity2 中的 Fragment 查出来的第一个位置也是选中的，what???</p>
+</blockquote>
+<p> 两个 Activity 分别 new Fragment, 这是在两个 Fragment 对象中的，最后 debug 跟踪到原来是在 Activity2 中数据库查出来的数据就是选中的，脑子里闪现出难道是 GreenDao 有缓存，于是搜索 “GreenDao 缓存”，果然是有，网上给出的清除缓存的方式就是调 daoSession.clear(), 这样的话不是把所有的表缓存都给清了吗，怎么让只是这个查询不缓存呢，看下 daoSession.clear() 里面做了什么</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">public void clear() &#123;</div><div class="line">    ***DaoConfig.getIdentityScope().clear();</div><div class="line">    ***DaoConfig.getIdentityScope().clear();</div><div class="line">    ***DTODaoConfig.getIdentityScope().clear();</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>可以看到清除的就是 DaoConfig 的 identityScope，下面看下这个做了什么<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line">public final class DaoConfig implements Cloneable &#123;</div><div class="line"></div><div class="line">    //...</div><div class="line">    private IdentityScope&lt;?, ?&gt; identityScope;</div><div class="line"></div><div class="line">    //...</div><div class="line"></div><div class="line">    // identityScope 在这里被赋值</div><div class="line">    @SuppressWarnings(&quot;rawtypes&quot;)</div><div class="line">    public void initIdentityScope(IdentityScopeType type) &#123;</div><div class="line">        if (type == IdentityScopeType.None) &#123;</div><div class="line">        	// 当 type 是 IdentityScopeType.None 时就没有缓存了</div><div class="line">            identityScope = null;</div><div class="line">        &#125; else if (type == IdentityScopeType.Session) &#123;</div><div class="line">            if (keyIsNumeric) &#123;</div><div class="line">                identityScope = new IdentityScopeLong();</div><div class="line">            &#125; else &#123;</div><div class="line">                identityScope = new IdentityScopeObject();</div><div class="line">            &#125;</div><div class="line">        &#125; else &#123;</div><div class="line">            throw new IllegalArgumentException(&quot;Unsupported type: &quot; + type);</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>设置 identityScope 是在 new Session 时传的，自动生成的 DaoMaster 类有两个 newSession 方法</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"> public class DaoMaster extends AbstractDaoMaster &#123;</div><div class="line">    //...</div><div class="line">    public DaoSession newSession() &#123;</div><div class="line">        return new DaoSession(db, IdentityScopeType.Session, daoConfigMap);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public DaoSession newSession(IdentityScopeType type) &#123;</div><div class="line">        return new DaoSession(db, type, daoConfigMap);</div><div class="line">    &#125;</div><div class="line">    //...</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>所以只要在 newSession 时传 IdentityScopeType.None 就可以不使用缓存了。</p>
+<p>当然，这次遇到的问题是查出来的状态需要是不选中的，也可以再查出来之后是选中状态的话进行修改，具体就要看具体问题适合哪种解决方式了。</p>
 
       
     </div>
@@ -341,8 +332,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2018/06/05/JVM-GC/" rel="next" title="JVM 垃圾回收">
-                <i class="fa fa-chevron-left"></i> JVM 垃圾回收
+              <a href="/2018/07/26/ActivityStartFlow/" rel="next" title="Activity 启动流程">
+                <i class="fa fa-chevron-left"></i> Activity 启动流程
               </a>
             
           </div>
@@ -350,10 +341,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2018/06/21/About-TCP/" rel="prev" title="TCP 的三次握手和四次挥手">
-                TCP 的三次握手和四次挥手 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -405,17 +392,8 @@
       
 
       
-        <ul class="sidebar-nav motion-element">
-          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
-            Table of Contents
-          </li>
-          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
-            Overview
-          </li>
-        </ul>
-      
 
-      <section class="site-overview-wrap sidebar-panel">
+      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -457,22 +435,6 @@
         </div>
       </section>
 
-      
-      <!--noindex-->
-        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
-          <div class="post-toc">
-
-            
-              
-            
-
-            
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#类的加载过程"><span class="nav-number">1.</span> <span class="nav-text">类的加载过程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#加载"><span class="nav-number">1.1.</span> <span class="nav-text">加载</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#验证"><span class="nav-number">1.2.</span> <span class="nav-text">验证</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#准备"><span class="nav-number">1.3.</span> <span class="nav-text">准备</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#解析"><span class="nav-number">1.4.</span> <span class="nav-text">解析</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#初始化"><span class="nav-number">1.5.</span> <span class="nav-text">初始化</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#类的卸载"><span class="nav-number">2.</span> <span class="nav-text">类的卸载</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#类加载器"><span class="nav-number">3.</span> <span class="nav-text">类加载器</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#三种类加载器"><span class="nav-number">3.0.1.</span> <span class="nav-text">三种类加载器</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#双亲委派机制"><span class="nav-number">3.0.2.</span> <span class="nav-text">双亲委派机制</span></a></li></ol></li></ol></li></ol></div>
-            
-
-          </div>
-        </section>
-      <!--/noindex-->
       
 
       
