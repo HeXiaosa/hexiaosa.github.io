@@ -85,7 +85,7 @@
 <meta property="og:url" content="http://hexiaosa.com/2018/07/31/GreenDao-Cache/index.html">
 <meta property="og:site_name" content="Hexiaosa">
 <meta property="og:description" content="在项目中遇到这样的问题，数据库使用的 GreenDao, 两个 Activity, 分别添加同一个 Fragment, 查本地数据库，实体类中有一个是否选中状态的字段是不保存到数据库的，@transient 标记的，发现会出现这样的现象：在 Activity1 中的 Fragment 查出来，第一个位置选中，到 Activity2 中的 Fragment 查出来的第一个位置也是选中的，what?">
-<meta property="og:updated_time" content="2018-07-31T04:00:19.462Z">
+<meta property="og:updated_time" content="2018-07-31T04:02:26.869Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="GreenDao 缓存">
 <meta name="twitter:description" content="在项目中遇到这样的问题，数据库使用的 GreenDao, 两个 Activity, 分别添加同一个 Fragment, 查本地数据库，实体类中有一个是否选中状态的字段是不保存到数据库的，@transient 标记的，发现会出现这样的现象：在 Activity1 中的 Fragment 查出来，第一个位置选中，到 Activity2 中的 Fragment 查出来的第一个位置也是选中的，what?">
@@ -184,7 +184,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
             
-            Home
+            Startseite
           </a>
         </li>
       
@@ -194,7 +194,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
             
-            Archives
+            Archiv
           </a>
         </li>
       
@@ -258,7 +258,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-07-31T11:34:33+08:00">
                 2018-07-31
@@ -302,7 +302,7 @@
 <p>在项目中遇到这样的问题，数据库使用的 GreenDao, 两个 Activity, 分别添加同一个 Fragment, 查本地数据库，实体类中有一个是否选中状态的字段是不保存到数据库的，@transient 标记的，发现会出现这样的现象：在 Activity1 中的 Fragment 查出来，第一个位置选中，到 Activity2 中的 Fragment 查出来的第一个位置也是选中的，what???</p>
 </blockquote>
 <p> 两个 Activity 分别 new Fragment, 这是在两个 Fragment 对象中的，最后 debug 跟踪到原来是在 Activity2 中数据库查出来的数据就是选中的，脑子里闪现出难道是 GreenDao 有缓存，于是搜索 “GreenDao 缓存”，果然是有，网上给出的清除缓存的方式就是调 daoSession.clear(), 这样的话不是把所有的表缓存都给清了吗，怎么让只是这个查询不缓存呢，看下 daoSession.clear() 里面做了什么</p>
- <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">public void clear() &#123;</div><div class="line">    ***DaoConfig.getIdentityScope().clear();</div><div class="line">    ***DaoConfig.getIdentityScope().clear();</div><div class="line">    ***DTODaoConfig.getIdentityScope().clear();</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">public void clear() &#123;</div><div class="line">    ***DaoConfig.getIdentityScope().clear();</div><div class="line">    ***DaoConfig.getIdentityScope().clear();</div><div class="line">    ***DaoConfig.getIdentityScope().clear();</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <p>可以看到清除的就是 DaoConfig 的 identityScope，下面看下这个做了什么<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line">public final class DaoConfig implements Cloneable &#123;</div><div class="line"></div><div class="line">    //...</div><div class="line">    private IdentityScope&lt;?, ?&gt; identityScope;</div><div class="line"></div><div class="line">    //...</div><div class="line"></div><div class="line">    // identityScope 在这里被赋值</div><div class="line">    @SuppressWarnings(&quot;rawtypes&quot;)</div><div class="line">    public void initIdentityScope(IdentityScopeType type) &#123;</div><div class="line">        if (type == IdentityScopeType.None) &#123;</div><div class="line">        	// 当 type 是 IdentityScopeType.None 时就没有缓存了</div><div class="line">            identityScope = null;</div><div class="line">        &#125; else if (type == IdentityScopeType.Session) &#123;</div><div class="line">            if (keyIsNumeric) &#123;</div><div class="line">                identityScope = new IdentityScopeLong();</div><div class="line">            &#125; else &#123;</div><div class="line">                identityScope = new IdentityScopeObject();</div><div class="line">            &#125;</div><div class="line">        &#125; else &#123;</div><div class="line">            throw new IllegalArgumentException(&quot;Unsupported type: &quot; + type);</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
 <p>设置 identityScope 是在 new Session 时传的，自动生成的 DaoMaster 类有两个 newSession 方法</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"> public class DaoMaster extends AbstractDaoMaster &#123;</div><div class="line">    //...</div><div class="line">    public DaoSession newSession() &#123;</div><div class="line">        return new DaoSession(db, IdentityScopeType.Session, daoConfigMap);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public DaoSession newSession(IdentityScopeType type) &#123;</div><div class="line">        return new DaoSession(db, type, daoConfigMap);</div><div class="line">    &#125;</div><div class="line">    //...</div><div class="line">&#125;</div></pre></td></tr></table></figure>
@@ -409,7 +409,7 @@
                 <a href="/archives/">
               
                   <span class="site-state-item-count">20</span>
-                  <span class="site-state-item-name">posts</span>
+                  <span class="site-state-item-name">Artikel</span>
                 </a>
               </div>
             
@@ -459,7 +459,7 @@
 </div>
 
 
-  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
 
 
 

@@ -86,7 +86,7 @@
 <meta property="og:site_name" content="Hexiaosa">
 <meta property="og:description" content="先上图 Handler sendMessage(msg) 会调用 sendMessageAtTime(msg, uptimeMillis), 在这里会调 enqueueMessage(queue, msg, uptimeMillis), 其中 queue 是 handler 的全局变量 mQueue, 在构造函数里，有这两行代码12mLooper = Looper.myLooper();mQueu">
 <meta property="og:image" content="http://hexiaosa.com/image/handler.png">
-<meta property="og:updated_time" content="2018-07-06T07:31:17.458Z">
+<meta property="og:updated_time" content="2018-08-06T06:39:10.831Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Handler 机制详解">
 <meta name="twitter:description" content="先上图 Handler sendMessage(msg) 会调用 sendMessageAtTime(msg, uptimeMillis), 在这里会调 enqueueMessage(queue, msg, uptimeMillis), 其中 queue 是 handler 的全局变量 mQueue, 在构造函数里，有这两行代码12mLooper = Looper.myLooper();mQueu">
@@ -186,7 +186,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
             
-            Home
+            Startseite
           </a>
         </li>
       
@@ -196,7 +196,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
             
-            Archives
+            Archiv
           </a>
         </li>
       
@@ -260,7 +260,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-05-24T16:13:41+08:00">
                 2018-05-24
@@ -306,10 +306,22 @@
 <p>Looper.loop() 方法会循环取 mQueue 中的值，由于 Looper 里面的 mQueue 对象在 handler 构造函数里赋值给 handler 的全局变量 mQueue, 所以这里循环的消息队列也就是上面插入消息的消息队列。 取到 msg 之后则会调用 msg.target.dispatchMessage(), 注意这里的 msg.target 在 handler 中插入 msg 时给其设置过 target 就是当前 handler, 所以调用就是同一个 handler 的 diapatchMessage 方法，在 dispatchMessage 方法中调用 CallBack 的实现方法或者是 handlerMessage, 这也就是我们需要实际去做的了。<br>Handler 还有一种用法是直接调用 post(Runnable r)，这种会构造一个 Message 对象，且 msg.callback = r, 再将 msg 对象插入到 MessageQueue 中，后面的步骤都一样的。</p>
 <p>思考：</p>
 <ol>
-<li>为什么在子线程中调用 sendMessage(msg) 或 post(runnable) 会在主线程中执行我们是实现的方法呢，这是因为 ActivityThread 的入口方法中就开始执行 Looper.loop(), 所以在 loop() 方法中调 dispatchMessage() 就是在主线程中的。</li>
-<li>在这个过程中的 Looper.myLooper() 取得就是当前线程的 Looper 对象，一个线程只能有一个 Looper 对象，那么一个线程也只有一个 MessageQueue 对象。</li>
-<li>一个线程只能有一个 Looper 对象是由 ThreadLocal 实现的，Looper 的构造参数是私有的，在 Looper.prepare() 的时候给当前线程设置 Looper 对象。</li>
-<li>为什么在子线程中调 Looper.prepare(); Looper.loop(); 就可以操作 UI, 是因为这样就是在主线程执行代码了吗？并不是这样的，更新 UI 时只要不是会抛出异常，都可以在子线程中更新 UI 的，在子线程调 Looper.prepare() 和 Looper.loop() 也只是为了能不抛异常和更新 UI, 但是并不推荐这样做，因为这样做仍然是在子线程中更新 UI 的，仍然是线程不安全的。</li>
+<li><p>为什么在子线程中调用 sendMessage(msg) 或 post(runnable) 会在主线程中执行我们是实现的方法呢，这是因为 ActivityThread 的入口方法中就开始执行 Looper.loop(), 所以在 loop() 方法中调 dispatchMessage() 就是在主线程中的。</p>
+</li>
+<li><p>在这个过程中的 Looper.myLooper() 取得就是当前线程的 Looper 对象，一个线程只能有一个 Looper 对象，那么一个线程也只有一个 MessageQueue 对象。</p>
+</li>
+<li><p>一个线程只能有一个 Looper 对象是由 ThreadLocal 实现的，Looper 的构造参数是私有的，在 Looper.prepare() 的时候给当前线程设置 Looper 对象。</p>
+</li>
+<li><p>为什么在子线程中调 Looper.prepare(); Looper.loop(); 就可以操作 UI, 是因为这样就是在主线程执行代码了吗？并不是这样的，更新 UI 时只要不是会抛出异常，都可以在子线程中更新 UI 的，在子线程调 Looper.prepare() 和 Looper.loop() 也只是为了能不抛异常和更新 UI, 但是并不推荐这样做，因为这样做仍然是在子线程中更新 UI 的，仍然是线程不安全的。</p>
+</li>
+<li><p>主线程的 Looper.loop 无限循环为什么不会造成 ANR?</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">for (;;) &#123;</div><div class="line">    Message msg = queue.next(); // might block</div><div class="line">    if (msg == null) &#123;</div><div class="line">        // No message indicates that the message queue is quitting.</div><div class="line">        return;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>最开始我天真的以为在 msg == null 时 loop 会结束，然后哪里会再启动该方法。实则不然，之所以不会造成 ANR 就是因为消息的阻塞和唤醒机制，重点在 queue.next() 获取新的消息时，<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">Message next() &#123;</div><div class="line">    // ...</div><div class="line">    for (;;) &#123;</div><div class="line">        //...</div><div class="line"></div><div class="line">        nativePollOnce(ptr, nextPollTimeoutMillis); // 重点在这里，</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>nativePollOnce 会引起阻塞，在唤醒时间到的时候再唤醒。<br>在此处会唤醒，还有在 enqueueMessage 时，如果有在消息队列头部插入的话，就会唤醒 nativeWake(mPtr).<br>推荐这篇文章<a href="https://my.oschina.net/youranhongcha/blog/492591，讲的很清楚。" target="_blank" rel="external">https://my.oschina.net/youranhongcha/blog/492591，讲的很清楚。</a></p>
+<ol>
+<li>Handler发送延迟消息的原理<br>发送延迟消息，最终一样都是调用 sendMessageAtTime，给设置一个唤醒的时间，在时间到了就唤醒。</li>
 </ol>
 
       
@@ -416,7 +428,7 @@
                 <a href="/archives/">
               
                   <span class="site-state-item-count">20</span>
-                  <span class="site-state-item-name">posts</span>
+                  <span class="site-state-item-name">Artikel</span>
                 </a>
               </div>
             
@@ -466,7 +478,7 @@
 </div>
 
 
-  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
 
 
 
