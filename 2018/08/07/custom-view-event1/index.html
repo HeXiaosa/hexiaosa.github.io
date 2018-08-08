@@ -85,7 +85,7 @@
 <meta property="og:url" content="http://hexiaosa.com/2018/08/07/custom-view-event1/index.html">
 <meta property="og:site_name" content="Hexiaosa">
 <meta property="og:description" content="本文例子是《Android 开发艺术探索》作者的 github, https://github.com/singwhatiwanna/PinnedHeaderExpandableListView。结合该例子学习自定义 View 的事件体系和弹性滑动。效果图也看 github 上的吧，都一样的。  思路：先是随着滑动更改头部的高度，这一部分是由 StickyLayout 处理 onTouchEven">
-<meta property="og:updated_time" content="2018-08-08T08:45:49.980Z">
+<meta property="og:updated_time" content="2018-08-08T08:51:22.543Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="自定义 View —— 事件体系例子 StickyLayout">
 <meta name="twitter:description" content="本文例子是《Android 开发艺术探索》作者的 github, https://github.com/singwhatiwanna/PinnedHeaderExpandableListView。结合该例子学习自定义 View 的事件体系和弹性滑动。效果图也看 github 上的吧，都一样的。  思路：先是随着滑动更改头部的高度，这一部分是由 StickyLayout 处理 onTouchEven">
@@ -184,7 +184,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
             
-            Home
+            Startseite
           </a>
         </li>
       
@@ -194,7 +194,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
             
-            Archives
+            Archiv
           </a>
         </li>
       
@@ -258,7 +258,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-08-07T18:58:51+08:00">
                 2018-08-07
@@ -300,7 +300,7 @@
       
         <p>本文例子是《Android 开发艺术探索》作者的 github, <a href="https://github.com/singwhatiwanna/PinnedHeaderExpandableListView。结合该例子学习自定义" target="_blank" rel="external">https://github.com/singwhatiwanna/PinnedHeaderExpandableListView。结合该例子学习自定义</a> View 的事件体系和弹性滑动。<br>效果图也看 github 上的吧，都一样的。</p>
 <blockquote>
-<p>思路：<br>先是随着滑动更改头部的高度，这一部分是由 StickyLayout 处理 onTouchEvent 事件；<br>当 (高度<0 ||="" 高度="">=初始高度) 时，StickyLayout 不再处理，分发给子 View 处理；<br>滑动过程中松手后，根据滑动的位置决定是否实现惯性滑动，以及滑动方向。</0></p>
+<p>思路：<br>先是随着滑动更改头部的高度，这一部分是由 StickyLayout 处理 onTouchEvent 事件；<br>头部高度为 0 时，StickyLayout 不再处理，分发给子 View 处理；<br>滑动过程中松手后，根据滑动的位置决定是否实现惯性滑动，以及滑动方向。</p>
 </blockquote>
 <p>上述是否自己处理 onTouchEvent 事件是由 onInterceptTouchEvent() 实现的，return true 则会调自己的 onTouchEvent，否则会到子 View 的 onInterceptTouchEvent/onTouchEvent（根据子 View 是 ViewGroup 还是 View 决定，View 是直接执行 onTouchEvent 的，因为 View 没有 onInterceptTouchEvent, 最后一层是肯定会执行 onTouchEvent 的）</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div></pre></td><td class="code"><pre><div class="line">@Override</div><div class="line">public boolean onInterceptTouchEvent(MotionEvent event) &#123;</div><div class="line">    int intercepted = 0;</div><div class="line">    switch (event.getAction()) &#123;</div><div class="line">    case MotionEvent.ACTION_DOWN: &#123;</div><div class="line">        // ...</div><div class="line">        intercepted = 0;</div><div class="line">        break;</div><div class="line">    &#125;</div><div class="line">    case MotionEvent.ACTION_MOVE: &#123;</div><div class="line">        int deltaX = x - mLastXIntercept;</div><div class="line">        int deltaY = y - mLastYIntercept;</div><div class="line">        if (y &lt;= getHeaderHeight()) &#123;</div><div class="line">        	// 自己不拦截，看子级的实现</div><div class="line">            intercepted = 0;</div><div class="line">        &#125; else if (Math.abs(deltaY) &lt;= Math.abs(deltaX)) &#123;</div><div class="line">        	// 这样认为是横向滑动，不处理 onTouchEvent</div><div class="line">            intercepted = 0;</div><div class="line">            // 否则当滑动距离 &gt; mTouchSlop(滑动的最小距离) 时就处理 onTouchEvent</div><div class="line">        &#125; else if (mStatus == STATUS_EXPANDED &amp;&amp; deltaY &lt;= -mTouchSlop) &#123;</div><div class="line">            intercepted = 1;</div><div class="line">        &#125; else if (deltaY &gt;= mTouchSlop) &#123;</div><div class="line">            intercepted = 1;</div><div class="line">        &#125;</div><div class="line">        break;</div><div class="line">    &#125;</div><div class="line">    case MotionEvent.ACTION_UP: &#123;</div><div class="line">        // ...</div><div class="line">        break;</div><div class="line">    &#125;</div><div class="line">    return intercepted != 0;</div><div class="line">&#125;</div><div class="line"></div><div class="line">@Override</div><div class="line">public boolean onTouchEvent(MotionEvent event) &#123;</div><div class="line">    int x = (int) event.getX();</div><div class="line">    int y = (int) event.getY();</div><div class="line">    switch (event.getAction()) &#123;</div><div class="line">    case MotionEvent.ACTION_DOWN: &#123;</div><div class="line">        break;</div><div class="line">    &#125;</div><div class="line">    case MotionEvent.ACTION_MOVE: &#123;</div><div class="line">        int deltaX = x - mLastX;</div><div class="line">        int deltaY = y - mLastY;</div><div class="line">        // 通过 LayoutParams 实现动画</div><div class="line">        setHeaderHeight(mHeaderHeight);</div><div class="line">        break;</div><div class="line">    &#125;</div><div class="line">    case MotionEvent.ACTION_UP: &#123;</div><div class="line">        // 这里做了下判断，当松开手的时候，会自动向两边滑动，具体向哪边滑，要看当前所处的位置</div><div class="line">        int destHeight = 0;</div><div class="line">        if (mHeaderHeight &lt;= mOriginalHeaderHeight * 0.5) &#123;</div><div class="line">            destHeight = 0;</div><div class="line">            mStatus = STATUS_COLLAPSED;</div><div class="line">        &#125; else &#123;</div><div class="line">            destHeight = mOriginalHeaderHeight;</div><div class="line">            mStatus = STATUS_EXPANDED;</div><div class="line">        &#125;</div><div class="line">        // 慢慢滑向终点</div><div class="line">        this.smoothSetHeaderHeight(mHeaderHeight, destHeight, 500);</div><div class="line">        break;</div><div class="line">    &#125;</div><div class="line">    default:</div><div class="line">        break;</div><div class="line">    &#125;</div><div class="line">    mLastX = x;</div><div class="line">    mLastY = y;</div><div class="line">    return true;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
@@ -404,7 +404,7 @@
                 <a href="/archives/">
               
                   <span class="site-state-item-count">21</span>
-                  <span class="site-state-item-name">posts</span>
+                  <span class="site-state-item-name">Artikel</span>
                 </a>
               </div>
             
@@ -454,7 +454,7 @@
 </div>
 
 
-  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
 
 
 
