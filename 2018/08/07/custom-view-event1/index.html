@@ -79,16 +79,16 @@
 
 
 
-<meta name="description" content="蓝牙4.0提出了低功耗蓝牙的模式。蓝牙4.0的传输分为: Single Mode 和 Dual Mode; Single Mode 只支持与 4.0 的相互传输，Dual Mode 支持与 4.0 以及 3.0, 2.1, 2.0 传输.相关代码如下： //获取蓝牙适配器，系统只有一个蓝牙适配器，若 adapter 为 null, 则说明系统不支持蓝牙功能 BluetoothAdapter ada">
+<meta name="description" content="本文例子是《Android 开发艺术探索》作者的 github, https://github.com/singwhatiwanna/PinnedHeaderExpandableListView。结合该例子学习自定义 View 的事件体系和弹性滑动。效果图也看 github 上的吧，都一样的。  思路：先是随着滑动更改头部的高度，这一部分是由 StickyLayout 处理 onTouchEven">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Android 蓝牙详解">
-<meta property="og:url" content="http://hexiaosa.com/2017/12/17/bluetooth_details/index.html">
+<meta property="og:title" content="自定义 View —— 事件体系例子 StickyLayout">
+<meta property="og:url" content="http://hexiaosa.com/2018/08/07/custom-view-event1/index.html">
 <meta property="og:site_name" content="Hexiaosa">
-<meta property="og:description" content="蓝牙4.0提出了低功耗蓝牙的模式。蓝牙4.0的传输分为: Single Mode 和 Dual Mode; Single Mode 只支持与 4.0 的相互传输，Dual Mode 支持与 4.0 以及 3.0, 2.1, 2.0 传输.相关代码如下： //获取蓝牙适配器，系统只有一个蓝牙适配器，若 adapter 为 null, 则说明系统不支持蓝牙功能 BluetoothAdapter ada">
-<meta property="og:updated_time" content="2017-12-17T09:41:08.960Z">
+<meta property="og:description" content="本文例子是《Android 开发艺术探索》作者的 github, https://github.com/singwhatiwanna/PinnedHeaderExpandableListView。结合该例子学习自定义 View 的事件体系和弹性滑动。效果图也看 github 上的吧，都一样的。  思路：先是随着滑动更改头部的高度，这一部分是由 StickyLayout 处理 onTouchEven">
+<meta property="og:updated_time" content="2018-08-08T08:45:49.980Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Android 蓝牙详解">
-<meta name="twitter:description" content="蓝牙4.0提出了低功耗蓝牙的模式。蓝牙4.0的传输分为: Single Mode 和 Dual Mode; Single Mode 只支持与 4.0 的相互传输，Dual Mode 支持与 4.0 以及 3.0, 2.1, 2.0 传输.相关代码如下： //获取蓝牙适配器，系统只有一个蓝牙适配器，若 adapter 为 null, 则说明系统不支持蓝牙功能 BluetoothAdapter ada">
+<meta name="twitter:title" content="自定义 View —— 事件体系例子 StickyLayout">
+<meta name="twitter:description" content="本文例子是《Android 开发艺术探索》作者的 github, https://github.com/singwhatiwanna/PinnedHeaderExpandableListView。结合该例子学习自定义 View 的事件体系和弹性滑动。效果图也看 github 上的吧，都一样的。  思路：先是随着滑动更改头部的高度，这一部分是由 StickyLayout 处理 onTouchEven">
 
 
 
@@ -118,13 +118,13 @@
 
 
 
-  <link rel="canonical" href="http://hexiaosa.com/2017/12/17/bluetooth_details/"/>
+  <link rel="canonical" href="http://hexiaosa.com/2018/08/07/custom-view-event1/"/>
 
 
 
 
 
-  <title>Android 蓝牙详解 | Hexiaosa</title>
+  <title>自定义 View —— 事件体系例子 StickyLayout | Hexiaosa</title>
   
 
 
@@ -231,7 +231,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2017/12/17/bluetooth_details/">
+    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/08/07/custom-view-event1/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Hexiaosa">
@@ -248,7 +248,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">Android 蓝牙详解</h1>
+          <h1 class="post-title" itemprop="name headline">自定义 View —— 事件体系例子 StickyLayout</h1>
         
 
         <div class="post-meta">
@@ -260,8 +260,8 @@
               
                 <span class="post-meta-item-text">Posted on</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-12-17T17:32:48+08:00">
-                2017-12-17
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-08-07T18:58:51+08:00">
+                2018-08-07
               </time>
             
 
@@ -298,94 +298,12 @@
       
 
       
-        <p>蓝牙4.0提出了低功耗蓝牙的模式。<br>蓝牙4.0的传输分为: Single Mode 和 Dual Mode; Single Mode 只支持与 4.0 的相互传输，Dual Mode 支持与 4.0 以及 3.0, 2.1, 2.0 传输.<br>相关代码如下：</p>
-<pre><code>//获取蓝牙适配器，系统只有一个蓝牙适配器，若 adapter 为 null, 则说明系统不支持蓝牙功能
-BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
-
-//表示蓝牙是否打开
-adapter.isEnabled();
-
-//获取已配对的蓝牙设备
-Set&lt;BluetoothDevice&gt; devices = adapter.getBondedDevices();
-
-BluetoothDevice device = null;
-if (devices.iterator().hasNext()) {
-    device = devices.iterator().next();
-}
-if (device == null) {
-    //没有已配对的设备
-} else {
-    //有已配对的设备，连接，发送数据
-    //4.0 的传输跟之前的版本有不同，看要连接的设备是否是4.0，是否支持4.0之前的来决定用什么代码来连接
-}
-</code></pre><p>经典蓝牙连接</p>
-<pre><code>权限：
-&lt;uses-permission android:name=&quot;android.permission.BLUETOOTH&quot; /&gt;
-&lt;uses-permission android:name=&quot;android.permission.BLUETOOTH_ADMIN&quot; /&gt;
-
-BluetoothSocket socket = adapter.createRfcommSocketToServiceRecord(NAME, MY_UUID);
-new Thread(
-    @Override
-    public void run() {
-        // 向服务端发送连接
-        socket.connect();
-        // 获取到输出流，向外写数据
-        os = clientSocket.getOutputStream();
-        // 判断是否拿到输出流
-        if (os != null) {
-            // 需要发送的信息
-            String text = &quot;open&quot;;
-            // 以utf-8的格式发送出去
-            os.write(text.getBytes(&quot;UTF-8&quot;));
-        }
-    }
-).start();
-</code></pre><p>低功耗蓝牙连接</p>
-<pre><code>权限：
-&lt;uses-permission android:name=&quot;android.permission.BLUETOOTH&quot; /&gt;
-&lt;uses-permission android:name=&quot;android.permission.BLUETOOTH_ADMIN&quot; /&gt;
-&lt;uses-permission android:name=&quot;android.permission.ACCESS_COARSE_LOCATION&quot; /&gt;
-&lt;uses-permission android:name=&quot;android.permission.ACCESS_FINE_LOCATION&quot; /&gt;
-&lt;uses-feature
-    android:name=&quot;android.hardware.bluetooth_le&quot;
-    android:required=&quot;true&quot; /&gt;
-
-BluetoothGatt gatt = device.connGatt(context, autoConnect, BluetoothGattCallback);
-//连接蓝牙，连接后将会回调到 BluetoothGattCallback 的 onConnectChanged 方法中
-@Override
-public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
-    super.onConnectionStateChange(gatt, status, newState);
-    if (newState == BluetoothProfile.STATE_CONNECTED) {
-        //即表示连接成功
-        gatt.discoverServices();//该方法之后将会调用 onServiceDiscovered() 方法中
-    }
-}
-@Override
-public void onServicesDiscovered(BluetoothGatt gatt, int status) {
-    super.onServicesDiscovered(gatt, status);
-    //开始发送数据
-    sendData();
-}
-
-//发送数据，具体怎么发送，要看设备方的要求(怎么接受)，还有需要注意的是 获取服务和获取写入数据的需要设备方提供的UUID与设备相匹配
-private void sendData() {
-    BluetoothGattService service = mBluetoothGatt.getService(RX_SERVICE_UUID);
-    BluetoothGattCharacteristic characteristic = service.getCharacteristic(RX_CHAR_UUID);
-    byte[] value = new byte[4];
-    value[0] = (byte) &apos;o&apos;;
-    value[1] = (byte) &apos;p&apos;;
-    value[2] = (byte) &apos;e&apos;;
-    value[3] = (byte) &apos;n&apos;;
-    characteristic.setValue(value);
-    Log.e(&quot;TAG&quot;, &quot;send value -&gt; &quot; + Arrays.toString(characteristic.getValue()));
-    boolean isWrite = mBluetoothGatt.writeCharacteristic(characteristic);
-    if (isWrite) {
-        Log.e(&quot;TAG&quot;, &quot;发送数据成功&quot;);
-    } else {
-        Log.e(&quot;TAG&quot;, &quot;发送数据失败&quot;);
-    }
-}
-</code></pre>
+        <p>本文例子是《Android 开发艺术探索》作者的 github, <a href="https://github.com/singwhatiwanna/PinnedHeaderExpandableListView。结合该例子学习自定义" target="_blank" rel="external">https://github.com/singwhatiwanna/PinnedHeaderExpandableListView。结合该例子学习自定义</a> View 的事件体系和弹性滑动。<br>效果图也看 github 上的吧，都一样的。</p>
+<blockquote>
+<p>思路：<br>先是随着滑动更改头部的高度，这一部分是由 StickyLayout 处理 onTouchEvent 事件；<br>当 (高度<0 ||="" 高度="">=初始高度) 时，StickyLayout 不再处理，分发给子 View 处理；<br>滑动过程中松手后，根据滑动的位置决定是否实现惯性滑动，以及滑动方向。</0></p>
+</blockquote>
+<p>上述是否自己处理 onTouchEvent 事件是由 onInterceptTouchEvent() 实现的，return true 则会调自己的 onTouchEvent，否则会到子 View 的 onInterceptTouchEvent/onTouchEvent（根据子 View 是 ViewGroup 还是 View 决定，View 是直接执行 onTouchEvent 的，因为 View 没有 onInterceptTouchEvent, 最后一层是肯定会执行 onTouchEvent 的）</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div></pre></td><td class="code"><pre><div class="line">@Override</div><div class="line">public boolean onInterceptTouchEvent(MotionEvent event) &#123;</div><div class="line">    int intercepted = 0;</div><div class="line">    switch (event.getAction()) &#123;</div><div class="line">    case MotionEvent.ACTION_DOWN: &#123;</div><div class="line">        // ...</div><div class="line">        intercepted = 0;</div><div class="line">        break;</div><div class="line">    &#125;</div><div class="line">    case MotionEvent.ACTION_MOVE: &#123;</div><div class="line">        int deltaX = x - mLastXIntercept;</div><div class="line">        int deltaY = y - mLastYIntercept;</div><div class="line">        if (y &lt;= getHeaderHeight()) &#123;</div><div class="line">        	// 自己不拦截，看子级的实现</div><div class="line">            intercepted = 0;</div><div class="line">        &#125; else if (Math.abs(deltaY) &lt;= Math.abs(deltaX)) &#123;</div><div class="line">        	// 这样认为是横向滑动，不处理 onTouchEvent</div><div class="line">            intercepted = 0;</div><div class="line">            // 否则当滑动距离 &gt; mTouchSlop(滑动的最小距离) 时就处理 onTouchEvent</div><div class="line">        &#125; else if (mStatus == STATUS_EXPANDED &amp;&amp; deltaY &lt;= -mTouchSlop) &#123;</div><div class="line">            intercepted = 1;</div><div class="line">        &#125; else if (deltaY &gt;= mTouchSlop) &#123;</div><div class="line">            intercepted = 1;</div><div class="line">        &#125;</div><div class="line">        break;</div><div class="line">    &#125;</div><div class="line">    case MotionEvent.ACTION_UP: &#123;</div><div class="line">        // ...</div><div class="line">        break;</div><div class="line">    &#125;</div><div class="line">    return intercepted != 0;</div><div class="line">&#125;</div><div class="line"></div><div class="line">@Override</div><div class="line">public boolean onTouchEvent(MotionEvent event) &#123;</div><div class="line">    int x = (int) event.getX();</div><div class="line">    int y = (int) event.getY();</div><div class="line">    switch (event.getAction()) &#123;</div><div class="line">    case MotionEvent.ACTION_DOWN: &#123;</div><div class="line">        break;</div><div class="line">    &#125;</div><div class="line">    case MotionEvent.ACTION_MOVE: &#123;</div><div class="line">        int deltaX = x - mLastX;</div><div class="line">        int deltaY = y - mLastY;</div><div class="line">        // 通过 LayoutParams 实现动画</div><div class="line">        setHeaderHeight(mHeaderHeight);</div><div class="line">        break;</div><div class="line">    &#125;</div><div class="line">    case MotionEvent.ACTION_UP: &#123;</div><div class="line">        // 这里做了下判断，当松开手的时候，会自动向两边滑动，具体向哪边滑，要看当前所处的位置</div><div class="line">        int destHeight = 0;</div><div class="line">        if (mHeaderHeight &lt;= mOriginalHeaderHeight * 0.5) &#123;</div><div class="line">            destHeight = 0;</div><div class="line">            mStatus = STATUS_COLLAPSED;</div><div class="line">        &#125; else &#123;</div><div class="line">            destHeight = mOriginalHeaderHeight;</div><div class="line">            mStatus = STATUS_EXPANDED;</div><div class="line">        &#125;</div><div class="line">        // 慢慢滑向终点</div><div class="line">        this.smoothSetHeaderHeight(mHeaderHeight, destHeight, 500);</div><div class="line">        break;</div><div class="line">    &#125;</div><div class="line">    default:</div><div class="line">        break;</div><div class="line">    &#125;</div><div class="line">    mLastX = x;</div><div class="line">    mLastY = y;</div><div class="line">    return true;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
       
     </div>
     
@@ -409,8 +327,8 @@ private void sendData() {
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2017/11/24/java_memory/" rel="next" title="Java 内存管理部分">
-                <i class="fa fa-chevron-left"></i> Java 内存管理部分
+              <a href="/2018/07/31/GreenDao-Cache/" rel="next" title="GreenDao 缓存">
+                <i class="fa fa-chevron-left"></i> GreenDao 缓存
               </a>
             
           </div>
@@ -418,10 +336,6 @@ private void sendData() {
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2018/01/09/adb/" rel="prev" title="ADB (Android Debug Bridge)">
-                ADB (Android Debug Bridge) <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>

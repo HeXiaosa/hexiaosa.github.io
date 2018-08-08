@@ -181,7 +181,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
             
-            Startseite
+            Home
           </a>
         </li>
       
@@ -191,7 +191,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
             
-            Archiv
+            Archives
           </a>
         </li>
       
@@ -214,6 +214,144 @@
           <div id="content" class="content">
             
   <section id="posts" class="posts-expand">
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/01/29/Intent_Action/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Hexiaosa">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexiaosa">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/01/29/Intent_Action/" itemprop="url">Intent 的一些 Action 总结</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-29T11:20:58+08:00">
+                2018-01-29
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <ol>
+<li><p>直接对 data 中的号码拨号 : Intent.ACTION_CALL(android.intent.action.CALL)<br>设置号码（必须）<br>使用此功能注意权限 android.permission.CALL_PHONE</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">Intent intent = new Intent();</div><div class="line">intent.setAction(Intent.ACTION_CALL);</div><div class="line">intent.setData(Uri.parse(&quot;tel:22222222&quot;));</div><div class="line">startActivity(intent);</div></pre></td></tr></table></figure>
+</li>
+<li><p>跳转拨号页面，并且号码是展示的 data 中的 : Intent.ACTION_DIAL(android.intent.action.DIAL)<br>设置号码（可以不设置，不设置就是跳转到拨号界面，不指定号码）</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">Intent intent = new Intent();</div><div class="line">intent.setAction(Intent.ACTION_DIAL);</div><div class="line">intent.setData(Uri.parse(&quot;tel:手机号&quot;));</div><div class="line">startActivity(intent);</div></pre></td></tr></table></figure>
+</li>
+<li><p>相当于点击拨号：Intent.ACTION_CALL_BUTTON(android.intent.action.CALL_BUTTON)，直接启动就可以，不用设置其它。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">Intent intent = new Intent();</div><div class="line">intent.setAction(Intent.ACTION_CALL_BUTTON);</div><div class="line">startActivity(intent);</div></pre></td></tr></table></figure>
+</li>
+<li><p>发送短信，Intent.ACTION_SENDTO(android.intent.action.SENDTO) 用法如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">Intent intent = new Intent();</div><div class="line">intent.setAction(Intent.ACTION_SENDTO);</div><div class="line">intent.setData(Uri.parse(&quot;smsto:收信人&quot;));</div><div class="line">intent.putExtra(&quot;sms_body&quot;, &quot;信息内容：test&quot;);</div><div class="line">startActivity(intent);</div></pre></td></tr></table></figure>
+</li>
+<li><p>调用系统相机，MediaStore.ACTION_IMAGE_CAPTURE(android.media.action.IMAGE_CAPTURE)</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">Intent intent = new Intent();</div><div class="line">intent.setAction(MediaStore.ACTION_IMAGE_CAPTURE);</div><div class="line">startActivityForResult(intent, requestCode);</div><div class="line"></div><div class="line">@Override</div><div class="line">protected void onActivityResult(int requestCode, int resultCode, Intent data) &#123;</div><div class="line">    super.onActivityResult(requestCode, resultCode, data);</div><div class="line">    // 获取到拍的照片</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+<li><p>调用安装应用</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">Intent install = new Intent(Intent.ACTION_VIEW);</div><div class="line">install.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);</div><div class="line">File apkFile = new File(Environment.getExternalStorageDirectory() + &quot;/download/&quot; + &quot;app.apk&quot;;</div><div class="line">install.setDataAndType(Uri.fromFile(apkFile)), &quot;application/vnd.android.package-archive&quot;);</div><div class="line">startActivity(install)</div></pre></td></tr></table></figure></li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
     
       
 
@@ -257,7 +395,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-24T17:10:20+08:00">
                 2018-01-24
@@ -395,7 +533,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-19T10:58:37+08:00">
                 2018-01-19
@@ -520,7 +658,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-09T09:56:51+08:00">
                 2018-01-09
@@ -652,7 +790,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-12-17T17:32:48+08:00">
                 2017-12-17
@@ -858,7 +996,7 @@ private void sendData() {
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-11-24T15:32:48+08:00">
                 2017-11-24
@@ -990,7 +1128,7 @@ private void sendData() {
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-11-09T11:32:48+08:00">
                 2017-11-09
@@ -1115,7 +1253,7 @@ private void sendData() {
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-11-09T09:32:48+08:00">
                 2017-11-09
@@ -1243,7 +1381,7 @@ private void sendData() {
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-10-19T09:32:48+08:00">
                 2017-10-19
@@ -1432,7 +1570,7 @@ private void sendData() {
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-10-11T16:56:51+08:00">
                 2017-10-11
@@ -1518,135 +1656,11 @@ private void sendData() {
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2017/10/09/MotionEvent_description/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Hexiaosa">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexiaosa">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/10/09/MotionEvent_description/" itemprop="url">MotionEvent介绍</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Veröffentlicht am</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-10-09T10:32:48+08:00">
-                2017-10-09
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>本文主要介绍 MotionEvent 的两点，一：MotionEvent 的点击事件；二：MotionEvent 的 X, Y 等含义。</p>
-<h4 id="MotionEvent-的点击事件"><a href="#MotionEvent-的点击事件" class="headerlink" title="MotionEvent 的点击事件"></a>MotionEvent 的点击事件</h4><p>常用的有这几个：<br>ACTION_DOWN 刚接触到屏幕执行一次<br>ACTION_MOVE 在屏幕上滑动<br>ACTION_UP 离开屏幕执行一次<br>ACTION_POINTER_DOWN 已经有event 事件，又有一个手指的触摸 DOWN 事件发生<br>ACTION_POINTER_UP 一个手指离开屏幕，但还有其它触摸点在</p>
-<p>单指触摸事件：ACTION_DOWN -&gt; ACTION_MOVE -&gt; ACTION_UP<br>多指触摸事件：ACTION_DOWN -&gt; ACTION_MOVE -&gt; ACTION_POINTER_DOWN -&gt; ACTION_POINTER_UP -&gt; ACTION_UP</p>
-<h4 id="MotionEvent-的位置参数含义"><a href="#MotionEvent-的位置参数含义" class="headerlink" title="MotionEvent 的位置参数含义"></a>MotionEvent 的位置参数含义</h4><p>常用的主要有 getX(), getY(), getRawX(), getRawY(), 下面用一张图来展示：<br>getX : 触摸点到当前 view 左边的距离<br>getY : 触摸点到当前 view 上边的距离<br>getRawX : 触摸点到屏幕左边的距离<br>getRawY : 触摸点到屏幕上边的距离</p>
-<p><img src="/image/motionevent_description1.jpg" alt="motionevent_description1"></p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span>
+    <a class="extend prev" rel="prev" href="/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/3/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 
@@ -1692,8 +1706,8 @@ private void sendData() {
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">20</span>
-                  <span class="site-state-item-name">Artikel</span>
+                  <span class="site-state-item-count">21</span>
+                  <span class="site-state-item-name">posts</span>
                 </a>
               </div>
             
@@ -1743,7 +1757,7 @@ private void sendData() {
 </div>
 
 
-  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
 
 
 

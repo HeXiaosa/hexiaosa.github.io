@@ -181,7 +181,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
             
-            Startseite
+            Home
           </a>
         </li>
       
@@ -191,7 +191,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
             
-            Archiv
+            Archives
           </a>
         </li>
       
@@ -214,6 +214,130 @@
           <div id="content" class="content">
             
   <section id="posts" class="posts-expand">
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/08/07/custom-view-event1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Hexiaosa">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexiaosa">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/08/07/custom-view-event1/" itemprop="url">自定义 View —— 事件体系例子 StickyLayout</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-08-07T18:58:51+08:00">
+                2018-08-07
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>本文例子是《Android 开发艺术探索》作者的 github, <a href="https://github.com/singwhatiwanna/PinnedHeaderExpandableListView。结合该例子学习自定义" target="_blank" rel="external">https://github.com/singwhatiwanna/PinnedHeaderExpandableListView。结合该例子学习自定义</a> View 的事件体系和弹性滑动。<br>效果图也看 github 上的吧，都一样的。</p>
+<blockquote>
+<p>思路：<br>先是随着滑动更改头部的高度，这一部分是由 StickyLayout 处理 onTouchEvent 事件；<br>当 (高度<0 ||="" 高度="">=初始高度) 时，StickyLayout 不再处理，分发给子 View 处理；<br>滑动过程中松手后，根据滑动的位置决定是否实现惯性滑动，以及滑动方向。</0></p>
+</blockquote>
+<p>上述是否自己处理 onTouchEvent 事件是由 onInterceptTouchEvent() 实现的，return true 则会调自己的 onTouchEvent，否则会到子 View 的 onInterceptTouchEvent/onTouchEvent（根据子 View 是 ViewGroup 还是 View 决定，View 是直接执行 onTouchEvent 的，因为 View 没有 onInterceptTouchEvent, 最后一层是肯定会执行 onTouchEvent 的）</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div></pre></td><td class="code"><pre><div class="line">@Override</div><div class="line">public boolean onInterceptTouchEvent(MotionEvent event) &#123;</div><div class="line">    int intercepted = 0;</div><div class="line">    switch (event.getAction()) &#123;</div><div class="line">    case MotionEvent.ACTION_DOWN: &#123;</div><div class="line">        // ...</div><div class="line">        intercepted = 0;</div><div class="line">        break;</div><div class="line">    &#125;</div><div class="line">    case MotionEvent.ACTION_MOVE: &#123;</div><div class="line">        int deltaX = x - mLastXIntercept;</div><div class="line">        int deltaY = y - mLastYIntercept;</div><div class="line">        if (y &lt;= getHeaderHeight()) &#123;</div><div class="line">        	// 自己不拦截，看子级的实现</div><div class="line">            intercepted = 0;</div><div class="line">        &#125; else if (Math.abs(deltaY) &lt;= Math.abs(deltaX)) &#123;</div><div class="line">        	// 这样认为是横向滑动，不处理 onTouchEvent</div><div class="line">            intercepted = 0;</div><div class="line">            // 否则当滑动距离 &gt; mTouchSlop(滑动的最小距离) 时就处理 onTouchEvent</div><div class="line">        &#125; else if (mStatus == STATUS_EXPANDED &amp;&amp; deltaY &lt;= -mTouchSlop) &#123;</div><div class="line">            intercepted = 1;</div><div class="line">        &#125; else if (deltaY &gt;= mTouchSlop) &#123;</div><div class="line">            intercepted = 1;</div><div class="line">        &#125;</div><div class="line">        break;</div><div class="line">    &#125;</div><div class="line">    case MotionEvent.ACTION_UP: &#123;</div><div class="line">        // ...</div><div class="line">        break;</div><div class="line">    &#125;</div><div class="line">    return intercepted != 0;</div><div class="line">&#125;</div><div class="line"></div><div class="line">@Override</div><div class="line">public boolean onTouchEvent(MotionEvent event) &#123;</div><div class="line">    int x = (int) event.getX();</div><div class="line">    int y = (int) event.getY();</div><div class="line">    switch (event.getAction()) &#123;</div><div class="line">    case MotionEvent.ACTION_DOWN: &#123;</div><div class="line">        break;</div><div class="line">    &#125;</div><div class="line">    case MotionEvent.ACTION_MOVE: &#123;</div><div class="line">        int deltaX = x - mLastX;</div><div class="line">        int deltaY = y - mLastY;</div><div class="line">        // 通过 LayoutParams 实现动画</div><div class="line">        setHeaderHeight(mHeaderHeight);</div><div class="line">        break;</div><div class="line">    &#125;</div><div class="line">    case MotionEvent.ACTION_UP: &#123;</div><div class="line">        // 这里做了下判断，当松开手的时候，会自动向两边滑动，具体向哪边滑，要看当前所处的位置</div><div class="line">        int destHeight = 0;</div><div class="line">        if (mHeaderHeight &lt;= mOriginalHeaderHeight * 0.5) &#123;</div><div class="line">            destHeight = 0;</div><div class="line">            mStatus = STATUS_COLLAPSED;</div><div class="line">        &#125; else &#123;</div><div class="line">            destHeight = mOriginalHeaderHeight;</div><div class="line">            mStatus = STATUS_EXPANDED;</div><div class="line">        &#125;</div><div class="line">        // 慢慢滑向终点</div><div class="line">        this.smoothSetHeaderHeight(mHeaderHeight, destHeight, 500);</div><div class="line">        break;</div><div class="line">    &#125;</div><div class="line">    default:</div><div class="line">        break;</div><div class="line">    &#125;</div><div class="line">    mLastX = x;</div><div class="line">    mLastY = y;</div><div class="line">    return true;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
     
       
 
@@ -257,7 +381,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-07-31T11:34:33+08:00">
                 2018-07-31
@@ -386,7 +510,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-07-26T14:46:35+08:00">
                 2018-07-26
@@ -549,7 +673,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-06-21T15:58:20+08:00">
                 2018-06-21
@@ -681,7 +805,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-06-07T10:14:00+08:00">
                 2018-06-07
@@ -819,7 +943,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-06-05T11:10:33+08:00">
                 2018-06-05
@@ -968,7 +1092,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-05-30T17:25:53+08:00">
                 2018-05-30
@@ -1106,7 +1230,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-05-28T17:37:05+08:00">
                 2018-05-28
@@ -1246,7 +1370,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-05-24T16:13:41+08:00">
                 2018-05-24
@@ -1294,16 +1418,11 @@
 <p>Looper.loop() 方法会循环取 mQueue 中的值，由于 Looper 里面的 mQueue 对象在 handler 构造函数里赋值给 handler 的全局变量 mQueue, 所以这里循环的消息队列也就是上面插入消息的消息队列。 取到 msg 之后则会调用 msg.target.dispatchMessage(), 注意这里的 msg.target 在 handler 中插入 msg 时给其设置过 target 就是当前 handler, 所以调用就是同一个 handler 的 diapatchMessage 方法，在 dispatchMessage 方法中调用 CallBack 的实现方法或者是 handlerMessage, 这也就是我们需要实际去做的了。<br>Handler 还有一种用法是直接调用 post(Runnable r)，这种会构造一个 Message 对象，且 msg.callback = r, 再将 msg 对象插入到 MessageQueue 中，后面的步骤都一样的。</p>
 <p>思考：</p>
 <ol>
-<li><p>为什么在子线程中调用 sendMessage(msg) 或 post(runnable) 会在主线程中执行我们是实现的方法呢，这是因为 ActivityThread 的入口方法中就开始执行 Looper.loop(), 所以在 loop() 方法中调 dispatchMessage() 就是在主线程中的。</p>
-</li>
-<li><p>在这个过程中的 Looper.myLooper() 取得就是当前线程的 Looper 对象，一个线程只能有一个 Looper 对象，那么一个线程也只有一个 MessageQueue 对象。</p>
-</li>
-<li><p>一个线程只能有一个 Looper 对象是由 ThreadLocal 实现的，Looper 的构造参数是私有的，在 Looper.prepare() 的时候给当前线程设置 Looper 对象。</p>
-</li>
-<li><p>为什么在子线程中调 Looper.prepare(); Looper.loop(); 就可以操作 UI, 是因为这样就是在主线程执行代码了吗？并不是这样的，更新 UI 时只要不是会抛出异常，都可以在子线程中更新 UI 的，在子线程调 Looper.prepare() 和 Looper.loop() 也只是为了能不抛异常和更新 UI, 但是并不推荐这样做，因为这样做仍然是在子线程中更新 UI 的，仍然是线程不安全的。</p>
-</li>
-<li><p>主线程的 Looper.loop 无限循环为什么不会造成 ANR?</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">for (;;) &#123;</div><div class="line">    Message msg = queue.next(); // might block</div><div class="line">    if (msg == null) &#123;</div><div class="line">        // No message indicates that the message queue is quitting.</div><div class="line">        return;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<li>为什么在子线程中调用 sendMessage(msg) 或 post(runnable) 会在主线程中执行我们是实现的方法呢，这是因为 ActivityThread 的入口方法中就开始执行 Looper.loop(), 所以在 loop() 方法中调 dispatchMessage() 就是在主线程中的。</li>
+<li>在这个过程中的 Looper.myLooper() 取得就是当前线程的 Looper 对象，一个线程只能有一个 Looper 对象，那么一个线程也只有一个 MessageQueue 对象。</li>
+<li>一个线程只能有一个 Looper 对象是由 ThreadLocal 实现的，Looper 的构造参数是私有的，在 Looper.prepare() 的时候给当前线程设置 Looper 对象。</li>
+<li>为什么在子线程中调 Looper.prepare(); Looper.loop(); 就可以操作 UI, 是因为这样就是在主线程执行代码了吗？并不是这样的，更新 UI 时只要不是会抛出异常，都可以在子线程中更新 UI 的，在子线程调 Looper.prepare() 和 Looper.loop() 也只是为了能不抛异常和更新 UI, 但是并不推荐这样做，因为这样做仍然是在子线程中更新 UI 的，仍然是线程不安全的。</li>
+<li>主线程的 Looper.loop 无限循环为什么不会造成 ANR?<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">for (;;) &#123;</div><div class="line">    Message msg = queue.next(); // might block</div><div class="line">    if (msg == null) &#123;</div><div class="line">        // No message indicates that the message queue is quitting.</div><div class="line">        return;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 </li>
 </ol>
 <p>最开始我天真的以为在 msg == null 时 loop 会结束，然后哪里会再启动该方法。实则不然，之所以不会造成 ANR 就是因为消息的阻塞和唤醒机制，重点在 queue.next() 获取新的消息时，<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">Message next() &#123;</div><div class="line">    // ...</div><div class="line">    for (;;) &#123;</div><div class="line">        //...</div><div class="line"></div><div class="line">        nativePollOnce(ptr, nextPollTimeoutMillis); // 重点在这里，</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
@@ -1388,7 +1507,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-30T09:17:37+08:00">
                 2018-01-30
@@ -1473,149 +1592,11 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/01/29/Intent_Action/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Hexiaosa">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexiaosa">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/01/29/Intent_Action/" itemprop="url">Intent 的一些 Action 总结</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Veröffentlicht am</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-29T11:20:58+08:00">
-                2018-01-29
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <ol>
-<li><p>直接对 data 中的号码拨号 : Intent.ACTION_CALL(android.intent.action.CALL)<br>设置号码（必须）<br>使用此功能注意权限 android.permission.CALL_PHONE</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">Intent intent = new Intent();</div><div class="line">intent.setAction(Intent.ACTION_CALL);</div><div class="line">intent.setData(Uri.parse(&quot;tel:22222222&quot;));</div><div class="line">startActivity(intent);</div></pre></td></tr></table></figure>
-</li>
-<li><p>跳转拨号页面，并且号码是展示的 data 中的 : Intent.ACTION_DIAL(android.intent.action.DIAL)<br>设置号码（可以不设置，不设置就是跳转到拨号界面，不指定号码）</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">Intent intent = new Intent();</div><div class="line">intent.setAction(Intent.ACTION_DIAL);</div><div class="line">intent.setData(Uri.parse(&quot;tel:手机号&quot;));</div><div class="line">startActivity(intent);</div></pre></td></tr></table></figure>
-</li>
-<li><p>相当于点击拨号：Intent.ACTION_CALL_BUTTON(android.intent.action.CALL_BUTTON)，直接启动就可以，不用设置其它。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">Intent intent = new Intent();</div><div class="line">intent.setAction(Intent.ACTION_CALL_BUTTON);</div><div class="line">startActivity(intent);</div></pre></td></tr></table></figure>
-</li>
-<li><p>发送短信，Intent.ACTION_SENDTO(android.intent.action.SENDTO) 用法如下：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">Intent intent = new Intent();</div><div class="line">intent.setAction(Intent.ACTION_SENDTO);</div><div class="line">intent.setData(Uri.parse(&quot;smsto:收信人&quot;));</div><div class="line">intent.putExtra(&quot;sms_body&quot;, &quot;信息内容：test&quot;);</div><div class="line">startActivity(intent);</div></pre></td></tr></table></figure>
-</li>
-<li><p>调用系统相机，MediaStore.ACTION_IMAGE_CAPTURE(android.media.action.IMAGE_CAPTURE)</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">Intent intent = new Intent();</div><div class="line">intent.setAction(MediaStore.ACTION_IMAGE_CAPTURE);</div><div class="line">startActivityForResult(intent, requestCode);</div><div class="line"></div><div class="line">@Override</div><div class="line">protected void onActivityResult(int requestCode, int resultCode, Intent data) &#123;</div><div class="line">    super.onActivityResult(requestCode, resultCode, data);</div><div class="line">    // 获取到拍的照片</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-</li>
-<li><p>调用安装应用</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">Intent install = new Intent(Intent.ACTION_VIEW);</div><div class="line">install.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);</div><div class="line">File apkFile = new File(Environment.getExternalStorageDirectory() + &quot;/download/&quot; + &quot;app.apk&quot;;</div><div class="line">install.setDataAndType(Uri.fromFile(apkFile)), &quot;application/vnd.android.package-archive&quot;);</div><div class="line">startActivity(install)</div></pre></td></tr></table></figure></li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
   <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right"></i></a>
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 
@@ -1661,8 +1642,8 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">20</span>
-                  <span class="site-state-item-name">Artikel</span>
+                  <span class="site-state-item-count">21</span>
+                  <span class="site-state-item-name">posts</span>
                 </a>
               </div>
             
@@ -1712,7 +1693,7 @@
 </div>
 
 
-  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
 
 
 
