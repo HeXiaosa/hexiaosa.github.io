@@ -228,6 +228,133 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/01/30/ActivitySection/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Hexiaosa">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexiaosa">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/01/30/ActivitySection/" itemprop="url">Activity 相关知识</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-30T09:17:37+08:00">
+                2018-01-30
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h3 id="关于生命周期"><a href="#关于生命周期" class="headerlink" title="关于生命周期"></a>关于生命周期</h3><p>两个 Activity 跳转，不管有没有执行 onNewIntent, 都会前一个 Activity 执行 onPause, onStop, 后一个 Activity 执行 onStart, onResume 方法。</p>
+<h3 id="关于-configChanges"><a href="#关于-configChanges" class="headerlink" title="关于 configChanges"></a>关于 configChanges</h3><p>在 AndroidManifest 文件中声明 configChanges, 那么当声明的系统配置发生变化时，Activity 不会重新执行生命周期，只会调用 onConfigurationChanged() 方法。</p>
+<h6 id="configChanges-orientation"><a href="#configChanges-orientation" class="headerlink" title="configChanges:orientation"></a>configChanges:orientation</h6><p>屏幕方向 “orientation|screenSize”，官方文档这样说</p>
+<blockquote>
+<p>Beginning with Android 3.2 (API level 13), the “screen size” also changes when the device switches between portrait and landscape orientation. Thus, if you want to prevent runtime restarts due to orientation change when developing for API level 13 or higher (as declared by the minSdkVersion and targetSdkVersion attributes), you must include the “screenSize” value in addition to the “orientation” value. However, if your application targets API level 12 or lower, then your activity always handles this configuration change itself (this configuration change does not restart your activity, even when running on an Android 3.2 or higher device).</p>
+</blockquote>
+<p>也就是说 API 13 以上的如果要在 configChanges 设置 orientation 时，必须要加上 screenSize 才会有效。但是这里指的 API 13 是在程序中设置的 targetApi, 如果 targetApi 是 13 以下的，那么只设置 orientation 运行在 13 以上的版本上也是可以的。 </p>
+<h3 id="关于启动模式"><a href="#关于启动模式" class="headerlink" title="关于启动模式"></a>关于启动模式</h3><p>AActivity 启动 BActivity, 当 B 的启动模式为 standard 或 singleTop, B 启动后会位于 A 所在的栈（除了 A 的启动模式是 singleInstance 外）。所以当 context 启动 Activity 时，由于 context 不是 Activity, 也没有所位于的栈，所以启动的时候需加上标记 FLAG_ACTIVITY_NEW_TASK.<br>当 A 和 B 位于不同栈，并且 B 的启动模式为 singleInstance/singleTask 时，启动后的 B 和 A 不在同一栈内<br>另：taskAffinity 在 AndroidManifest 中声明 Activity 所在的栈，栈名必须包含 “.”</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/01/29/Intent_Action/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1528,134 +1655,6 @@ private void sendData() {
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2017/10/11/View-Attribute-Set/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Hexiaosa">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexiaosa">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/10/11/View-Attribute-Set/" itemprop="url">View 属性</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Veröffentlicht am</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-10-11T16:56:51+08:00">
-                2017-10-11
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>关于 View 设置属性的方式：<br> Java<br>xml<br>style<br>defStyleAttr<br>defStyleRes<br>Theme</p>
-<hr>
-<p>关于 defStyleRes 的使用，和在 xml 中声明 style=”@style/<em>*</em>“ 使用是一样的；<br>Theme 中定义，就是在当前应用使用的 theme 中，方式和 style 中定义的一样，其作用范围是全局的，只要有使用这个属性的地方，value 就是 theme 中定义的；<br>defStyleRes, defStyleAttr 的作用主要是用于自定义 View 中，想要使用该自定义 View 的地方都是这些属性</p>
-<hr>
-<p>defStyleAttr 使用方法一般如下：<br>attr.xml<br>    <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&lt;attr name=&quot;ZTV_def_style&quot; format=&quot;reference&quot;/&gt;</div></pre></td></tr></table></figure></p>
-<p>style.xml<br>    <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">&lt;style name=&quot;AppTheme&quot; parent=&quot;Theme.AppCompat.DayNight&quot;&gt;</div><div class="line">    &lt;!-- Customize your theme here. --&gt;</div><div class="line">    &lt;item name=&quot;ZTV_def_style&quot;&gt;@style/---&lt;/item&gt;</div><div class="line">&lt;/style&gt;</div></pre></td></tr></table></figure></p>
-<p>然后定义你想要指定属性的 style, 再在自定义的 View 中使用 R.attr.ZTV_def_style</p>
-<hr>
-<p>这几中方式的优先级：Java &gt; xml &gt; style &gt; defStyleAttr &gt; defStyleRes &gt; Theme<br>原因可以根据使用的习惯想要，defStyleAttr &gt; defStyleRes 在官方文档中有声明 defStyleRes used only if defStyleAttr is 0 or can not be found in the theme。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -1706,7 +1705,7 @@ private void sendData() {
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">21</span>
+                  <span class="site-state-item-count">22</span>
                   <span class="site-state-item-name">Artikel</span>
                 </a>
               </div>

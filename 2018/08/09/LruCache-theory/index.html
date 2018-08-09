@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="LruCache 的使用LruCache 是用于缓存的，缓存的原理是使用近期最少使用的方法，使用例子代码如下：1234567891011121314151617181920int cacheSize = ((int) (Runtime.getRuntime().maxMemory() / 1024)) / 8; // 最大可缓存的大小LruCache&amp;lt;String, Bitmap&amp;gt; l">
+<meta property="og:type" content="article">
+<meta property="og:title" content="LruCache 原理">
+<meta property="og:url" content="http://hexiaosa.com/2018/08/09/LruCache-theory/index.html">
+<meta property="og:site_name" content="Hexiaosa">
+<meta property="og:description" content="LruCache 的使用LruCache 是用于缓存的，缓存的原理是使用近期最少使用的方法，使用例子代码如下：1234567891011121314151617181920int cacheSize = ((int) (Runtime.getRuntime().maxMemory() / 1024)) / 8; // 最大可缓存的大小LruCache&amp;lt;String, Bitmap&amp;gt; l">
+<meta property="og:updated_time" content="2018-08-09T06:52:19.063Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="LruCache 原理">
+<meta name="twitter:description" content="LruCache 的使用LruCache 是用于缓存的，缓存的原理是使用近期最少使用的方法，使用例子代码如下：1234567891011121314151617181920int cacheSize = ((int) (Runtime.getRuntime().maxMemory() / 1024)) / 8; // 最大可缓存的大小LruCache&amp;lt;String, Bitmap&amp;gt; l">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://hexiaosa.com/2018/08/09/LruCache-theory/"/>
+
+
+
+
+
+  <title>LruCache 原理 | Hexiaosa</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Hexiaosa</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Startseite
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archiv
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/08/09/LruCache-theory/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Hexiaosa">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexiaosa">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">LruCache 原理</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-08-09T11:04:00+08:00">
+                2018-08-09
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="LruCache-的使用"><a href="#LruCache-的使用" class="headerlink" title="LruCache 的使用"></a>LruCache 的使用</h3><p>LruCache 是用于缓存的，缓存的原理是使用近期最少使用的方法，使用例子代码如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">int cacheSize = ((int) (Runtime.getRuntime().maxMemory() / 1024)) / 8; // 最大可缓存的大小</div><div class="line">LruCache&lt;String, Bitmap&gt; lruCache = new LruCache&lt;String, Bitmap&gt;(cacheSize) &#123;</div><div class="line">    @Override</div><div class="line">    protected int sizeOf(String key, Bitmap value) &#123;</div><div class="line">        // 计算每次存放的 value 的大小</div><div class="line">        return value.getRowBytes() * value.getHeight() * 1024;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    protected Bitmap create(String key) &#123;</div><div class="line">        // 自己根据 key 来创建需要的 value, 在 get 方法取不到 key 对应的 value 时会调用该方法</div><div class="line">        // 也可以选择不实现该方法，在取到的 value 是 null 时自己根据需要创建</div><div class="line">        return super.create(key);</div><div class="line">    &#125;</div><div class="line">&#125;;</div><div class="line">// 此处仅作为演示，实际使用时可根据需要优化 bitmap 的加载</div><div class="line">lruCache.put(&quot;test1&quot;, BitmapFactory.decodeResource(getApplicationContext().getResources(), R.mipmap.ic_launcher));</div><div class="line">if (lruCache.get(&quot;test1&quot;) == null) &#123;</div><div class="line">	lruCache.put(&quot;test1&quot;, bitmap);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h3 id="原理分析"><a href="#原理分析" class="headerlink" title="原理分析"></a>原理分析</h3><p>上面的使用方法中主要的就是 put, get 两个方法，下面具体看这两个方法都做了什么。</p>
+<p>put 方法分析：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div></pre></td><td class="code"><pre><div class="line">public final V put(K key, V value) &#123;</div><div class="line">    // key, value 不可为 null</div><div class="line">    if (key == null || value == null) &#123;</div><div class="line">        throw new NullPointerException(&quot;key == null || value == null&quot;);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    V previous; // key 原有的 value</div><div class="line">    synchronized (this) &#123;</div><div class="line">    	// 存的次数增加</div><div class="line">        putCount++;</div><div class="line">        // 存的 size 增加</div><div class="line">        size += safeSizeOf(key, value);</div><div class="line">        // 实际存 value, 原来的 value 返回</div><div class="line">        previous = map.put(key, value);</div><div class="line">        if (previous != null) &#123;</div><div class="line">        	// 原来的 value 不为 null 则 size 也相应的减少</div><div class="line">            size -= safeSizeOf(key, previous);</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    if (previous != null) &#123;</div><div class="line">    	// 删除了原来的 value, 根据自己需要做相应的操作</div><div class="line">        entryRemoved(false, key, previous, value);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    // 在缓存的大小已经超过 maxSize 时去除近期最少使用的 value</div><div class="line">    trimToSize(maxSize);</div><div class="line">    return previous;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>get 方法分析：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">public final V get(K key) &#123;</div><div class="line">	// key 不可为 null</div><div class="line">    if (key == null) &#123;</div><div class="line">        throw new NullPointerException(&quot;key == null&quot;);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    // 记录查到的 value</div><div class="line">    V mapValue;</div><div class="line">    synchronized (this) &#123;</div><div class="line">        mapValue = map.get(key);</div><div class="line">        if (mapValue != null) &#123;</div><div class="line">        	// 查到缓存的次数加 1</div><div class="line">            hitCount++;</div><div class="line">            return mapValue;</div><div class="line">        &#125;</div><div class="line">        // 没有查到缓存的次数加 1</div><div class="line">        missCount++;</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    V createdValue = create(key);</div><div class="line"></div><div class="line">    // 看自己是否实现了 create 方法，如果没有实现就 return null</div><div class="line">    if (createdValue == null) &#123;</div><div class="line">        return null;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    // create 方法创建过程中可能已经 put 了同样的 key, 如果相同则释放掉 create 方法创建的，保留  put 进去的</div><div class="line">    synchronized (this) &#123;</div><div class="line">    	// create 次数加 1</div><div class="line">        createCount++;</div><div class="line">        // 存 create 的，返回 key 对应的原来的值，也就是在 create 过程中 put 进去了相同 key 的值(mapValue)</div><div class="line">        mapValue = map.put(key, createdValue);</div><div class="line"></div><div class="line">        // mapValue 有值，则以 put 的为主，否则就正常保存 create 的，size 相应增加</div><div class="line">        if (mapValue != null) &#123;</div><div class="line">            map.put(key, mapValue);</div><div class="line">        &#125; else &#123;</div><div class="line">            size += safeSizeOf(key, createdValue);</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    // mapValue 有值，则执行清除 createValue 时根据我们的需要要做的操作，返回 mapValue</div><div class="line">    // 否则就是 create 执行正常，在缓存的大小已经超过 maxSize 时去除近期最少使用的 value, 返回 createValue</div><div class="line">    if (mapValue != null) &#123;</div><div class="line">        entryRemoved(false, key, createdValue, mapValue);</div><div class="line">        return mapValue;</div><div class="line">    &#125; else &#123;</div><div class="line">        trimToSize(maxSize);</div><div class="line">        return createdValue;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>那么最近最少使用原理是怎么实现的呢？就是靠 LinkedHashMap, 在 new LruCache 时创建 map,<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">this.map = new LinkedHashMap&lt;K, V&gt;(0, 0.75f, true);</div></pre></td></tr></table></figure></p>
+<p>这里把 accesssOrder 参数的值赋为 true, accesssOrder 在官方文档的解释是：the ordering mode - true for access-order, false for insertion-order, 也是是设为 true 则表示以访问排序。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/08/07/custom-view-event1/" rel="next" title="自定义 View —— 事件体系例子 StickyLayout">
+                <i class="fa fa-chevron-left"></i> 自定义 View —— 事件体系例子 StickyLayout
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Inhaltsverzeichnis
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Übersicht
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Hexiaosa</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">22</span>
+                  <span class="site-state-item-name">Artikel</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#LruCache-的使用"><span class="nav-number">1.</span> <span class="nav-text">LruCache 的使用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#原理分析"><span class="nav-number">2.</span> <span class="nav-text">原理分析</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Hexiaosa</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
