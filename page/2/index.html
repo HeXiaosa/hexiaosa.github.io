@@ -181,7 +181,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
             
-            Startseite
+            Home
           </a>
         </li>
       
@@ -191,7 +191,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
             
-            Archiv
+            Archives
           </a>
         </li>
       
@@ -214,6 +214,143 @@
           <div id="content" class="content">
             
   <section id="posts" class="posts-expand">
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/05/24/Handler/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Hexiaosa">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexiaosa">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/05/24/Handler/" itemprop="url">Handler 机制详解</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-05-24T16:13:41+08:00">
+                2018-05-24
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>先上图<br><img src="/image/handler.png" alt="handler"></p>
+<p>Handler sendMessage(msg) 会调用 sendMessageAtTime(msg, uptimeMillis), 在这里会调 enqueueMessage(queue, msg, uptimeMillis), 其中 queue 是 handler 的全局变量 mQueue, 在构造函数里，有这两行代码<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">mLooper = Looper.myLooper();</div><div class="line">mQueue = mLooper.mQueue;</div></pre></td></tr></table></figure></p>
+<p>最终会调用 queue.enqueueMessage(msg, uptimeMiilis), 在这个方法里会设置 msg.target = this, 然后把该 msg 插入 queue 中。</p>
+<p>Looper.loop() 方法会循环取 mQueue 中的值，由于 Looper 里面的 mQueue 对象在 handler 构造函数里赋值给 handler 的全局变量 mQueue, 所以这里循环的消息队列也就是上面插入消息的消息队列。 取到 msg 之后则会调用 msg.target.dispatchMessage(), 注意这里的 msg.target 在 handler 中插入 msg 时给其设置过 target 就是当前 handler, 所以调用就是同一个 handler 的 diapatchMessage 方法，在 dispatchMessage 方法中调用 CallBack 的实现方法或者是 handlerMessage, 这也就是我们需要实际去做的了。<br>Handler 还有一种用法是直接调用 post(Runnable r)，这种会构造一个 Message 对象，且 msg.callback = r, 再将 msg 对象插入到 MessageQueue 中，后面的步骤都一样的。</p>
+<p>思考：</p>
+<ol>
+<li>为什么在子线程中调用 sendMessage(msg) 或 post(runnable) 会在主线程中执行我们是实现的方法呢，这是因为 ActivityThread 的入口方法中就开始执行 Looper.loop(), 所以在 loop() 方法中调 dispatchMessage() 就是在主线程中的。</li>
+<li>在这个过程中的 Looper.myLooper() 取得就是当前线程的 Looper 对象，一个线程只能有一个 Looper 对象，那么一个线程也只有一个 MessageQueue 对象。</li>
+<li>一个线程只能有一个 Looper 对象是由 ThreadLocal 实现的，Looper 的构造参数是私有的，在 Looper.prepare() 的时候给当前线程设置 Looper 对象。</li>
+<li>为什么在子线程中调 Looper.prepare(); Looper.loop(); 就可以操作 UI, 是因为这样就是在主线程执行代码了吗？并不是这样的，更新 UI 时只要不是会抛出异常，都可以在子线程中更新 UI 的，在子线程调 Looper.prepare() 和 Looper.loop() 也只是为了能不抛异常和更新 UI, 但是并不推荐这样做，因为这样做仍然是在子线程中更新 UI 的，仍然是线程不安全的。</li>
+<li>主线程的 Looper.loop 无限循环为什么不会造成 ANR?<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">for (;;) &#123;</div><div class="line">    Message msg = queue.next(); // might block</div><div class="line">    if (msg == null) &#123;</div><div class="line">        // No message indicates that the message queue is quitting.</div><div class="line">        return;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>最开始我天真的以为在 msg == null 时 loop 会结束，然后哪里会再启动该方法。实则不然，之所以不会造成 ANR 就是因为消息的阻塞和唤醒机制，重点在 queue.next() 获取新的消息时，<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">Message next() &#123;</div><div class="line">    // ...</div><div class="line">    for (;;) &#123;</div><div class="line">        //...</div><div class="line"></div><div class="line">        nativePollOnce(ptr, nextPollTimeoutMillis); // 重点在这里，</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>nativePollOnce 会引起阻塞，在唤醒时间到的时候再唤醒。<br>在此处会唤醒，还有在 enqueueMessage 时，如果有在消息队列头部插入的话，就会唤醒 nativeWake(mPtr).<br>推荐这篇文章<a href="https://my.oschina.net/youranhongcha/blog/492591，讲的很清楚。" target="_blank" rel="external">https://my.oschina.net/youranhongcha/blog/492591，讲的很清楚。</a></p>
+<ol>
+<li>Handler发送延迟消息的原理<br>发送延迟消息，最终一样都是调用 sendMessageAtTime，给设置一个唤醒的时间，在时间到了就唤醒。</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
     
       
 
@@ -257,7 +394,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-30T09:17:37+08:00">
                 2018-01-30
@@ -384,7 +521,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-29T11:20:58+08:00">
                 2018-01-29
@@ -522,7 +659,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-24T17:10:20+08:00">
                 2018-01-24
@@ -660,7 +797,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-19T10:58:37+08:00">
                 2018-01-19
@@ -785,7 +922,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-09T09:56:51+08:00">
                 2018-01-09
@@ -917,7 +1054,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-12-17T17:32:48+08:00">
                 2017-12-17
@@ -1123,7 +1260,7 @@ private void sendData() {
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-11-24T15:32:48+08:00">
                 2017-11-24
@@ -1255,7 +1392,7 @@ private void sendData() {
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-11-09T11:32:48+08:00">
                 2017-11-09
@@ -1380,7 +1517,7 @@ private void sendData() {
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-11-09T09:32:48+08:00">
                 2017-11-09
@@ -1466,195 +1603,6 @@ private void sendData() {
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2017/10/19/note/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Hexiaosa">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexiaosa">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/10/19/note/" itemprop="url">笔记</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Veröffentlicht am</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-10-19T09:32:48+08:00">
-                2017-10-19
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h3 id="最近总结"><a href="#最近总结" class="headerlink" title="最近总结"></a>最近总结</h3><h4 id="1-Serializable-和-Parcelable"><a href="#1-Serializable-和-Parcelable" class="headerlink" title="1. Serializable 和 Parcelable"></a>1. Serializable 和 Parcelable</h4><p>Serializable 和 Parcelable 都是用于序列化的。<br>Serializable 是 Java 中定义的用于序列化的，使用方法是直接实现 Serializable 接口即可;<br>使用 Parcelable 比 Serializable 快大概十倍，因为 Serializable 使用了反射是一个很慢的过程，并且会产生大量的临时对象导致内存回收。</p>
-<h4 id="2-Canvas-Bitmap"><a href="#2-Canvas-Bitmap" class="headerlink" title="2. Canvas, Bitmap"></a>2. Canvas, Bitmap</h4><h4 id="3-Java内存管理"><a href="#3-Java内存管理" class="headerlink" title="3. Java内存管理"></a>3. Java内存管理</h4><p>堆：new 出的对象，<br>栈：基本变量，引用<br>方法区：方法，常量</p>
-<h4 id="4-Binder"><a href="#4-Binder" class="headerlink" title="4. Binder"></a>4. Binder</h4><p>AIDL 文件的本质是系统提供的快速生成 Binder 的工具</p>
-<h4 id="5-transient"><a href="#5-transient" class="headerlink" title="5. transient"></a>5. transient</h4><p>transient 的作用是：对于已经序列化的对象，创建实例时前面加上 transient 可以阻止序列化。</p>
-<h4 id="6-volatile"><a href="#6-volatile" class="headerlink" title="6. volatile"></a>6. volatile</h4><p>volatile 的作用：</p>
-<ol>
-<li>防止编译器优化代码，如：<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">a = 1;</div><div class="line">a = 2;</div><div class="line">a = 3;</div></pre></td></tr></table></figure>
-</li>
-</ol>
-<p>上面三句代码，如果没有 volatile 修饰，编译就会对其进行优化，只生成 a = 3; 这一句的机器代码，如果有 volatile 修饰，则每一句都会生成代码。</p>
-<ol>
-<li>volatile 保证不同线程操作时，对变量的修改立即可见<br><img src="/image/valatile1.jpg" alt="volatile 作用"></li>
-</ol>
-<h4 id="7-static-方法重写无效"><a href="#7-static-方法重写无效" class="headerlink" title="7. static 方法重写无效"></a>7. static 方法重写无效</h4><h4 id="8-Java-中的引用："><a href="#8-Java-中的引用：" class="headerlink" title="8. Java 中的引用："></a>8. Java 中的引用：</h4><p>强引用：new 出来的对象<br>软引用：当堆发生 OOM 时会被回收，若回收后内存仍不足，才会发生 OOM.<br>弱引用：WeakReference 只要发生 gc, 就会被回收</p>
-<h4 id="9-静态块"><a href="#9-静态块" class="headerlink" title="9. 静态块"></a>9. 静态块</h4><p>执行顺序：静态块 -&gt; 构造函数 -&gt; 调用方法<br>静态块在当前类的调用中只执行一次</p>
-<h4 id="10-fail-fast-和-fail-safe"><a href="#10-fail-fast-和-fail-safe" class="headerlink" title="10. fail-fast 和 fail-safe"></a>10. fail-fast 和 fail-safe</h4><p>fail-fast 发生条件：单线程-集合在被访问的过程中内部结构发生修改；多线程-多个线程同时修改同一个集合<br>解决方法就是用 fail-safe 机制，即可以使用 CopyOnWriteArrayList 或 ConCurrentHashMap, 它的实现机制是所有的修改都在一个复制的集合上操作</p>
-<h4 id="11-线程池"><a href="#11-线程池" class="headerlink" title="11. 线程池"></a>11. 线程池</h4><p>newCacheThreadPool, 可缓存的线程池<br>newFixedThreadPool， 创建固定数量的线程池<br>newScheduledThreadPool<br>newSingleThreadExcytor, 所有的线程单线程执行</p>
-<h4 id="12-canvas"><a href="#12-canvas" class="headerlink" title="12. canvas"></a>12. canvas</h4><p>canvas drawArc 时，paint 需要 setStyle(Paint.Style.STROKE) 才能画成弧，FILL 画成是扇形</p>
-<h4 id="13-捕获全局异常-http-www-jianshu-com-p-01b69d91a3a8"><a href="#13-捕获全局异常-http-www-jianshu-com-p-01b69d91a3a8" class="headerlink" title="13. 捕获全局异常  http://www.jianshu.com/p/01b69d91a3a8"></a>13. 捕获全局异常  <a href="http://www.jianshu.com/p/01b69d91a3a8" target="_blank" rel="external">http://www.jianshu.com/p/01b69d91a3a8</a></h4><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">private void handleUncaughtException() &#123;</div><div class="line">	new Handler(Looper.getMainLooper()).post(new Runnable() &#123;</div><div class="line">		@Override</div><div class="line">		public void run() &#123;</div><div class="line">			//主线程异常拦截</div><div class="line">			while (true) &#123;</div><div class="line">				try &#123;</div><div class="line">					Looper.loop();//主线程的异常会从这里抛出</div><div class="line">				&#125; catch (Throwable e) &#123;</div><div class="line">					Log.e(&quot;TAG&quot;, &quot;主线程异常----&quot; + e.getMessage());</div><div class="line">					if (e != null) &#123;</div><div class="line">						handleAfterUncaught();</div><div class="line">					&#125;</div><div class="line">				&#125;</div><div class="line">			&#125;</div><div class="line">		&#125;</div><div class="line">	&#125;);</div><div class="line">	//所有线程异常拦截，由于主线程的异常都被我们catch住了，所以下面的代码拦截到的都是子线程的异常</div><div class="line">	Thread.setDefaultUncaughtExceptionHandler(new MyException());</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-</code></pre><h4 id="14-onDraw-使用"><a href="#14-onDraw-使用" class="headerlink" title="14. onDraw 使用"></a>14. onDraw 使用</h4><p>onDraw 不能做耗时操作，否则会导致界面卡顿。<br>原因：onDraw 引起了 Android 界面渲染，而渲染机制是：系统每 16ms 会执行一次。超过 16ms, 就开始了下次的渲染，导致界面卡顿。</p>
-<h4 id="15-this-关键字的作用"><a href="#15-this-关键字的作用" class="headerlink" title="15. this 关键字的作用"></a>15. this 关键字的作用</h4><ol>
-<li><p>上下文，当前类的引用</p>
-</li>
-<li><p>在一个构造器里面调用另一个构造器</p>
-</li>
-</ol>
-<h4 id="16-ListView"><a href="#16-ListView" class="headerlink" title="16. ListView"></a>16. ListView</h4><ol>
-<li><p>使用 ViewHolder 避免了每次都 findViewById, 据测试可以提升 50% 以上的效率</p>
-</li>
-<li><p>使用 adapter.notifyDataSetChanged() 时，list 需要是同一个对象</p>
-</li>
-</ol>
-<h4 id="17-关于-View"><a href="#17-关于-View" class="headerlink" title="17. 关于 View"></a>17. 关于 View</h4><p>setX(), setY() 和 layout() 的区别</p>
-<h4 id="18-移动-View-的方式"><a href="#18-移动-View-的方式" class="headerlink" title="18. 移动 View 的方式"></a>18. 移动 View 的方式</h4><ol>
-<li><p>setX(), setY()</p>
-</li>
-<li><p>layout()</p>
-</li>
-<li><p>offsetLeftAndRight(), offsetTopAndBottom()</p>
-</li>
-<li><p>LayoutParams</p>
-</li>
-<li><p>scrollTo(), scrollBy() 移动的是 View 的内容</p>
-</li>
-<li><p>Scroller</p>
-</li>
-<li><p>动画</p>
-</li>
-</ol>
-<h4 id="19-View-事件分发"><a href="#19-View-事件分发" class="headerlink" title="19. View 事件分发"></a>19. View 事件分发</h4><p>以下三个默认都返回 false, 一旦返回 true 就表示拦截事件。<br>若有 A(B(MyView)), 则事件的默认传递：</p>
-<p>A dispatch<br>A onIntercept<br>B dispatch<br>B onIntercept<br>MyView dispatch<br>MyView onTouch<br>B onTouch<br>A onTouch</p>
-<p>在理解以上分发流程的基础上，以下方法返回 true 代表：<br>dispatchTouchEvent : 事件到此结束，不再继续分发</p>
-<p>onInterceptTouchEvent : 拦截事件，不再往子 View 分发</p>
-<p>onTouch : 由自己完全处理，事件不再往父 View 传递</p>
-<h4 id="20-动画"><a href="#20-动画" class="headerlink" title="20. 动画"></a>20. 动画</h4><h6 id="补间动画-Animation"><a href="#补间动画-Animation" class="headerlink" title="补间动画 (Animation)"></a>补间动画 (Animation)</h6><h6 id="属性动画-Animator"><a href="#属性动画-Animator" class="headerlink" title="属性动画 (Animator)"></a>属性动画 (Animator)</h6><ol>
-<li><p>ValueAnimator 的用法</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">ValueAnimator valueAnimator = new ValueAnimator(1, 100);</div><div class="line">valueAnimator.setTarget(view);</div><div class="line">valueAnimator.setDuration(500);</div><div class="line">valueAnimator.start();</div><div class="line">valueAnimator.addUpdateListener(new AnimatorUpdateListener()&#123;</div><div class="line">	@Override</div><div class="line">	publid void onAnimationUpdate(ValueAnimator animator) &#123;</div><div class="line">	    Float value = (Float)animator.getAnimatedValue();</div><div class="line">	    //todo use the value</div><div class="line">	&#125;</div><div class="line">&#125;);</div></pre></td></tr></table></figure>
-</li>
-<li><p>PropertyValuesHolder 类似AnimatorSet, 多个动画一起执行</p>
-</li>
-<li>动画的监听，animator.addListener(), new AnimatorListener/AnimatorListenerAdapter</li>
-<li>View 的 animate<br>View 可以直接使用 animate() 方法</li>
-</ol>
-<h6 id="布局动画"><a href="#布局动画" class="headerlink" title="布局动画"></a>布局动画</h6><p>用于 ViewGroup, 用法：</p>
-<ol>
-<li>xml中在 ViewGroup 声明 animationLayoutDChanges=”true”, 但是测试时并未发现有动画效果</li>
-<li>代码中动态添加，如：<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">LinearLayout ll = (LinearLayout)findViewById(R.id.ll);</div><div class="line"></div><div class="line">ScaleAnimation sa = new ScaleAnimation(0, 1, 0, 1);</div><div class="line">sa.setDuration(500);</div><div class="line"></div><div class="line">LayoutAnimationControllor lac = new LayoutAnimationControlor(sa, 0.5f);</div><div class="line">lac.setOrder(LayoutAnimationControlor.ORDER_NORMAL);</div><div class="line"></div><div class="line">ll.setLayoutAnimationControlor(lac);</div></pre></td></tr></table></figure>
-</li>
-</ol>
-<h4 id="21-清空任务栈"><a href="#21-清空任务栈" class="headerlink" title="21. 清空任务栈"></a>21. 清空任务栈</h4><p>AndroidManifest 中 activity 标签中的几个属性：<br>clearTaskOnLaunch : 每次初始化该 activity, 任务栈就会被清空，只有这一个实例<br>finishOnTaskLaunch : 离开任务栈，再次初始化时，如果有该 activity, 就会被 finish.<br>alwaysRetainTaskState : 给了该 activity 一个免死金牌，永远不会被清理</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -1705,8 +1653,8 @@ private void sendData() {
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">22</span>
-                  <span class="site-state-item-name">Artikel</span>
+                  <span class="site-state-item-count">23</span>
+                  <span class="site-state-item-name">posts</span>
                 </a>
               </div>
             
@@ -1756,7 +1704,7 @@ private void sendData() {
 </div>
 
 
-  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
 
 
 
