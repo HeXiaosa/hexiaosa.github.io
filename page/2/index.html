@@ -228,6 +228,146 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/05/28/android-performance-optimize/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Hexiaosa">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexiaosa">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/05/28/android-performance-optimize/" itemprop="url">Android 性能优化</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-05-28T17:37:05+08:00">
+                2018-05-28
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>下面将从布局优化、绘制优化、Bitmap、内存泄漏几个方面讲解 Android 性能优化。</p>
+<h4 id="Android-中布局优化"><a href="#Android-中布局优化" class="headerlink" title="Android 中布局优化"></a>Android 中布局优化</h4><ol>
+<li>加载可能性小的布局使用 ViewStub, 在需要使用的时候再动态加载，因为 ViewStub 默认是 VISIBLE_GONE, 不去加载布局，在主动调用 inflate() 或 setVisible() 方法时才会渲染布局。</li>
+<li>尽可能减少布局的层级，比如一般情况下使用 RelativeLayout 可减少层级，在可使用的时候使用 merge 减少层级</li>
+<li>尽可能复用布局，比如 title 布局，使复用性提高</li>
+<li>在适当情况下复用 style, dimen, color 等，以方便维护</li>
+<li>自定义 View 不在 onDraw() 方法中做耗时操作，不得超过 16ms, 系统的每次渲染时间是 16ms, onDraw() 方法超过这个时间，则会导致该 View 没有完全画完。</li>
+</ol>
+<h4 id="内存泄漏"><a href="#内存泄漏" class="headerlink" title="内存泄漏"></a>内存泄漏</h4><p>内存泄漏的原因：忘记释放内存，持有已不再使用对象的强引用，导致结果是不再使用的内存回收不掉，严重则会导致 OOM.</p>
+<ol>
+<li><p>忘记释放内存<br>比如使用完 cursor 没有调 close(), 使用完 BroadcastReceiver 没有调 unregisterReceiver().</p>
+</li>
+<li><p>持有已不再使用对象的强引用<br>这种问题一般都是在 Activity 里使用非静态内部类或匿名内部类导致的，因为非静态内部类持有外部类的强引用，当 Activity 被销毁后，还被内部类引用，导致 Activitiy 不能被回收，解决方法就是使用静态内部类来替代。<br>比如使用 Handler 导致的，会 new 一个匿名内部类，解决方法就是把 Handler 对象改成静态的。<br>比如使用动画时在 onDestroy() 方法中没有取消动画，导致 View 一直引用着 Actvitiy, 解决方法是在 onDestroy() 方法中取消动画。</p>
+</li>
+</ol>
+<h4 id="Bitmap-高效加载"><a href="#Bitmap-高效加载" class="headerlink" title="Bitmap 高效加载"></a>Bitmap 高效加载</h4><p>如果一个图片过大，直接加载可能就会导致 OOM, 那么有什么方法来使图片加载更加高效呢，比较常用的就是设置 Options.inSampleSize.<br>BitmapFactory.decode… 方法可以将资源文件，本地文件，指定的二进制流，文件流加载成 Bitmap, 在加载的过程中有一个参数 Options, 可以通过设置 inSampleSize 对图片进行压缩。</p>
+<blockquote>
+<p>规定 inSampleSize 需要是 2 的整数幂，如果不是，将会自动向下取整，且 inSampleSize 需大于 1, 如果不是，则修改为 1。<br>若 inSampleSize 设置为 2, 加载后的 Bitmap 宽高是原图的 1/2, 以此类推。</p>
+</blockquote>
+<p>计算 inSampleSize 的方法：<br>Options 还有一个参数 inJustDecodeBounds, 设置为 true 调用 BitmapFactory.decode…方法不会加载 Bitmap, 且返回值为 null, 只会解析 Bitmap 的宽高并赋值给 Options 的 outWidth 和 outHeight 参数，然后将 Options.inJustDecodeBounds 设为 false, 再根据需要设置 inSampleSize, 然后再加载图片。示例代码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">BitmapFactory.Options opt = new BitmapFactory.Options();</div><div class="line">opt.inJustDecodeBounds = true;</div><div class="line">BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher, opt);</div><div class="line">Log.e(&quot;TAG&quot;, &quot;outWidth:&quot; + opt.outWidth + &quot;, outHeight:&quot; + opt.outHeight);</div><div class="line">opt.inJustDecodeBounds = false;</div><div class="line">// 根据实际需要计算</div><div class="line">opt.inSampleSize = 4;</div><div class="line">Bitmap bitmapScale = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher, opt);</div></pre></td></tr></table></figure></p>
+<p>完善中</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/05/24/Handler/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -299,24 +439,17 @@
       
         
           
-            <p>先上图<br><img src="/image/handler.png" alt="handler"></p>
+            <h3 id="Handler-的原理看这张图就可以知道"><a href="#Handler-的原理看这张图就可以知道" class="headerlink" title="Handler 的原理看这张图就可以知道"></a>Handler 的原理看这张图就可以知道</h3><p><img src="/image/handler.png" alt="handler"></p>
 <p>Handler sendMessage(msg) 会调用 sendMessageAtTime(msg, uptimeMillis), 在这里会调 enqueueMessage(queue, msg, uptimeMillis), 其中 queue 是 handler 的全局变量 mQueue, 在构造函数里，有这两行代码<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">mLooper = Looper.myLooper();</div><div class="line">mQueue = mLooper.mQueue;</div></pre></td></tr></table></figure></p>
-<p>最终会调用 queue.enqueueMessage(msg, uptimeMiilis), 在这个方法里会设置 msg.target = this, 然后把该 msg 插入 queue 中。</p>
-<p>Looper.loop() 方法会循环取 mQueue 中的值，由于 Looper 里面的 mQueue 对象在 handler 构造函数里赋值给 handler 的全局变量 mQueue, 所以这里循环的消息队列也就是上面插入消息的消息队列。 取到 msg 之后则会调用 msg.target.dispatchMessage(), 注意这里的 msg.target 在 handler 中插入 msg 时给其设置过 target 就是当前 handler, 所以调用就是同一个 handler 的 diapatchMessage 方法，在 dispatchMessage 方法中调用 CallBack 的实现方法或者是 handlerMessage, 这也就是我们需要实际去做的了。<br>Handler 还有一种用法是直接调用 post(Runnable r)，这种会构造一个 Message 对象，且 msg.callback = r, 再将 msg 对象插入到 MessageQueue 中，后面的步骤都一样的。</p>
-<p>思考：</p>
-<ol>
-<li>为什么在子线程中调用 sendMessage(msg) 或 post(runnable) 会在主线程中执行我们是实现的方法呢，这是因为 ActivityThread 的入口方法中就开始执行 Looper.loop(), 所以在 loop() 方法中调 dispatchMessage() 就是在主线程中的。</li>
-<li>在这个过程中的 Looper.myLooper() 取得就是当前线程的 Looper 对象，一个线程只能有一个 Looper 对象，那么一个线程也只有一个 MessageQueue 对象。</li>
-<li>一个线程只能有一个 Looper 对象是由 ThreadLocal 实现的，Looper 的构造参数是私有的，在 Looper.prepare() 的时候给当前线程设置 Looper 对象。</li>
-<li>为什么在子线程中调 Looper.prepare(); Looper.loop(); 就可以操作 UI, 是因为这样就是在主线程执行代码了吗？并不是这样的，更新 UI 时只要不是会抛出异常，都可以在子线程中更新 UI 的，在子线程调 Looper.prepare() 和 Looper.loop() 也只是为了能不抛异常和更新 UI, 但是并不推荐这样做，因为这样做仍然是在子线程中更新 UI 的，仍然是线程不安全的。</li>
-<li>主线程的 Looper.loop 无限循环为什么不会造成 ANR?<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">for (;;) &#123;</div><div class="line">    Message msg = queue.next(); // might block</div><div class="line">    if (msg == null) &#123;</div><div class="line">        // No message indicates that the message queue is quitting.</div><div class="line">        return;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-</li>
-</ol>
-<p>最开始我天真的以为在 msg == null 时 loop 会结束，然后哪里会再启动该方法。实则不然，之所以不会造成 ANR 就是因为消息的阻塞和唤醒机制，重点在 queue.next() 获取新的消息时，<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">Message next() &#123;</div><div class="line">    // ...</div><div class="line">    for (;;) &#123;</div><div class="line">        //...</div><div class="line"></div><div class="line">        nativePollOnce(ptr, nextPollTimeoutMillis); // 重点在这里，</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>nativePollOnce 会引起阻塞，在唤醒时间到的时候再唤醒。<br>在此处会唤醒，还有在 enqueueMessage 时，如果有在消息队列头部插入的话，就会唤醒 nativeWake(mPtr).<br>推荐这篇文章<a href="https://my.oschina.net/youranhongcha/blog/492591，讲的很清楚。" target="_blank" rel="external">https://my.oschina.net/youranhongcha/blog/492591，讲的很清楚。</a></p>
-<ol>
-<li>Handler发送延迟消息的原理<br>发送延迟消息，最终一样都是调用 sendMessageAtTime，给设置一个唤醒的时间，在时间到了就唤醒。</li>
-</ol>
+<p>最终会调用 queue.enqueueMessage(msg, uptimeMiilis), 在这个方法里会设置 msg.target = this, 然后把该 msg 插入 queue 中。<br>Looper.loop() 方法会循环取 mQueue 中的值，取到消息就分发执行。</p>
+<h3 id="思考："><a href="#思考：" class="headerlink" title="思考："></a>思考：</h3><h6 id="1-为什么子线程中直接-new-Handler-会报异常呢？"><a href="#1-为什么子线程中直接-new-Handler-会报异常呢？" class="headerlink" title="1. 为什么子线程中直接 new Handler() 会报异常呢？"></a>1. 为什么子线程中直接 new Handler() 会报异常呢？</h6><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">mLooper = Looper.myLooper();</div><div class="line">if (mLooper == null) &#123;</div><div class="line">    throw new RuntimeException(</div><div class="line">        &quot;Can&apos;t create handler inside thread that has not called Looper.prepare()&quot;);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>上面一段代码是 Handler 的构造方法中的一段代码，创建 Handler 时会取 Looper.myLooper(), 返回的是当前线程的 Looper 对象，由于子线程中还没有 Looper 对象，所以会报异常。主线程是在 ActivityThread 的 main 方法中创建的 Looper 对象。<br>注：子线程先调用 Looper.prepare() 之后也可以创建 Handler, 但是更新 UI 时不建议这样做，因为这样还是在子线程中更新的 UI, 还是线程不安全的。</p>
+<h6 id="2-一个线程只能有一个-Looper-对象？"><a href="#2-一个线程只能有一个-Looper-对象？" class="headerlink" title="2. 一个线程只能有一个 Looper 对象？"></a>2. 一个线程只能有一个 Looper 对象？</h6><p>创建 Looper 对象是调用 Looper.prepare, 其源码如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">if (sThreadLocal.get() != null) &#123;</div><div class="line">    throw new RuntimeException(&quot;Only one Looper may be created per thread&quot;);</div><div class="line">&#125;</div><div class="line">sThreadLocal.set(new Looper(quitAllowed));</div></pre></td></tr></table></figure></p>
+<p>这里使用 ThreadLocal 保证了一个线程只有一个 Looper 对象。</p>
+<h6 id="3-主线程的-Looper-loop-无限循环为什么不会造成-ANR"><a href="#3-主线程的-Looper-loop-无限循环为什么不会造成-ANR" class="headerlink" title="3. 主线程的 Looper.loop 无限循环为什么不会造成 ANR?"></a>3. 主线程的 Looper.loop 无限循环为什么不会造成 ANR?</h6><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">for (;;) &#123;</div><div class="line">    Message msg = queue.next(); // might block</div><div class="line">    if (msg == null) &#123;</div><div class="line">        // No message indicates that the message queue is quitting.</div><div class="line">        return;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>之所以不会造成 ANR 就是因为消息的阻塞和唤醒机制，重点在 queue.next() 获取新的消息时，<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">Message next() &#123;</div><div class="line">    // ...</div><div class="line">    for (;;) &#123;</div><div class="line">        //...</div><div class="line"></div><div class="line">        nativePollOnce(ptr, nextPollTimeoutMillis); // 重点在这里，</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>nativePollOnce 会引起阻塞消息队列，在唤醒时间到的时候再唤醒。<br>在此处会唤醒，还有在 enqueueMessage 时，如果有在消息队列头部插入的话，就会调用唤醒 nativeWake(mPtr).<br>推荐这篇文章<a href="https://my.oschina.net/youranhongcha/blog/492591，讲的很清楚。" target="_blank" rel="external">https://my.oschina.net/youranhongcha/blog/492591，讲的很清楚。</a></p>
+<h6 id="4-Handler发送延迟消息的原理"><a href="#4-Handler发送延迟消息的原理" class="headerlink" title="4. Handler发送延迟消息的原理"></a>4. Handler发送延迟消息的原理</h6><p>发送延迟消息，最终一样都是调用 sendMessageAtTime，给设置一个唤醒的时间，在时间到了就唤醒。</p>
 
           
         
@@ -1231,138 +1364,6 @@ private void sendData() {
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2017/11/24/java_memory/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Hexiaosa">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexiaosa">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/11/24/java_memory/" itemprop="url">Java 内存管理部分</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-11-24T15:32:48+08:00">
-                2017-11-24
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h4 id="1-JVM-内存"><a href="#1-JVM-内存" class="headerlink" title="1. JVM 内存"></a>1. JVM 内存</h4><p>JVM 会用一段空间来存储程序运行时的数据和相关信息，这段空间一般称作 Runtime Data Area. 包含 Java 堆，方法区，（和线程私有的）程序计数器，虚拟机栈，本地方法栈。<br>Java 堆：用于存放 new 出的对象，垃圾回收也主要就是针对这一块；<br>方法区主要存放 静态变量，常量，方法区就包含了常量池；<br>本地方法栈存放的就是 native 方法；<br>虚拟机栈中有一个局部变量表，存放的是基本类型和对象的引用；虚拟机栈用于存方法在执行的内存区，每个方法执行都会创建栈针，方法执行的过程，也就是虚拟机栈的入栈出栈。</p>
-<h4 id="2-字符串内存分析"><a href="#2-字符串内存分析" class="headerlink" title="2. 字符串内存分析"></a>2. 字符串内存分析</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">String s1 = &quot;a&quot;;</div><div class="line">String s2 = &quot;b&quot;;</div><div class="line">String s3 = &quot;a&quot; + &quot;b&quot;;</div><div class="line">System.out.println(&quot;ab == s1+s2&quot; + (&quot;ab&quot; == s1+s2));</div><div class="line">System.out.println(&quot;ab == s3&quot; + (&quot;ab&quot; == s3));</div></pre></td></tr></table></figure>
-<p>输出结果：<br>false<br>true<br>直接用引号包裹的字符串相加产生的新对象会放到常量池中，对象相加的不会放到常量池中。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">public static final String A = &quot;ab&quot;; // 常量A</div><div class="line">public static final String B = &quot;cd&quot;; // 常量B</div><div class="line">// A+B 会放到常量池中，因为 A, B 都是常量，在类编译时已经确定了。</div></pre></td></tr></table></figure>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">public static final A;</div><div class="line">public static final B;</div><div class="line">static &#123;</div><div class="line">	A = &quot;a&quot;;</div><div class="line">	B = &quot;b&quot;;</div><div class="line">&#125;</div><div class="line">// A+B 不会放到常量池中，虽然被 final 修饰，但是在后来被赋值，并不是在一开始编译时就确定的。</div></pre></td></tr></table></figure>
-<p>intern()方法表示，如果字符串在常量池中存在，就取常量池中的。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">String hello = &quot;hello&quot;, lo = &quot;lo&quot;;</div><div class="line">hello == &quot;hel&quot; + &quot;lo&quot;; //true</div><div class="line">hello == &quot;hel&quot; + lo; //false</div><div class="line">hello == (&quot;hel&quot; + lo).intern();  //true</div></pre></td></tr></table></figure></p>
-<h4 id="3-Integer-内存分析"><a href="#3-Integer-内存分析" class="headerlink" title="3. Integer 内存分析"></a>3. Integer 内存分析</h4><p>定义一个 Integer 类型，赋值方式</p>
-<ol>
-<li>Integer i = new Integer(10);</li>
-<li>Integer i = 10;</li>
-</ol>
-<p>对于 -128~127 之间的数，使用第二种赋值方式时如果值相同，则两个变量 “==” true;<br>其它范围的数，两种赋值方式比较结果都为 false.</p>
-<p>原因：<br>-128~127 之间的数会存储在常量池中，比较的直接就是存在在常量池中的对象，而其它数都是新建的对象。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2017/11/09/about_string/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1382,7 +1383,7 @@ private void sendData() {
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2017/11/09/about_string/" itemprop="url">字符串</a></h1>
+                <a class="post-title-link" href="/2017/11/09/about_string/" itemprop="url">字符串、整型内存相关</a></h1>
         
 
         <div class="post-meta">
@@ -1434,12 +1435,24 @@ private void sendData() {
       
         
           
-            <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">String s = &quot;abc&quot;;</div><div class="line">s += &quot;d&quot;;</div></pre></td></tr></table></figure>
+            <h4 id="1-StringBuilder-和字符串连接符"><a href="#1-StringBuilder-和字符串连接符" class="headerlink" title="1. StringBuilder 和字符串连接符"></a>1. StringBuilder 和字符串连接符</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">String s = &quot;abc&quot;;</div><div class="line">s += &quot;d&quot;;</div></pre></td></tr></table></figure>
 <p>上述代码上，编译器会自动生成更高效的 StringBuilder, 调用 append() 方法来实现。</p>
 <p>那么是否表示可以完全信任编译器呢，再看下面代码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">String s = &quot;a&quot;;</div><div class="line">for (int i = 0; i &lt; 5; i++) &#123;</div><div class="line">	s += &quot;a&quot;;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
 <p>这种形式的，编译器会在循环体内创建 StringBuilder, 像这种操作，我们应该手动创建 StringBuilder 对象，而不仅仅是依赖编译器。</p>
 <p>当然也要避免类似以下的代码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">StringBuilder s = new StringBuilder();</div><div class="line">for (int i = 0; i &lt; 10; i++) &#123;</div><div class="line">	s.append(&quot;a&quot; + i + &quot;b&quot;);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
 <p>这种代码在循环里面依然有字符串的连接，依然会创建多个 StringBuilder 对象。</p>
+<h4 id="2-字符串存储"><a href="#2-字符串存储" class="headerlink" title="2. 字符串存储"></a>2. 字符串存储</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">String s1 = &quot;a&quot;;</div><div class="line">String s2 = &quot;b&quot;;</div><div class="line">String s3 = &quot;a&quot; + &quot;b&quot;;</div><div class="line">System.out.println(&quot;ab == s1+s2&quot; + (&quot;ab&quot; == s1+s2));</div><div class="line">System.out.println(&quot;ab == s3&quot; + (&quot;ab&quot; == s3));</div></pre></td></tr></table></figure>
+<p>输出结果：<br>false<br>true<br>直接用引号包裹的字符串相加产生的新对象会放到常量池中，对象相加的不会放到常量池中。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">public static final String A = &quot;ab&quot;; // 常量A</div><div class="line">public static final String B = &quot;cd&quot;; // 常量B</div><div class="line">// A+B 会放到常量池中，因为 A, B 都是常量，在类编译时已经确定了。</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">public static final A;</div><div class="line">public static final B;</div><div class="line">static &#123;</div><div class="line">	A = &quot;a&quot;;</div><div class="line">	B = &quot;b&quot;;</div><div class="line">&#125;</div><div class="line">// A+B 不会放到常量池中，虽然被 final 修饰，但是在后来被赋值，并不是在一开始编译时就确定的。</div></pre></td></tr></table></figure>
+<p>intern()方法表示，如果字符串在常量池中存在，就取常量池中的。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">String hello = &quot;hello&quot;, lo = &quot;lo&quot;;</div><div class="line">hello == &quot;hel&quot; + &quot;lo&quot;; //true</div><div class="line">hello == &quot;hel&quot; + lo; //false</div><div class="line">hello == (&quot;hel&quot; + lo).intern();  //true</div></pre></td></tr></table></figure></p>
+<h4 id="3-Integer-内存分析"><a href="#3-Integer-内存分析" class="headerlink" title="3. Integer 内存分析"></a>3. Integer 内存分析</h4><p>定义一个 Integer 类型，赋值方式</p>
+<ol>
+<li>Integer i = new Integer(10);</li>
+<li>Integer i = 10;</li>
+</ol>
+<p>对于 -128~127 之间的数，使用第二种赋值方式时如果值相同，则两个变量 “==” true;<br>其它范围的数，两种赋值方式比较结果都为 false.</p>
+<p>原因：<br>-128~127 之间的数会存储在常量池中，比较的直接就是存在在常量池中的对象，而其它数都是新建的对象。</p>
 
           
         

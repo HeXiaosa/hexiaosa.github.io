@@ -79,17 +79,17 @@
 
 
 
-<meta name="description" content="记 Activity 启动流程的流水账。。下面的流程图比较有意义一些   开始 startActivity  最终都会调用 Activity 的 startActivityForResult 方法 1234567startActivityForResult(Intent intent, int requestCode, @Nullable Bundle options) &amp;#123;    //.">
+<meta name="description" content="首先大致讲一下 Activity 的启动流程，从 startActivity 会执行到类 Instrumentation, 然后跨进程调用 ActivityManagerService 的 startActivity, 最终会调用 ActivityThread 中的 H 类(一个 Handler)，会执行 handleLaunchActivity, 里面会实际启动和显示 Activity. 记 A">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Activity 启动流程">
 <meta property="og:url" content="http://hexiaosa.com/2018/07/26/ActivityStartFlow/index.html">
 <meta property="og:site_name" content="Hexiaosa">
-<meta property="og:description" content="记 Activity 启动流程的流水账。。下面的流程图比较有意义一些   开始 startActivity  最终都会调用 Activity 的 startActivityForResult 方法 1234567startActivityForResult(Intent intent, int requestCode, @Nullable Bundle options) &amp;#123;    //.">
+<meta property="og:description" content="首先大致讲一下 Activity 的启动流程，从 startActivity 会执行到类 Instrumentation, 然后跨进程调用 ActivityManagerService 的 startActivity, 最终会调用 ActivityThread 中的 H 类(一个 Handler)，会执行 handleLaunchActivity, 里面会实际启动和显示 Activity. 记 A">
 <meta property="og:image" content="http://hexiaosa.com/image/Activity_Start.png">
-<meta property="og:updated_time" content="2018-07-30T04:06:46.232Z">
+<meta property="og:updated_time" content="2018-08-13T02:05:33.678Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Activity 启动流程">
-<meta name="twitter:description" content="记 Activity 启动流程的流水账。。下面的流程图比较有意义一些   开始 startActivity  最终都会调用 Activity 的 startActivityForResult 方法 1234567startActivityForResult(Intent intent, int requestCode, @Nullable Bundle options) &amp;#123;    //.">
+<meta name="twitter:description" content="首先大致讲一下 Activity 的启动流程，从 startActivity 会执行到类 Instrumentation, 然后跨进程调用 ActivityManagerService 的 startActivity, 最终会调用 ActivityThread 中的 H 类(一个 Handler)，会执行 handleLaunchActivity, 里面会实际启动和显示 Activity. 记 A">
 <meta name="twitter:image" content="http://hexiaosa.com/image/Activity_Start.png">
 
 
@@ -300,7 +300,8 @@
       
 
       
-        <p>记 Activity 启动流程的流水账。。下面的流程图比较有意义一些</p>
+        <p>首先大致讲一下 Activity 的启动流程，从 startActivity 会执行到类 Instrumentation, 然后跨进程调用 ActivityManagerService 的 startActivity, 最终会调用 ActivityThread 中的 H 类(一个 Handler)，会执行 handleLaunchActivity, 里面会实际启动和显示 Activity.</p>
+<p>记 Activity 启动流程的流水账。。下面的流程图比较有意义一些</p>
 <p><img src="/image/Activity_Start.png" alt="Activity 启动流程"></p>
 <ol>
 <li><p>开始 startActivity</p>

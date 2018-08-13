@@ -79,16 +79,16 @@
 
 
 
-<meta name="description" content="更新中…… Java 内存模型Java 内存模型分为 5 个部分，程序计数器，虚拟机栈，本地方法栈，堆，方法区 程序计数器：线程私有，每个线程都有自己的程序计数器，指向正在执行的字节码地址。这个内存区也是 Java 内存模型中唯一一个不会发生内存溢出的区域。 虚拟机栈：线程私有，方法的执行都会涉及到虚拟机栈的入栈出栈操作。包含局部变量表、操作数栈、动态连接栈，局部变量表保存方法参数和方法内部变量，">
+<meta name="description" content="Java 内存模型Java 内存模型分为 5 个部分，程序计数器，虚拟机栈，本地方法栈，堆，方法区  程序计数器：线程私有，每个线程都有自己的程序计数器，指向正在执行的字节码地址。这个内存区也是 Java 内存模型中唯一一个不会发生内存溢出的区域。  虚拟机栈：线程私有，方法的执行都会涉及到虚拟机栈的入栈出栈操作。包含局部变量表、操作数栈、动态连接栈，局部变量表保存方法参数和方法内部变量，对于实例">
 <meta property="og:type" content="article">
 <meta property="og:title" content="JVM 垃圾回收">
 <meta property="og:url" content="http://hexiaosa.com/2018/06/05/JVM-GC/index.html">
 <meta property="og:site_name" content="Hexiaosa">
-<meta property="og:description" content="更新中…… Java 内存模型Java 内存模型分为 5 个部分，程序计数器，虚拟机栈，本地方法栈，堆，方法区 程序计数器：线程私有，每个线程都有自己的程序计数器，指向正在执行的字节码地址。这个内存区也是 Java 内存模型中唯一一个不会发生内存溢出的区域。 虚拟机栈：线程私有，方法的执行都会涉及到虚拟机栈的入栈出栈操作。包含局部变量表、操作数栈、动态连接栈，局部变量表保存方法参数和方法内部变量，">
-<meta property="og:updated_time" content="2018-06-07T02:28:55.318Z">
+<meta property="og:description" content="Java 内存模型Java 内存模型分为 5 个部分，程序计数器，虚拟机栈，本地方法栈，堆，方法区  程序计数器：线程私有，每个线程都有自己的程序计数器，指向正在执行的字节码地址。这个内存区也是 Java 内存模型中唯一一个不会发生内存溢出的区域。  虚拟机栈：线程私有，方法的执行都会涉及到虚拟机栈的入栈出栈操作。包含局部变量表、操作数栈、动态连接栈，局部变量表保存方法参数和方法内部变量，对于实例">
+<meta property="og:updated_time" content="2018-08-13T06:48:10.847Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="JVM 垃圾回收">
-<meta name="twitter:description" content="更新中…… Java 内存模型Java 内存模型分为 5 个部分，程序计数器，虚拟机栈，本地方法栈，堆，方法区 程序计数器：线程私有，每个线程都有自己的程序计数器，指向正在执行的字节码地址。这个内存区也是 Java 内存模型中唯一一个不会发生内存溢出的区域。 虚拟机栈：线程私有，方法的执行都会涉及到虚拟机栈的入栈出栈操作。包含局部变量表、操作数栈、动态连接栈，局部变量表保存方法参数和方法内部变量，">
+<meta name="twitter:description" content="Java 内存模型Java 内存模型分为 5 个部分，程序计数器，虚拟机栈，本地方法栈，堆，方法区  程序计数器：线程私有，每个线程都有自己的程序计数器，指向正在执行的字节码地址。这个内存区也是 Java 内存模型中唯一一个不会发生内存溢出的区域。  虚拟机栈：线程私有，方法的执行都会涉及到虚拟机栈的入栈出栈操作。包含局部变量表、操作数栈、动态连接栈，局部变量表保存方法参数和方法内部变量，对于实例">
 
 
 
@@ -298,27 +298,20 @@
       
 
       
-        <p>更新中……</p>
-<h4 id="Java-内存模型"><a href="#Java-内存模型" class="headerlink" title="Java 内存模型"></a>Java 内存模型</h4><p>Java 内存模型分为 5 个部分，程序计数器，虚拟机栈，本地方法栈，堆，方法区</p>
-<p>程序计数器：线程私有，每个线程都有自己的程序计数器，指向正在执行的字节码地址。这个内存区也是 Java 内存模型中唯一一个不会发生内存溢出的区域。</p>
-<p>虚拟机栈：线程私有，方法的执行都会涉及到虚拟机栈的入栈出栈操作。包含局部变量表、操作数栈、动态连接栈，局部变量表保存方法参数和方法内部变量，对于实例方法来说，局部变量表还保存着当前类的引用 this. 动态连接表，是用于指向常量池的。</p>
-<p>本地方法栈：线程私有，保存 native 方法的信息。</p>
-<p>堆：线程共享，保存 new 出的对象实例和数组，该区域也是垃圾回收的主要对象。</p>
-<p>方法区：线程共享，保存的是类信息，常量，静态变量等数据，该区域也会进行垃圾回收，属于长久代的内存区域。运行时常量池就是方法区的一部分，保存编译期间的常量，不过并不只是编译器可以保存，在运行期也可以保存，比如 String 的 intern() 方法，如果常量池不存在该字符串常量，则将该字符串常量放入常量池。</p>
-<h4 id="JVM-内存分配策略"><a href="#JVM-内存分配策略" class="headerlink" title="JVM 内存分配策略"></a>JVM 内存分配策略</h4><h4 id="怎样判断垃圾需要回收"><a href="#怎样判断垃圾需要回收" class="headerlink" title="怎样判断垃圾需要回收"></a>怎样判断垃圾需要回收</h4><h6 id="引用计数"><a href="#引用计数" class="headerlink" title="引用计数"></a>引用计数</h6><p>引用计数是给每个对象一个标记，每增加一个引用，标记就加 1, 在垃圾回收时标记是 0 则对其进行回收。<br>这样的算法有一个缺点就是假如有下面这样的代码<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">String a = new String(&quot;123&quot;);</div><div class="line">String b = a + &quot;ab&quot;;</div></pre></td></tr></table></figure></p>
-<p>这之后就没有再引用 a, b 的地方了，但是由于 a 的标记值为 1, 所以一直不能被回收。</p>
-<h6 id="可达性分析"><a href="#可达性分析" class="headerlink" title="可达性分析"></a>可达性分析</h6><h6 id="方法区回收的判断"><a href="#方法区回收的判断" class="headerlink" title="方法区回收的判断"></a>方法区回收的判断</h6><p>常量：没有再被引用<br>类：<br>1) 该类的所有的实例都已经被回收<br>2) 该类的类加载器已经被回收<br>3) 没有任何对该类的引用，也没有对该类的反射</p>
-<h4 id="垃圾回收算法"><a href="#垃圾回收算法" class="headerlink" title="垃圾回收算法"></a>垃圾回收算法</h4><ol>
-<li><p>标记清除算法<br>标记清除分为标记阶段和清除阶段，标记可回收的对象，在清除阶段对其进行回收，这样的算法缺点就是会产生空间碎片较多，若给大对象分配内存空间时，就有可能提前触发 GC.</p>
+        <h4 id="Java-内存模型"><a href="#Java-内存模型" class="headerlink" title="Java 内存模型"></a>Java 内存模型</h4><p>Java 内存模型分为 5 个部分，程序计数器，虚拟机栈，本地方法栈，堆，方法区</p>
+<ol>
+<li><p>程序计数器：线程私有，每个线程都有自己的程序计数器，指向正在执行的字节码地址。这个内存区也是 Java 内存模型中唯一一个不会发生内存溢出的区域。</p>
 </li>
-<li><p>复制算法<br>复制算法把内存空间分为两块，垃圾回收时就将仍存活的对象复制到另一块未使用的内存块上。</p>
+<li><p>虚拟机栈：线程私有，方法的执行都会涉及到虚拟机栈的入栈出栈操作。包含局部变量表、操作数栈、动态连接栈，局部变量表保存方法参数和方法内部变量，对于实例方法来说，局部变量表还保存着当前类的引用 this. 动态连接表，是用于指向常量池的。</p>
 </li>
-<li><p>标记整理算法</p>
+<li><p>本地方法栈：线程私有，保存 native 方法的信息。</p>
 </li>
-<li><p>分代收集</p>
+<li><p>堆：线程共享，保存 new 出的对象实例和数组，该区域也是垃圾回收的主要对象。</p>
+</li>
+<li><p>方法区：线程共享，保存的是类信息，常量，静态变量等数据，该区域也会进行垃圾回收，属于长久代的内存区域。运行时常量池就是方法区的一部分，保存编译期间的常量，不过并不只是编译器可以保存，在运行期也可以保存，比如 String 的 intern() 方法，如果常量池不存在该字符串常量，则将该字符串常量放入常量池。</p>
 </li>
 </ol>
-<h4 id="垃圾回收器"><a href="#垃圾回收器" class="headerlink" title="垃圾回收器"></a>垃圾回收器</h4><h4 id="四种引用"><a href="#四种引用" class="headerlink" title="四种引用"></a>四种引用</h4><ol>
+<h4 id="四种引用"><a href="#四种引用" class="headerlink" title="四种引用"></a>四种引用</h4><ol>
 <li><p>强引用，就是我们平时使用的最常见直接 new 处的对象。强引用的对象只有在不可达时才会被回收。</p>
 </li>
 <li><p>软引用，是在内存不足时才会被回收，内存够用的时候不会被回收</p>
@@ -326,6 +319,58 @@
 <li><p>弱引用，是每次发生 GC 时就会被回收，不管内存是否够用</p>
 </li>
 <li><p>虚引用，随时都有可能会被回收，主要用于跟踪对象被垃圾回收时的活动</p>
+</li>
+</ol>
+<h4 id="怎样判断垃圾需要回收"><a href="#怎样判断垃圾需要回收" class="headerlink" title="怎样判断垃圾需要回收"></a>怎样判断垃圾需要回收</h4><ol>
+<li>引用计数<br>引用计数是给每个对象一个标记，每增加一个引用，标记就加 1, 在垃圾回收时标记是 0 则对其进行回收。<br>这样的算法有一个缺点就是假如有下面这样的代码<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">String a = new String(&quot;123&quot;);</div><div class="line">String b = a + &quot;ab&quot;;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>这之后就没有再引用 a, b 的地方了，但是由于 a 的标记值为 1, 所以一直不能被回收。</p>
+<ol>
+<li><p>可达性分析<br>只要是没有被 GC Root 引用的对象就可以回收，可作为 GC Root 的引用为：虚拟机栈中引用的对象，方法区中常量池的对象，方法区中类静态属性对象，本地方法栈 JNI 引用的对象。</p>
+</li>
+<li><p>方法区回收的判断<br>常量：没有再被引用<br>类：<br>1) 该类的所有的实例都已经被回收<br>2) 该类的类加载器已经被回收<br>3) 没有任何对该类的引用，也没有对该类的反射</p>
+</li>
+</ol>
+<h4 id="垃圾回收算法"><a href="#垃圾回收算法" class="headerlink" title="垃圾回收算法"></a>垃圾回收算法</h4><ol>
+<li><p>标记清除算法<br>标记清除分为标记阶段和清除阶段，标记可回收的对象，在清除阶段对其进行回收，这样的算法缺点就是会产生空间碎片较多，若给大对象分配内存空间时，就有可能提前触发 GC.</p>
+</li>
+<li><p>复制算法<br>复制算法把内存空间分为两块，垃圾回收时就将仍存活的对象复制到另一块未使用的内存块上。</p>
+</li>
+<li><p>标记整理算法<br>不直接对不可用对象进行回收，先把可用对象整理到一边，再清理边界外的不可用对象。</p>
+</li>
+<li><p>分代收集<br>针对新生代和老年代使用不同的回收算法。</p>
+</li>
+</ol>
+<h4 id="垃圾回收器"><a href="#垃圾回收器" class="headerlink" title="垃圾回收器"></a>垃圾回收器</h4><ol>
+<li><p>Serial : 新生代（复制算法），单线程，需暂停用户线程</p>
+</li>
+<li><p>Serial Old : 老年代（标记-整理），单线程，需暂停用户线程</p>
+</li>
+<li><p>Parallel Savenge : 新生代（复制算法），多线程，需暂停用户线程。吞吐量优先，两个参数：MaxGCPauseMills(GC停顿时间)，GCTimeRation(GC吞吐量倒数，自适应调节策略)</p>
+</li>
+<li><p>Parallel Old : 老年代（标记-整理），多线程，需暂停用户线程，吞吐量优先。</p>
+</li>
+<li><p>ParNew : 新生代（复制算法），多线程，需暂停用户线程。Serial 的多线程版本。</p>
+</li>
+<li><p>CMS : 以获取最短回收时间为目标，老年代（标记-清除）<br>过程：<br>初始标记，需 stop the world, 标记直接与 GC Root 关联的对象；<br>并发标记，可与用户线程并发执行，标记所有被 GC Root 引用的对象；<br>重新标记，需 stop the world, 修改用户线程执行过程中已被标记的对象重新被引用的；<br>并发清除，可与用户线程并发执行，清除被标记的对象。</p>
+<blockquote>
+<p>由于回收算法使用的是标记-清除，所以就会导致有碎片产生，可通过设置 UseCMSCompactAtFullCollection(Full GC 时是否开启碎片整理，默认开启), CMSFullGCsBeforeCompaction(设置执行多少次 GC 不压缩后，执行一次碎片整理，默认是 0, 每次都整理碎片)<br>由于并发，无法处理浮动垃圾，也就是在 GC 进行过程中用户线程还在执行产生的垃圾，GC 运行中需要预留一部分空间供用户线程使用，如果预留空间不足，则会触发 “Concurrent Mode Failure”, 临时启动 Serial Old 来重新进行老年代垃圾收集。<br>由于并发，会导致用户线程变慢，于是出现了“增量式并发收集器”，GC 与用户线程交替执行，效果很一般，已不提倡使用。</p>
+</blockquote>
+</li>
+<li><p>G1 收集器<br>G1 收集器实现了分代收集，采用并行和并发，充分利用了多 CPU、多核，目标是低停顿，还建立了可预测的停顿时间模型，可指定在 M 时间内，GC 的时间小于 N.</p>
+</li>
+</ol>
+<h4 id="JVM-内存分配策略"><a href="#JVM-内存分配策略" class="headerlink" title="JVM 内存分配策略"></a>JVM 内存分配策略</h4><ol>
+<li><p>对象优先在新生代 Eden 区分配，当 Eden 区没有内存可分配时，触发一次 Minor GC.</p>
+</li>
+<li><p>大对象直接进入老年代，其中有一个参数 PretenureSizeThreShord, 大于改值的对象直接进入老年代。</p>
+</li>
+<li><p>长期存活对象进入老年代，Eden 区的对象，经过一个 Minor GC 后依然存活的进入 Survivor 区，且年龄设为 1, 此后每经过一次 Minor GC, 年龄加 1, 当年龄大于 MaxTenuringThreShold 时进入老年代。</p>
+</li>
+<li><p>动态对象年龄判定：当大于等于某一年龄的对象大小总和大于所有空间的一半时，大于等于某一年龄的对象进入老年代。</p>
+</li>
+<li><p>空间分配担保：当 Survivor 上没有足够的空间存 Eden 区经过 Minor GC 存活下来的对象时，这些对象将直接通过空间分配担保进入老年代。</p>
 </li>
 </ol>
 
@@ -478,7 +523,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#Java-内存模型"><span class="nav-number">1.</span> <span class="nav-text">Java 内存模型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#JVM-内存分配策略"><span class="nav-number">2.</span> <span class="nav-text">JVM 内存分配策略</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#怎样判断垃圾需要回收"><span class="nav-number">3.</span> <span class="nav-text">怎样判断垃圾需要回收</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#引用计数"><span class="nav-number">3.0.1.</span> <span class="nav-text">引用计数</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#可达性分析"><span class="nav-number">3.0.2.</span> <span class="nav-text">可达性分析</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#方法区回收的判断"><span class="nav-number">3.0.3.</span> <span class="nav-text">方法区回收的判断</span></a></li></ol></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#垃圾回收算法"><span class="nav-number">4.</span> <span class="nav-text">垃圾回收算法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#垃圾回收器"><span class="nav-number">5.</span> <span class="nav-text">垃圾回收器</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#四种引用"><span class="nav-number">6.</span> <span class="nav-text">四种引用</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#Java-内存模型"><span class="nav-number">1.</span> <span class="nav-text">Java 内存模型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#四种引用"><span class="nav-number">2.</span> <span class="nav-text">四种引用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#怎样判断垃圾需要回收"><span class="nav-number">3.</span> <span class="nav-text">怎样判断垃圾需要回收</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#垃圾回收算法"><span class="nav-number">4.</span> <span class="nav-text">垃圾回收算法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#垃圾回收器"><span class="nav-number">5.</span> <span class="nav-text">垃圾回收器</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#JVM-内存分配策略"><span class="nav-number">6.</span> <span class="nav-text">JVM 内存分配策略</span></a></li></ol></div>
             
 
           </div>

@@ -228,6 +228,165 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/08/12/ThreadPool/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Hexiaosa">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexiaosa">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/08/12/ThreadPool/" itemprop="url">线程池简介和源码分析</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-08-12T14:39:43+08:00">
+                2018-08-12
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h3 id="线程池的介绍和使用"><a href="#线程池的介绍和使用" class="headerlink" title="线程池的介绍和使用"></a>线程池的介绍和使用</h3><p>线程池的优点：提高性能，提高线程的利用率，可控制线程的最大并发数，方便线程管理。<br>线程池的核心类是 ThreadPoolExecutor, 可通过 Executors 中的几个方法创建线程池，分别是：</p>
+<ol>
+<li><p>CachedThreadPool<br>核心线程数为 0, 线程数量无上限</p>
+</li>
+<li><p>FixedThreadPool<br>核心线程数由使用者自己指定，无非核心线程，线程空闲时不会被回收，除非线程池被关闭</p>
+</li>
+<li><p>ScheduledThreadPool<br>指定数量的核心线程数，线程数无上限，非核心线程空闲时会被回收</p>
+</li>
+<li><p>SingleThreadExecutor<br>核心线程为 1, 无非核心线程，线程空闲时不会被回收。意义在于使得任务都放在同一线程处理，不必考虑线程同步问题。</p>
+</li>
+</ol>
+<h3 id="线程池构造方法参数介绍"><a href="#线程池构造方法参数介绍" class="headerlink" title="线程池构造方法参数介绍"></a>线程池构造方法参数介绍</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">public ThreadPoolExecutor(int corePoolSize,</div><div class="line">                          int maximumPoolSize,</div><div class="line">                          long keepAliveTime,</div><div class="line">                          TimeUnit unit,</div><div class="line">                          BlockingQueue&lt;Runnable&gt; workQueue,</div><div class="line">                          ThreadFactory threadFactory,</div><div class="line">                          RejectedExecutionHandler handler) &#123;</div><div class="line">    // ...</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>上面是线程池的构造方法，分析一下创建线程池的七个参数的含义：</p>
+<ol>
+<li><p>corePoolSize<br>核心线程数，在空闲时不会被回收，在线程池关闭后才会被回收（allowCoreThreadTimeOut 被设为 true 除外）。</p>
+</li>
+<li><p>maximunPoolSize<br>线程数上限，可利用该参数控制线程最大并发数，非核心线程在空闲时会被回收。</p>
+</li>
+<li><p>keepAliveTime<br>非核心线程的闲置时长，超过这个时长就会被回收，当 allowCoreThreadTimeOut 被设为 true 后，这个时长也同样作用于核心线程。</p>
+</li>
+<li><p>unit<br>keepAliveTime 的时间单位。</p>
+</li>
+<li><p>workQueue<br>保存核心线程的队列。</p>
+</li>
+<li><p>threadFactory<br>用于创建新的线程。</p>
+</li>
+<li><p>handler<br>如果执行（添加）任务失败，则会执行 handler.rejectedExecution(command, this); 这个方法在需要处理拒绝后的操作时由我们自己实现来处理。</p>
+</li>
+</ol>
+<h3 id="线程池原理"><a href="#线程池原理" class="headerlink" title="线程池原理"></a>线程池原理</h3><p>线程池创建过后执行会调用 ThreadPoolExecutor 的 execute(Runnable) 方法来执行线程，步骤如下：</p>
+<ol>
+<li><p>如果当前线程数小于核心线程，则创建新的线程保存到核心线程并执行；</p>
+</li>
+<li><p>否则，核心线程数已满，则插入到任务队列中等待</p>
+</li>
+<li><p>插入到任务队列失败，则启动非核心线程来执行</p>
+</li>
+<li><p>启动非核心线程失败，则 reject.</p>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/08/11/Activity-setContentView/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -802,7 +961,8 @@
       
         
           
-            <p>记 Activity 启动流程的流水账。。下面的流程图比较有意义一些</p>
+            <p>首先大致讲一下 Activity 的启动流程，从 startActivity 会执行到类 Instrumentation, 然后跨进程调用 ActivityManagerService 的 startActivity, 最终会调用 ActivityThread 中的 H 类(一个 Handler)，会执行 handleLaunchActivity, 里面会实际启动和显示 Activity.</p>
+<p>记 Activity 启动流程的流水账。。下面的流程图比较有意义一些</p>
 <p><img src="/image/Activity_Start.png" alt="Activity 启动流程"></p>
 <ol>
 <li><p>开始 startActivity</p>
@@ -1235,27 +1395,20 @@
       
         
           
-            <p>更新中……</p>
-<h4 id="Java-内存模型"><a href="#Java-内存模型" class="headerlink" title="Java 内存模型"></a>Java 内存模型</h4><p>Java 内存模型分为 5 个部分，程序计数器，虚拟机栈，本地方法栈，堆，方法区</p>
-<p>程序计数器：线程私有，每个线程都有自己的程序计数器，指向正在执行的字节码地址。这个内存区也是 Java 内存模型中唯一一个不会发生内存溢出的区域。</p>
-<p>虚拟机栈：线程私有，方法的执行都会涉及到虚拟机栈的入栈出栈操作。包含局部变量表、操作数栈、动态连接栈，局部变量表保存方法参数和方法内部变量，对于实例方法来说，局部变量表还保存着当前类的引用 this. 动态连接表，是用于指向常量池的。</p>
-<p>本地方法栈：线程私有，保存 native 方法的信息。</p>
-<p>堆：线程共享，保存 new 出的对象实例和数组，该区域也是垃圾回收的主要对象。</p>
-<p>方法区：线程共享，保存的是类信息，常量，静态变量等数据，该区域也会进行垃圾回收，属于长久代的内存区域。运行时常量池就是方法区的一部分，保存编译期间的常量，不过并不只是编译器可以保存，在运行期也可以保存，比如 String 的 intern() 方法，如果常量池不存在该字符串常量，则将该字符串常量放入常量池。</p>
-<h4 id="JVM-内存分配策略"><a href="#JVM-内存分配策略" class="headerlink" title="JVM 内存分配策略"></a>JVM 内存分配策略</h4><h4 id="怎样判断垃圾需要回收"><a href="#怎样判断垃圾需要回收" class="headerlink" title="怎样判断垃圾需要回收"></a>怎样判断垃圾需要回收</h4><h6 id="引用计数"><a href="#引用计数" class="headerlink" title="引用计数"></a>引用计数</h6><p>引用计数是给每个对象一个标记，每增加一个引用，标记就加 1, 在垃圾回收时标记是 0 则对其进行回收。<br>这样的算法有一个缺点就是假如有下面这样的代码<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">String a = new String(&quot;123&quot;);</div><div class="line">String b = a + &quot;ab&quot;;</div></pre></td></tr></table></figure></p>
-<p>这之后就没有再引用 a, b 的地方了，但是由于 a 的标记值为 1, 所以一直不能被回收。</p>
-<h6 id="可达性分析"><a href="#可达性分析" class="headerlink" title="可达性分析"></a>可达性分析</h6><h6 id="方法区回收的判断"><a href="#方法区回收的判断" class="headerlink" title="方法区回收的判断"></a>方法区回收的判断</h6><p>常量：没有再被引用<br>类：<br>1) 该类的所有的实例都已经被回收<br>2) 该类的类加载器已经被回收<br>3) 没有任何对该类的引用，也没有对该类的反射</p>
-<h4 id="垃圾回收算法"><a href="#垃圾回收算法" class="headerlink" title="垃圾回收算法"></a>垃圾回收算法</h4><ol>
-<li><p>标记清除算法<br>标记清除分为标记阶段和清除阶段，标记可回收的对象，在清除阶段对其进行回收，这样的算法缺点就是会产生空间碎片较多，若给大对象分配内存空间时，就有可能提前触发 GC.</p>
+            <h4 id="Java-内存模型"><a href="#Java-内存模型" class="headerlink" title="Java 内存模型"></a>Java 内存模型</h4><p>Java 内存模型分为 5 个部分，程序计数器，虚拟机栈，本地方法栈，堆，方法区</p>
+<ol>
+<li><p>程序计数器：线程私有，每个线程都有自己的程序计数器，指向正在执行的字节码地址。这个内存区也是 Java 内存模型中唯一一个不会发生内存溢出的区域。</p>
 </li>
-<li><p>复制算法<br>复制算法把内存空间分为两块，垃圾回收时就将仍存活的对象复制到另一块未使用的内存块上。</p>
+<li><p>虚拟机栈：线程私有，方法的执行都会涉及到虚拟机栈的入栈出栈操作。包含局部变量表、操作数栈、动态连接栈，局部变量表保存方法参数和方法内部变量，对于实例方法来说，局部变量表还保存着当前类的引用 this. 动态连接表，是用于指向常量池的。</p>
 </li>
-<li><p>标记整理算法</p>
+<li><p>本地方法栈：线程私有，保存 native 方法的信息。</p>
 </li>
-<li><p>分代收集</p>
+<li><p>堆：线程共享，保存 new 出的对象实例和数组，该区域也是垃圾回收的主要对象。</p>
+</li>
+<li><p>方法区：线程共享，保存的是类信息，常量，静态变量等数据，该区域也会进行垃圾回收，属于长久代的内存区域。运行时常量池就是方法区的一部分，保存编译期间的常量，不过并不只是编译器可以保存，在运行期也可以保存，比如 String 的 intern() 方法，如果常量池不存在该字符串常量，则将该字符串常量放入常量池。</p>
 </li>
 </ol>
-<h4 id="垃圾回收器"><a href="#垃圾回收器" class="headerlink" title="垃圾回收器"></a>垃圾回收器</h4><h4 id="四种引用"><a href="#四种引用" class="headerlink" title="四种引用"></a>四种引用</h4><ol>
+<h4 id="四种引用"><a href="#四种引用" class="headerlink" title="四种引用"></a>四种引用</h4><ol>
 <li><p>强引用，就是我们平时使用的最常见直接 new 处的对象。强引用的对象只有在不可达时才会被回收。</p>
 </li>
 <li><p>软引用，是在内存不足时才会被回收，内存够用的时候不会被回收</p>
@@ -1263,6 +1416,58 @@
 <li><p>弱引用，是每次发生 GC 时就会被回收，不管内存是否够用</p>
 </li>
 <li><p>虚引用，随时都有可能会被回收，主要用于跟踪对象被垃圾回收时的活动</p>
+</li>
+</ol>
+<h4 id="怎样判断垃圾需要回收"><a href="#怎样判断垃圾需要回收" class="headerlink" title="怎样判断垃圾需要回收"></a>怎样判断垃圾需要回收</h4><ol>
+<li>引用计数<br>引用计数是给每个对象一个标记，每增加一个引用，标记就加 1, 在垃圾回收时标记是 0 则对其进行回收。<br>这样的算法有一个缺点就是假如有下面这样的代码<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">String a = new String(&quot;123&quot;);</div><div class="line">String b = a + &quot;ab&quot;;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>这之后就没有再引用 a, b 的地方了，但是由于 a 的标记值为 1, 所以一直不能被回收。</p>
+<ol>
+<li><p>可达性分析<br>只要是没有被 GC Root 引用的对象就可以回收，可作为 GC Root 的引用为：虚拟机栈中引用的对象，方法区中常量池的对象，方法区中类静态属性对象，本地方法栈 JNI 引用的对象。</p>
+</li>
+<li><p>方法区回收的判断<br>常量：没有再被引用<br>类：<br>1) 该类的所有的实例都已经被回收<br>2) 该类的类加载器已经被回收<br>3) 没有任何对该类的引用，也没有对该类的反射</p>
+</li>
+</ol>
+<h4 id="垃圾回收算法"><a href="#垃圾回收算法" class="headerlink" title="垃圾回收算法"></a>垃圾回收算法</h4><ol>
+<li><p>标记清除算法<br>标记清除分为标记阶段和清除阶段，标记可回收的对象，在清除阶段对其进行回收，这样的算法缺点就是会产生空间碎片较多，若给大对象分配内存空间时，就有可能提前触发 GC.</p>
+</li>
+<li><p>复制算法<br>复制算法把内存空间分为两块，垃圾回收时就将仍存活的对象复制到另一块未使用的内存块上。</p>
+</li>
+<li><p>标记整理算法<br>不直接对不可用对象进行回收，先把可用对象整理到一边，再清理边界外的不可用对象。</p>
+</li>
+<li><p>分代收集<br>针对新生代和老年代使用不同的回收算法。</p>
+</li>
+</ol>
+<h4 id="垃圾回收器"><a href="#垃圾回收器" class="headerlink" title="垃圾回收器"></a>垃圾回收器</h4><ol>
+<li><p>Serial : 新生代（复制算法），单线程，需暂停用户线程</p>
+</li>
+<li><p>Serial Old : 老年代（标记-整理），单线程，需暂停用户线程</p>
+</li>
+<li><p>Parallel Savenge : 新生代（复制算法），多线程，需暂停用户线程。吞吐量优先，两个参数：MaxGCPauseMills(GC停顿时间)，GCTimeRation(GC吞吐量倒数，自适应调节策略)</p>
+</li>
+<li><p>Parallel Old : 老年代（标记-整理），多线程，需暂停用户线程，吞吐量优先。</p>
+</li>
+<li><p>ParNew : 新生代（复制算法），多线程，需暂停用户线程。Serial 的多线程版本。</p>
+</li>
+<li><p>CMS : 以获取最短回收时间为目标，老年代（标记-清除）<br>过程：<br>初始标记，需 stop the world, 标记直接与 GC Root 关联的对象；<br>并发标记，可与用户线程并发执行，标记所有被 GC Root 引用的对象；<br>重新标记，需 stop the world, 修改用户线程执行过程中已被标记的对象重新被引用的；<br>并发清除，可与用户线程并发执行，清除被标记的对象。</p>
+<blockquote>
+<p>由于回收算法使用的是标记-清除，所以就会导致有碎片产生，可通过设置 UseCMSCompactAtFullCollection(Full GC 时是否开启碎片整理，默认开启), CMSFullGCsBeforeCompaction(设置执行多少次 GC 不压缩后，执行一次碎片整理，默认是 0, 每次都整理碎片)<br>由于并发，无法处理浮动垃圾，也就是在 GC 进行过程中用户线程还在执行产生的垃圾，GC 运行中需要预留一部分空间供用户线程使用，如果预留空间不足，则会触发 “Concurrent Mode Failure”, 临时启动 Serial Old 来重新进行老年代垃圾收集。<br>由于并发，会导致用户线程变慢，于是出现了“增量式并发收集器”，GC 与用户线程交替执行，效果很一般，已不提倡使用。</p>
+</blockquote>
+</li>
+<li><p>G1 收集器<br>G1 收集器实现了分代收集，采用并行和并发，充分利用了多 CPU、多核，目标是低停顿，还建立了可预测的停顿时间模型，可指定在 M 时间内，GC 的时间小于 N.</p>
+</li>
+</ol>
+<h4 id="JVM-内存分配策略"><a href="#JVM-内存分配策略" class="headerlink" title="JVM 内存分配策略"></a>JVM 内存分配策略</h4><ol>
+<li><p>对象优先在新生代 Eden 区分配，当 Eden 区没有内存可分配时，触发一次 Minor GC.</p>
+</li>
+<li><p>大对象直接进入老年代，其中有一个参数 PretenureSizeThreShord, 大于改值的对象直接进入老年代。</p>
+</li>
+<li><p>长期存活对象进入老年代，Eden 区的对象，经过一个 Minor GC 后依然存活的进入 Survivor 区，且年龄设为 1, 此后每经过一次 Minor GC, 年龄加 1, 当年龄大于 MaxTenuringThreShold 时进入老年代。</p>
+</li>
+<li><p>动态对象年龄判定：当大于等于某一年龄的对象大小总和大于所有空间的一半时，大于等于某一年龄的对象进入老年代。</p>
+</li>
+<li><p>空间分配担保：当 Survivor 上没有足够的空间存 Eden 区经过 Minor GC 存活下来的对象时，这些对象将直接通过空间分配担保进入老年代。</p>
 </li>
 </ol>
 
@@ -1403,146 +1608,6 @@
 <p>lock(加锁), 作用于主内存，在主内存中给数据加标记线程独占<br>unlock(解锁)，作用于主内存，在主内存中给数据去掉线程独占的标记<br>read(读取)，作用于主内存，从主内存中读取数据到工作内存<br>load(载入)，作用于工作内存，将 read 的数据保存到工作内存中<br>use(使用)，作用于工作内存，在工作内存中使用数据<br>assign(赋值)，作用于工作内存，在工作内存中给数据赋值<br>store(存储)，作用于工作内存，从工作内存保存到主内存<br>write(写入)，作用主内存，把工作内存传过来的值写入到主内存</p>
 </blockquote>
 <p>其中 read 和 load 需要一起使用，store 和 write 需要一起使用。<br>线程不安全的场景分析如下图：<br><img src="/image/java_memory.png" alt="java_memory"></p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/05/28/android-performance-optimize/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Hexiaosa">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexiaosa">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/05/28/android-performance-optimize/" itemprop="url">Android 性能优化</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-05-28T17:37:05+08:00">
-                2018-05-28
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>下面将从布局优化、绘制优化、Bitmap、内存泄漏几个方面讲解 Android 性能优化。</p>
-<h4 id="Android-中布局优化"><a href="#Android-中布局优化" class="headerlink" title="Android 中布局优化"></a>Android 中布局优化</h4><ol>
-<li>加载可能性小的布局使用 ViewStub, 在需要使用的时候再动态加载，因为 ViewStub 默认是 VISIBLE_GONE, 不去加载布局，在主动调用 inflate() 或 setVisible() 方法时才会渲染布局。</li>
-<li>尽可能减少布局的层级，比如一般情况下使用 RelativeLayout 可减少层级，在可使用的时候使用 merge 减少层级</li>
-<li>尽可能复用布局，比如 title 布局，使复用性提高</li>
-<li>在适当情况下复用 style, dimen, color 等，以方便维护</li>
-<li>自定义 View 不在 onDraw() 方法中做耗时操作，不得超过 16ms, 系统的每次渲染时间是 16ms, onDraw() 方法超过这个时间，则会导致该 View 没有完全画完。</li>
-</ol>
-<h4 id="内存泄漏"><a href="#内存泄漏" class="headerlink" title="内存泄漏"></a>内存泄漏</h4><p>内存泄漏的原因：忘记释放内存，持有已不再使用对象的强引用，导致结果是不再使用的内存回收不掉，严重则会导致 OOM.</p>
-<ol>
-<li><p>忘记释放内存<br>比如使用完 cursor 没有调 close(), 使用完 BroadcastReceiver 没有调 unregisterReceiver().</p>
-</li>
-<li><p>持有已不再使用对象的强引用<br>这种问题一般都是在 Activity 里使用非静态内部类或匿名内部类导致的，因为非静态内部类持有外部类的强引用，当 Activity 被销毁后，还被内部类引用，导致 Activitiy 不能被回收，解决方法就是使用静态内部类来替代。<br>比如使用 Handler 导致的，会 new 一个匿名内部类，解决方法就是把 Handler 对象改成静态的。<br>比如使用动画时在 onDestroy() 方法中没有取消动画，导致 View 一直引用着 Actvitiy, 解决方法是在 onDestroy() 方法中取消动画。</p>
-</li>
-</ol>
-<h4 id="Bitmap-高效加载"><a href="#Bitmap-高效加载" class="headerlink" title="Bitmap 高效加载"></a>Bitmap 高效加载</h4><p>如果一个图片过大，直接加载可能就会导致 OOM, 那么有什么方法来使图片加载更加高效呢，比较常用的就是设置 Options.inSampleSize.<br>BitmapFactory.decode… 方法可以将资源文件，本地文件，指定的二进制流，文件流加载成 Bitmap, 在加载的过程中有一个参数 Options, 可以通过设置 inSampleSize 对图片进行压缩。</p>
-<blockquote>
-<p>规定 inSampleSize 需要是 2 的整数幂，如果不是，将会自动向下取整，且 inSampleSize 需大于 1, 如果不是，则修改为 1。<br>若 inSampleSize 设置为 2, 加载后的 Bitmap 宽高是原图的 1/2, 以此类推。</p>
-</blockquote>
-<p>计算 inSampleSize 的方法：<br>Options 还有一个参数 inJustDecodeBounds, 设置为 true 调用 BitmapFactory.decode…方法不会加载 Bitmap, 且返回值为 null, 只会解析 Bitmap 的宽高并赋值给 Options 的 outWidth 和 outHeight 参数，然后将 Options.inJustDecodeBounds 设为 false, 再根据需要设置 inSampleSize, 然后再加载图片。示例代码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">BitmapFactory.Options opt = new BitmapFactory.Options();</div><div class="line">opt.inJustDecodeBounds = true;</div><div class="line">BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher, opt);</div><div class="line">Log.e(&quot;TAG&quot;, &quot;outWidth:&quot; + opt.outWidth + &quot;, outHeight:&quot; + opt.outHeight);</div><div class="line">opt.inJustDecodeBounds = false;</div><div class="line">// 根据实际需要计算</div><div class="line">opt.inSampleSize = 4;</div><div class="line">Bitmap bitmapScale = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher, opt);</div></pre></td></tr></table></figure></p>
-<p>完善中</p>
 
           
         

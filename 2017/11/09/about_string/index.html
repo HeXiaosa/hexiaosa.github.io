@@ -79,16 +79,16 @@
 
 
 
-<meta name="description" content="12String s = &amp;quot;abc&amp;quot;;s += &amp;quot;d&amp;quot;; 上述代码上，编译器会自动生成更高效的 StringBuilder, 调用 append() 方法来实现。 那么是否表示可以完全信任编译器呢，再看下面代码：1234String s = &amp;quot;a&amp;quot;;for (int i = 0; i &amp;lt; 5; i++) &amp;#123;	s += &amp;q">
+<meta name="description" content="1. StringBuilder 和字符串连接符12String s = &amp;quot;abc&amp;quot;;s += &amp;quot;d&amp;quot;; 上述代码上，编译器会自动生成更高效的 StringBuilder, 调用 append() 方法来实现。 那么是否表示可以完全信任编译器呢，再看下面代码：1234String s = &amp;quot;a&amp;quot;;for (int i = 0; i &amp;lt">
 <meta property="og:type" content="article">
-<meta property="og:title" content="字符串">
+<meta property="og:title" content="字符串、整型内存相关">
 <meta property="og:url" content="http://hexiaosa.com/2017/11/09/about_string/index.html">
 <meta property="og:site_name" content="Hexiaosa">
-<meta property="og:description" content="12String s = &amp;quot;abc&amp;quot;;s += &amp;quot;d&amp;quot;; 上述代码上，编译器会自动生成更高效的 StringBuilder, 调用 append() 方法来实现。 那么是否表示可以完全信任编译器呢，再看下面代码：1234String s = &amp;quot;a&amp;quot;;for (int i = 0; i &amp;lt; 5; i++) &amp;#123;	s += &amp;q">
-<meta property="og:updated_time" content="2017-11-09T03:37:31.314Z">
+<meta property="og:description" content="1. StringBuilder 和字符串连接符12String s = &amp;quot;abc&amp;quot;;s += &amp;quot;d&amp;quot;; 上述代码上，编译器会自动生成更高效的 StringBuilder, 调用 append() 方法来实现。 那么是否表示可以完全信任编译器呢，再看下面代码：1234String s = &amp;quot;a&amp;quot;;for (int i = 0; i &amp;lt">
+<meta property="og:updated_time" content="2018-08-13T08:52:22.292Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="字符串">
-<meta name="twitter:description" content="12String s = &amp;quot;abc&amp;quot;;s += &amp;quot;d&amp;quot;; 上述代码上，编译器会自动生成更高效的 StringBuilder, 调用 append() 方法来实现。 那么是否表示可以完全信任编译器呢，再看下面代码：1234String s = &amp;quot;a&amp;quot;;for (int i = 0; i &amp;lt; 5; i++) &amp;#123;	s += &amp;q">
+<meta name="twitter:title" content="字符串、整型内存相关">
+<meta name="twitter:description" content="1. StringBuilder 和字符串连接符12String s = &amp;quot;abc&amp;quot;;s += &amp;quot;d&amp;quot;; 上述代码上，编译器会自动生成更高效的 StringBuilder, 调用 append() 方法来实现。 那么是否表示可以完全信任编译器呢，再看下面代码：1234String s = &amp;quot;a&amp;quot;;for (int i = 0; i &amp;lt">
 
 
 
@@ -124,7 +124,7 @@
 
 
 
-  <title>字符串 | Hexiaosa</title>
+  <title>字符串、整型内存相关 | Hexiaosa</title>
   
 
 
@@ -248,7 +248,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">字符串</h1>
+          <h1 class="post-title" itemprop="name headline">字符串、整型内存相关</h1>
         
 
         <div class="post-meta">
@@ -298,12 +298,24 @@
       
 
       
-        <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">String s = &quot;abc&quot;;</div><div class="line">s += &quot;d&quot;;</div></pre></td></tr></table></figure>
+        <h4 id="1-StringBuilder-和字符串连接符"><a href="#1-StringBuilder-和字符串连接符" class="headerlink" title="1. StringBuilder 和字符串连接符"></a>1. StringBuilder 和字符串连接符</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">String s = &quot;abc&quot;;</div><div class="line">s += &quot;d&quot;;</div></pre></td></tr></table></figure>
 <p>上述代码上，编译器会自动生成更高效的 StringBuilder, 调用 append() 方法来实现。</p>
 <p>那么是否表示可以完全信任编译器呢，再看下面代码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">String s = &quot;a&quot;;</div><div class="line">for (int i = 0; i &lt; 5; i++) &#123;</div><div class="line">	s += &quot;a&quot;;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
 <p>这种形式的，编译器会在循环体内创建 StringBuilder, 像这种操作，我们应该手动创建 StringBuilder 对象，而不仅仅是依赖编译器。</p>
 <p>当然也要避免类似以下的代码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">StringBuilder s = new StringBuilder();</div><div class="line">for (int i = 0; i &lt; 10; i++) &#123;</div><div class="line">	s.append(&quot;a&quot; + i + &quot;b&quot;);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
 <p>这种代码在循环里面依然有字符串的连接，依然会创建多个 StringBuilder 对象。</p>
+<h4 id="2-字符串存储"><a href="#2-字符串存储" class="headerlink" title="2. 字符串存储"></a>2. 字符串存储</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">String s1 = &quot;a&quot;;</div><div class="line">String s2 = &quot;b&quot;;</div><div class="line">String s3 = &quot;a&quot; + &quot;b&quot;;</div><div class="line">System.out.println(&quot;ab == s1+s2&quot; + (&quot;ab&quot; == s1+s2));</div><div class="line">System.out.println(&quot;ab == s3&quot; + (&quot;ab&quot; == s3));</div></pre></td></tr></table></figure>
+<p>输出结果：<br>false<br>true<br>直接用引号包裹的字符串相加产生的新对象会放到常量池中，对象相加的不会放到常量池中。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">public static final String A = &quot;ab&quot;; // 常量A</div><div class="line">public static final String B = &quot;cd&quot;; // 常量B</div><div class="line">// A+B 会放到常量池中，因为 A, B 都是常量，在类编译时已经确定了。</div></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">public static final A;</div><div class="line">public static final B;</div><div class="line">static &#123;</div><div class="line">	A = &quot;a&quot;;</div><div class="line">	B = &quot;b&quot;;</div><div class="line">&#125;</div><div class="line">// A+B 不会放到常量池中，虽然被 final 修饰，但是在后来被赋值，并不是在一开始编译时就确定的。</div></pre></td></tr></table></figure>
+<p>intern()方法表示，如果字符串在常量池中存在，就取常量池中的。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">String hello = &quot;hello&quot;, lo = &quot;lo&quot;;</div><div class="line">hello == &quot;hel&quot; + &quot;lo&quot;; //true</div><div class="line">hello == &quot;hel&quot; + lo; //false</div><div class="line">hello == (&quot;hel&quot; + lo).intern();  //true</div></pre></td></tr></table></figure></p>
+<h4 id="3-Integer-内存分析"><a href="#3-Integer-内存分析" class="headerlink" title="3. Integer 内存分析"></a>3. Integer 内存分析</h4><p>定义一个 Integer 类型，赋值方式</p>
+<ol>
+<li>Integer i = new Integer(10);</li>
+<li>Integer i = 10;</li>
+</ol>
+<p>对于 -128~127 之间的数，使用第二种赋值方式时如果值相同，则两个变量 “==” true;<br>其它范围的数，两种赋值方式比较结果都为 false.</p>
+<p>原因：<br>-128~127 之间的数会存储在常量池中，比较的直接就是存在在常量池中的对象，而其它数都是新建的对象。</p>
 
       
     </div>
@@ -338,8 +350,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2017/11/24/java_memory/" rel="prev" title="Java 内存管理部分">
-                Java 内存管理部分 <i class="fa fa-chevron-right"></i>
+              <a href="/2017/12/17/bluetooth_details/" rel="prev" title="Android 蓝牙详解">
+                Android 蓝牙详解 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -392,8 +404,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -435,6 +456,22 @@
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-StringBuilder-和字符串连接符"><span class="nav-number">1.</span> <span class="nav-text">1. StringBuilder 和字符串连接符</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-字符串存储"><span class="nav-number">2.</span> <span class="nav-text">2. 字符串存储</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-Integer-内存分析"><span class="nav-number">3.</span> <span class="nav-text">3. Integer 内存分析</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
