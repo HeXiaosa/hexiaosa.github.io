@@ -228,6 +228,338 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/06/05/JVM-GC/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Hexiaosa">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexiaosa">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/06/05/JVM-GC/" itemprop="url">JVM 垃圾回收</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-06-05T11:10:33+08:00">
+                2018-06-05
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h4 id="Java-内存模型"><a href="#Java-内存模型" class="headerlink" title="Java 内存模型"></a>Java 内存模型</h4><p>Java 内存模型分为 5 个部分，程序计数器，虚拟机栈，本地方法栈，堆，方法区</p>
+<ol>
+<li><p>程序计数器：线程私有，每个线程都有自己的程序计数器，指向正在执行的字节码地址。这个内存区也是 Java 内存模型中唯一一个不会发生内存溢出的区域。</p>
+</li>
+<li><p>虚拟机栈：线程私有，方法的执行都会涉及到虚拟机栈的入栈出栈操作。包含局部变量表、操作数栈、动态连接栈，局部变量表保存方法参数和方法内部变量，对于实例方法来说，局部变量表还保存着当前类的引用 this. 动态连接表，是用于指向常量池的。</p>
+</li>
+<li><p>本地方法栈：线程私有，保存 native 方法的信息。</p>
+</li>
+<li><p>堆：线程共享，保存 new 出的对象实例和数组，该区域也是垃圾回收的主要对象。</p>
+</li>
+<li><p>方法区：线程共享，保存的是类信息，常量，静态变量等数据，该区域也会进行垃圾回收，属于长久代的内存区域。运行时常量池就是方法区的一部分，保存编译期间的常量，不过并不只是编译器可以保存，在运行期也可以保存，比如 String 的 intern() 方法，如果常量池不存在该字符串常量，则将该字符串常量放入常量池。</p>
+</li>
+</ol>
+<h4 id="四种引用"><a href="#四种引用" class="headerlink" title="四种引用"></a>四种引用</h4><ol>
+<li><p>强引用，就是我们平时使用的最常见直接 new 处的对象。强引用的对象只有在不可达时才会被回收。</p>
+</li>
+<li><p>软引用，是在内存不足时才会被回收，内存够用的时候不会被回收</p>
+</li>
+<li><p>弱引用，是每次发生 GC 时就会被回收，不管内存是否够用</p>
+</li>
+<li><p>虚引用，随时都有可能会被回收，主要用于跟踪对象被垃圾回收时的活动</p>
+</li>
+</ol>
+<h4 id="怎样判断垃圾需要回收"><a href="#怎样判断垃圾需要回收" class="headerlink" title="怎样判断垃圾需要回收"></a>怎样判断垃圾需要回收</h4><ol>
+<li>引用计数<br>引用计数是给每个对象一个标记，每增加一个引用，标记就加 1, 在垃圾回收时标记是 0 则对其进行回收。<br>这样的算法有一个缺点就是假如有下面这样的代码<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">String a = new String(&quot;123&quot;);</div><div class="line">String b = a + &quot;ab&quot;;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>这之后就没有再引用 a, b 的地方了，但是由于 a 的标记值为 1, 所以一直不能被回收。</p>
+<ol>
+<li><p>可达性分析<br>只要是没有被 GC Root 引用的对象就可以回收，可作为 GC Root 的引用为：虚拟机栈中引用的对象，方法区中常量池的对象，方法区中类静态属性对象，本地方法栈 JNI 引用的对象。</p>
+</li>
+<li><p>方法区回收的判断<br>常量：没有再被引用<br>类：<br>1) 该类的所有的实例都已经被回收<br>2) 该类的类加载器已经被回收<br>3) 没有任何对该类的引用，也没有对该类的反射</p>
+</li>
+</ol>
+<h4 id="垃圾回收算法"><a href="#垃圾回收算法" class="headerlink" title="垃圾回收算法"></a>垃圾回收算法</h4><ol>
+<li><p>标记清除算法<br>标记清除分为标记阶段和清除阶段，标记可回收的对象，在清除阶段对其进行回收，这样的算法缺点就是会产生空间碎片较多，若给大对象分配内存空间时，就有可能提前触发 GC.</p>
+</li>
+<li><p>复制算法<br>复制算法把内存空间分为两块，垃圾回收时就将仍存活的对象复制到另一块未使用的内存块上。</p>
+</li>
+<li><p>标记整理算法<br>不直接对不可用对象进行回收，先把可用对象整理到一边，再清理边界外的不可用对象。</p>
+</li>
+<li><p>分代收集<br>针对新生代和老年代使用不同的回收算法。</p>
+</li>
+</ol>
+<h4 id="垃圾回收器"><a href="#垃圾回收器" class="headerlink" title="垃圾回收器"></a>垃圾回收器</h4><ol>
+<li><p>Serial : 新生代（复制算法），单线程，需暂停用户线程</p>
+</li>
+<li><p>Serial Old : 老年代（标记-整理），单线程，需暂停用户线程</p>
+</li>
+<li><p>Parallel Savenge : 新生代（复制算法），多线程，需暂停用户线程。吞吐量优先，两个参数：MaxGCPauseMills(GC停顿时间)，GCTimeRation(GC吞吐量倒数，自适应调节策略)</p>
+</li>
+<li><p>Parallel Old : 老年代（标记-整理），多线程，需暂停用户线程，吞吐量优先。</p>
+</li>
+<li><p>ParNew : 新生代（复制算法），多线程，需暂停用户线程。Serial 的多线程版本。</p>
+</li>
+<li><p>CMS : 以获取最短回收时间为目标，老年代（标记-清除）<br>过程：<br>初始标记，需 stop the world, 标记直接与 GC Root 关联的对象；<br>并发标记，可与用户线程并发执行，标记所有被 GC Root 引用的对象；<br>重新标记，需 stop the world, 修改用户线程执行过程中已被标记的对象重新被引用的；<br>并发清除，可与用户线程并发执行，清除被标记的对象。</p>
+<blockquote>
+<p>由于回收算法使用的是标记-清除，所以就会导致有碎片产生，可通过设置 UseCMSCompactAtFullCollection(Full GC 时是否开启碎片整理，默认开启), CMSFullGCsBeforeCompaction(设置执行多少次 GC 不压缩后，执行一次碎片整理，默认是 0, 每次都整理碎片)<br>由于并发，无法处理浮动垃圾，也就是在 GC 进行过程中用户线程还在执行产生的垃圾，GC 运行中需要预留一部分空间供用户线程使用，如果预留空间不足，则会触发 “Concurrent Mode Failure”, 临时启动 Serial Old 来重新进行老年代垃圾收集。<br>由于并发，会导致用户线程变慢，于是出现了“增量式并发收集器”，GC 与用户线程交替执行，效果很一般，已不提倡使用。</p>
+</blockquote>
+</li>
+<li><p>G1 收集器<br>G1 收集器实现了分代收集，采用并行和并发，充分利用了多 CPU、多核，目标是低停顿，还建立了可预测的停顿时间模型，可指定在 M 时间内，GC 的时间小于 N.</p>
+</li>
+</ol>
+<h4 id="JVM-内存分配策略"><a href="#JVM-内存分配策略" class="headerlink" title="JVM 内存分配策略"></a>JVM 内存分配策略</h4><ol>
+<li><p>对象优先在新生代 Eden 区分配，当 Eden 区没有内存可分配时，触发一次 Minor GC.</p>
+</li>
+<li><p>大对象直接进入老年代，其中有一个参数 PretenureSizeThreShord, 大于改值的对象直接进入老年代。</p>
+</li>
+<li><p>长期存活对象进入老年代，Eden 区的对象，经过一个 Minor GC 后依然存活的进入 Survivor 区，且年龄设为 1, 此后每经过一次 Minor GC, 年龄加 1, 当年龄大于 MaxTenuringThreShold 时进入老年代。</p>
+</li>
+<li><p>动态对象年龄判定：当大于等于某一年龄的对象大小总和大于所有空间的一半时，大于等于某一年龄的对象进入老年代。</p>
+</li>
+<li><p>空间分配担保：当 Survivor 上没有足够的空间存 Eden 区经过 Minor GC 存活下来的对象时，这些对象将直接通过空间分配担保进入老年代。</p>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/05/30/about-thread-safe/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Hexiaosa">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexiaosa">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/05/30/about-thread-safe/" itemprop="url">线程安全相关</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-05-30T17:25:53+08:00">
+                2018-05-30
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h4 id="线程不安全的原因"><a href="#线程不安全的原因" class="headerlink" title="线程不安全的原因"></a>线程不安全的原因</h4><p>正是有了多线程，才会出现线程不安全。线程不安全的原因就是多个线程某段代码不具备原子性、可见性或有序性导致的。</p>
+<ol>
+<li>原子性是指一个操作是不可被其它线程打断的，加锁就是保证了原子性。</li>
+<li>可见性是一个线程修改了某个共享值，其它线程能立即可知，不会出现一个线程修改了某个值，另一个线程读到旧值的情况。使用 volatile 就可以保证可见性。</li>
+<li>有序性是由于编译器会进行指令重排序，当不同线程间可进行指令重排的存在先后依赖时，就会破坏了其有序性，使用 volatile 可保证有序性。</li>
+</ol>
+<h4 id="线程安全的实现方法"><a href="#线程安全的实现方法" class="headerlink" title="线程安全的实现方法"></a>线程安全的实现方法</h4><h5 id="阻塞同步（互斥同步）"><a href="#阻塞同步（互斥同步）" class="headerlink" title="阻塞同步（互斥同步）"></a>阻塞同步（互斥同步）</h5><p>顾名思义，就是通过阻塞线程来达到同步的目的，保证同一时间只有一个线程对其访问。实现形式就是加锁，通过 synchronized 关键字或 ReenTrantLock 对象，比较两者的特点：<br>&gt;</p>
+<blockquote>
+<p>synchronized:<br>synchronized 关键字进行编译后，会在代码块前后加上 monitorenter 和 monitorexit 指令，线程的阻塞和唤醒表现在原生系统上，涉及到线程状态的转换，这会牺牲掉一些性能。<br>可重入；不会产生死锁，如遇异常则会释放锁；</p>
+<p>ReenTrantLock:<br>与 synchronized 一样都具有可重入性，不一样的是它是在 api 层面的互斥，且在使用时需要加 try-finally 块以防止发生异常时产生死锁，因为 ReenTrantLock 在遇到异常是不会释放锁的。另外还增加了三个新特性：等待中断，公平锁，一个锁可绑定多个条件</p>
+</blockquote>
+<p>JDK 1.6 之后, synchronized 在性能方面已经和 ReenTrantLock 没有什么区别了，所以在选择锁的时候，除非要用到 ReenTrantLock 的三个新特性，否则就优先选择 synchronized.<br>synchronized 锁优化的点：自旋锁（自适应自旋），消除锁，粗化锁，轻量级锁，偏向锁</p>
+<h5 id="非阻塞同步"><a href="#非阻塞同步" class="headerlink" title="非阻塞同步"></a>非阻塞同步</h5><p>非阻塞同步，就是不用通过阻塞线程来实现同步的目的。阻塞同步，就是悲观锁的概念，先进行加载，其它线程获取不到锁就阻塞等待。这样就有可能会出现一个问题，假如一个线程获取到锁之后执行时间很短，其它竞争该锁的线程刚被挂起就有可用资源了，就需要再抢占，这样频繁的挂起恢复存在很大的开销。<br>而非阻塞同步采用的是乐观锁，先操作，操作若是成功的，则执行完毕，操作若是不成功的则放弃本次操作，再重新开始操作。<br>如 CAS(Compare And Swap), 通过 sun.misc.Unsafe 中的 compareAndSwapInt, compareAndSwapLong 等方法来实现，这几个方法是原子操作。<br>但 CAS 中会有一个经典的 ABA 问题，如：先从线程 1 取 value(值为 A) 赋值给 current, 然后从线程 2 取 value(值为 B) 赋值给 current, 再在线程 2 中把 value 修改为 A, 进行 CAS 操作时看上去是成功的，但实际上中间有发生过变化，具体案例可看这里面一个链表的例子, <a href="https://www.cnblogs.com/549294286/p/3766717.html" target="_blank" rel="external">https://www.cnblogs.com/549294286/p/3766717.html</a>, 为解决这类问题一般会给对象加上 version 之类的标记。</p>
+<h5 id="非同步方案"><a href="#非同步方案" class="headerlink" title="非同步方案"></a>非同步方案</h5><p>在 Java 中就是使用 ThreadLocal, 它实际是每个线程都有一个对象，不涉及到多个线程操作同一对象，通过这样的方法来保证线程安全。</p>
+<h4 id="Java-内存模型与线程"><a href="#Java-内存模型与线程" class="headerlink" title="Java 内存模型与线程"></a>Java 内存模型与线程</h4><p>分析一下 Java 的内存模型，从这里面可以看到导致线程不安全的根本原因。仅用于自己的学习和理解。<br>在主内存中有一份数据，这块内存所有的线程都可以访问，每个线程访问的时候，会在自己的工作内存保存自己的一份数据，这块内存是仅该线程可访问的。对一个数据的操作过程：从主内存读数据到工作内存，然后对其进行操作，操作完成后再写回主内存。<br>Java 内存模型中定义了以下 8 中操作：</p>
+<blockquote>
+<p>lock(加锁), 作用于主内存，在主内存中给数据加标记线程独占<br>unlock(解锁)，作用于主内存，在主内存中给数据去掉线程独占的标记<br>read(读取)，作用于主内存，从主内存中读取数据到工作内存<br>load(载入)，作用于工作内存，将 read 的数据保存到工作内存中<br>use(使用)，作用于工作内存，在工作内存中使用数据<br>assign(赋值)，作用于工作内存，在工作内存中给数据赋值<br>store(存储)，作用于工作内存，从工作内存保存到主内存<br>write(写入)，作用主内存，把工作内存传过来的值写入到主内存</p>
+</blockquote>
+<p>其中 read 和 load 需要一起使用，store 和 write 需要一起使用。<br>线程不安全的场景分析如下图：<br><img src="/image/java_memory.png" alt="java_memory"></p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/05/28/android-performance-optimize/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1351,271 +1683,6 @@ private void sendData() {
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2017/11/09/about_string/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Hexiaosa">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexiaosa">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/11/09/about_string/" itemprop="url">字符串、整型内存相关</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Veröffentlicht am</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-11-09T11:32:48+08:00">
-                2017-11-09
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h4 id="1-StringBuilder-和字符串连接符"><a href="#1-StringBuilder-和字符串连接符" class="headerlink" title="1. StringBuilder 和字符串连接符"></a>1. StringBuilder 和字符串连接符</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">String s = &quot;abc&quot;;</div><div class="line">s += &quot;d&quot;;</div></pre></td></tr></table></figure>
-<p>上述代码上，编译器会自动生成更高效的 StringBuilder, 调用 append() 方法来实现。</p>
-<p>那么是否表示可以完全信任编译器呢，再看下面代码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">String s = &quot;a&quot;;</div><div class="line">for (int i = 0; i &lt; 5; i++) &#123;</div><div class="line">	s += &quot;a&quot;;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>这种形式的，编译器会在循环体内创建 StringBuilder, 像这种操作，我们应该手动创建 StringBuilder 对象，而不仅仅是依赖编译器。</p>
-<p>当然也要避免类似以下的代码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">StringBuilder s = new StringBuilder();</div><div class="line">for (int i = 0; i &lt; 10; i++) &#123;</div><div class="line">	s.append(&quot;a&quot; + i + &quot;b&quot;);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>这种代码在循环里面依然有字符串的连接，依然会创建多个 StringBuilder 对象。</p>
-<h4 id="2-字符串存储"><a href="#2-字符串存储" class="headerlink" title="2. 字符串存储"></a>2. 字符串存储</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">String s1 = &quot;a&quot;;</div><div class="line">String s2 = &quot;b&quot;;</div><div class="line">String s3 = &quot;a&quot; + &quot;b&quot;;</div><div class="line">System.out.println(&quot;ab == s1+s2&quot; + (&quot;ab&quot; == s1+s2));</div><div class="line">System.out.println(&quot;ab == s3&quot; + (&quot;ab&quot; == s3));</div></pre></td></tr></table></figure>
-<p>输出结果：<br>false<br>true<br>直接用引号包裹的字符串相加产生的新对象会放到常量池中，对象相加的不会放到常量池中。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">public static final String A = &quot;ab&quot;; // 常量A</div><div class="line">public static final String B = &quot;cd&quot;; // 常量B</div><div class="line">// A+B 会放到常量池中，因为 A, B 都是常量，在类编译时已经确定了。</div></pre></td></tr></table></figure>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">public static final A;</div><div class="line">public static final B;</div><div class="line">static &#123;</div><div class="line">	A = &quot;a&quot;;</div><div class="line">	B = &quot;b&quot;;</div><div class="line">&#125;</div><div class="line">// A+B 不会放到常量池中，虽然被 final 修饰，但是在后来被赋值，并不是在一开始编译时就确定的。</div></pre></td></tr></table></figure>
-<p>intern()方法表示，如果字符串在常量池中存在，就取常量池中的。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">String hello = &quot;hello&quot;, lo = &quot;lo&quot;;</div><div class="line">hello == &quot;hel&quot; + &quot;lo&quot;; //true</div><div class="line">hello == &quot;hel&quot; + lo; //false</div><div class="line">hello == (&quot;hel&quot; + lo).intern();  //true</div></pre></td></tr></table></figure></p>
-<h4 id="3-Integer-内存分析"><a href="#3-Integer-内存分析" class="headerlink" title="3. Integer 内存分析"></a>3. Integer 内存分析</h4><p>定义一个 Integer 类型，赋值方式</p>
-<ol>
-<li>Integer i = new Integer(10);</li>
-<li>Integer i = 10;</li>
-</ol>
-<p>对于 -128~127 之间的数，使用第二种赋值方式时如果值相同，则两个变量 “==” true;<br>其它范围的数，两种赋值方式比较结果都为 false.</p>
-<p>原因：<br>-128~127 之间的数会存储在常量池中，比较的直接就是存在在常量池中的对象，而其它数都是新建的对象。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2017/11/09/event_dispatch/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Hexiaosa">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexiaosa">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/11/09/event_dispatch/" itemprop="url">事件分发</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Veröffentlicht am</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-11-09T09:32:48+08:00">
-                2017-11-09
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>事件分发中设计到的几个方法：dispatchTouchEvent(), onInterceptTouchEvent(), onTouchEvent(), 这几个都有返回值 boolean 类型，默认情况下都返回 false, </p>
-<p>若有 A(B(MyView)), 则事件的默认传递：</p>
-<p>A dispatch<br>A onIntercept<br>B dispatch<br>B onIntercept<br>MyView dispatch<br>MyView onTouch<br>B onTouch<br>A onTouch</p>
-<p>当 dispatchTouchEvent 返回 true 时，上面的分发流程就此中止；<br>当 onInterceptTouchEvent 返回 true 时，事件不再往子 View 传递，其余都还正常；<br>当 onTouchEvent 返回 true 时，onTouchEvent 由自己处理，不再交给父级处理。</p>
-<p>由上面的分析看来已经很清晰了，有下面这些特殊情况：</p>
-<ol>
-<li>这几个事件中，ACTION_DOWN 返回 true 和整个事件返回 true 的效果一样。也就是该次 event 一旦返回 true 表示之后的事件都返回 true。</li>
-<li>PS: onInterceptTouchEvent() 中有事件返回 true, 则之后的事件该方法不会再被调用，直到本次事件结束。</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -1666,7 +1733,7 @@ private void sendData() {
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">23</span>
+                  <span class="site-state-item-count">25</span>
                   <span class="site-state-item-name">Artikel</span>
                 </a>
               </div>
