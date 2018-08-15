@@ -181,7 +181,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
             
-            Home
+            Startseite
           </a>
         </li>
       
@@ -191,7 +191,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
             
-            Archives
+            Archiv
           </a>
         </li>
       
@@ -214,6 +214,144 @@
           <div id="content" class="content">
             
   <section id="posts" class="posts-expand">
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/06/07/java-class-load/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Hexiaosa">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexiaosa">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/06/07/java-class-load/" itemprop="url">类的加载</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-06-07T10:14:00+08:00">
+                2018-06-07
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>更新中……</p>
+<h3 id="类的加载过程"><a href="#类的加载过程" class="headerlink" title="类的加载过程"></a>类的加载过程</h3><h4 id="加载"><a href="#加载" class="headerlink" title="加载"></a>加载</h4><p>由于计算机可以识别的是二进制码，加载过程就是把 .java 文件加载为二进制形式的 .class文件</p>
+<h4 id="验证"><a href="#验证" class="headerlink" title="验证"></a>验证</h4><p>验证过程是为了防止恶意代码破坏虚拟机，进行一系列的队代码，字节码进行验证的过程</p>
+<h4 id="准备"><a href="#准备" class="headerlink" title="准备"></a>准备</h4><p>准备过程是对类变量设置初值，实例变量是在对象初始化时设置初值。类变量和静态常量设置的初始值是不同的<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">private static int a = 12; // 这里面给类变量 a 设置的初始值是 0</div><div class="line">private static final int a = 12; // 这里给静态常量 a 设置的初始值是 12</div></pre></td></tr></table></figure></p>
+<h4 id="解析"><a href="#解析" class="headerlink" title="解析"></a>解析</h4><p>解析是将符号引用转换为直接引用的过程。</p>
+<h4 id="初始化"><a href="#初始化" class="headerlink" title="初始化"></a>初始化</h4><p>初始化的条件：</p>
+<ol>
+<li>遇到 new, putStatic, getStatic, invokeStatic 时对当前类进行初始化</li>
+<li>初始化子类时，如果父类没有初始化，则对父类进行初始化</li>
+<li>对该类进行反射操作时</li>
+<li>调用该类的静态方法时，如果还没有进行初始化，则对该类进行初始化<br>不会初始化的情况：调用子类的静态方法，不会初始化父类；调用常量，不会初始化常量所在的类，因为常量会保存在使用类的常量池；</li>
+</ol>
+<h3 id="类的卸载"><a href="#类的卸载" class="headerlink" title="类的卸载"></a>类的卸载</h3><p>类的卸载，即清除类在方法区的信息<br>类卸载的触发条件：</p>
+<ol>
+<li>该类的实例都已被回收</li>
+<li>没有对该类反射</li>
+<li>加载该类的类加载器都已被回收</li>
+</ol>
+<h3 id="类加载器"><a href="#类加载器" class="headerlink" title="类加载器"></a>类加载器</h3><h5 id="三种类加载器"><a href="#三种类加载器" class="headerlink" title="三种类加载器"></a>三种类加载器</h5><h5 id="双亲委派机制"><a href="#双亲委派机制" class="headerlink" title="双亲委派机制"></a>双亲委派机制</h5><p>每个类加载器在 loadClass 时先交给父类加载器，如果父类加载器处理不了才自己处理。这里的父类加载器是用组合实现的，而不是直接继承。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
     
       
 
@@ -257,7 +395,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-06-05T11:10:33+08:00">
                 2018-06-05
@@ -451,7 +589,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-05-30T17:25:53+08:00">
                 2018-05-30
@@ -589,7 +727,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-05-28T17:37:05+08:00">
                 2018-05-28
@@ -729,7 +867,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-05-24T16:13:41+08:00">
                 2018-05-24
@@ -859,7 +997,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-30T09:17:37+08:00">
                 2018-01-30
@@ -986,7 +1124,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-29T11:20:58+08:00">
                 2018-01-29
@@ -1124,7 +1262,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-24T17:10:20+08:00">
                 2018-01-24
@@ -1262,7 +1400,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-19T10:58:37+08:00">
                 2018-01-19
@@ -1387,7 +1525,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-09T09:56:51+08:00">
                 2018-01-09
@@ -1477,212 +1615,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2017/12/17/bluetooth_details/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Hexiaosa">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexiaosa">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/12/17/bluetooth_details/" itemprop="url">Android 蓝牙详解</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-12-17T17:32:48+08:00">
-                2017-12-17
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>蓝牙4.0提出了低功耗蓝牙的模式。<br>蓝牙4.0的传输分为: Single Mode 和 Dual Mode; Single Mode 只支持与 4.0 的相互传输，Dual Mode 支持与 4.0 以及 3.0, 2.1, 2.0 传输.<br>相关代码如下：</p>
-<pre><code>//获取蓝牙适配器，系统只有一个蓝牙适配器，若 adapter 为 null, 则说明系统不支持蓝牙功能
-BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
-
-//表示蓝牙是否打开
-adapter.isEnabled();
-
-//获取已配对的蓝牙设备
-Set&lt;BluetoothDevice&gt; devices = adapter.getBondedDevices();
-
-BluetoothDevice device = null;
-if (devices.iterator().hasNext()) {
-    device = devices.iterator().next();
-}
-if (device == null) {
-    //没有已配对的设备
-} else {
-    //有已配对的设备，连接，发送数据
-    //4.0 的传输跟之前的版本有不同，看要连接的设备是否是4.0，是否支持4.0之前的来决定用什么代码来连接
-}
-</code></pre><p>经典蓝牙连接</p>
-<pre><code>权限：
-&lt;uses-permission android:name=&quot;android.permission.BLUETOOTH&quot; /&gt;
-&lt;uses-permission android:name=&quot;android.permission.BLUETOOTH_ADMIN&quot; /&gt;
-
-BluetoothSocket socket = adapter.createRfcommSocketToServiceRecord(NAME, MY_UUID);
-new Thread(
-    @Override
-    public void run() {
-        // 向服务端发送连接
-        socket.connect();
-        // 获取到输出流，向外写数据
-        os = clientSocket.getOutputStream();
-        // 判断是否拿到输出流
-        if (os != null) {
-            // 需要发送的信息
-            String text = &quot;open&quot;;
-            // 以utf-8的格式发送出去
-            os.write(text.getBytes(&quot;UTF-8&quot;));
-        }
-    }
-).start();
-</code></pre><p>低功耗蓝牙连接</p>
-<pre><code>权限：
-&lt;uses-permission android:name=&quot;android.permission.BLUETOOTH&quot; /&gt;
-&lt;uses-permission android:name=&quot;android.permission.BLUETOOTH_ADMIN&quot; /&gt;
-&lt;uses-permission android:name=&quot;android.permission.ACCESS_COARSE_LOCATION&quot; /&gt;
-&lt;uses-permission android:name=&quot;android.permission.ACCESS_FINE_LOCATION&quot; /&gt;
-&lt;uses-feature
-    android:name=&quot;android.hardware.bluetooth_le&quot;
-    android:required=&quot;true&quot; /&gt;
-
-BluetoothGatt gatt = device.connGatt(context, autoConnect, BluetoothGattCallback);
-//连接蓝牙，连接后将会回调到 BluetoothGattCallback 的 onConnectChanged 方法中
-@Override
-public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
-    super.onConnectionStateChange(gatt, status, newState);
-    if (newState == BluetoothProfile.STATE_CONNECTED) {
-        //即表示连接成功
-        gatt.discoverServices();//该方法之后将会调用 onServiceDiscovered() 方法中
-    }
-}
-@Override
-public void onServicesDiscovered(BluetoothGatt gatt, int status) {
-    super.onServicesDiscovered(gatt, status);
-    //开始发送数据
-    sendData();
-}
-
-//发送数据，具体怎么发送，要看设备方的要求(怎么接受)，还有需要注意的是 获取服务和获取写入数据的需要设备方提供的UUID与设备相匹配
-private void sendData() {
-    BluetoothGattService service = mBluetoothGatt.getService(RX_SERVICE_UUID);
-    BluetoothGattCharacteristic characteristic = service.getCharacteristic(RX_CHAR_UUID);
-    byte[] value = new byte[4];
-    value[0] = (byte) &apos;o&apos;;
-    value[1] = (byte) &apos;p&apos;;
-    value[2] = (byte) &apos;e&apos;;
-    value[3] = (byte) &apos;n&apos;;
-    characteristic.setValue(value);
-    Log.e(&quot;TAG&quot;, &quot;send value -&gt; &quot; + Arrays.toString(characteristic.getValue()));
-    boolean isWrite = mBluetoothGatt.writeCharacteristic(characteristic);
-    if (isWrite) {
-        Log.e(&quot;TAG&quot;, &quot;发送数据成功&quot;);
-    } else {
-        Log.e(&quot;TAG&quot;, &quot;发送数据失败&quot;);
-    }
-}
-</code></pre>
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -1733,8 +1665,8 @@ private void sendData() {
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">25</span>
-                  <span class="site-state-item-name">posts</span>
+                  <span class="site-state-item-count">26</span>
+                  <span class="site-state-item-name">Artikel</span>
                 </a>
               </div>
             
@@ -1784,7 +1716,7 @@ private void sendData() {
 </div>
 
 
-  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
 
 
 

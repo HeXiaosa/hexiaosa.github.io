@@ -181,7 +181,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
             
-            Home
+            Startseite
           </a>
         </li>
       
@@ -191,7 +191,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
             
-            Archives
+            Archiv
           </a>
         </li>
       
@@ -214,6 +214,130 @@
           <div id="content" class="content">
             
   <section id="posts" class="posts-expand">
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/08/15/retrofit/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Hexiaosa">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexiaosa">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/08/15/retrofit/" itemprop="url">Retrofit 源码分析</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-08-15T20:47:33+08:00">
+                2018-08-15
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h3 id="Retrofit-使用例子"><a href="#Retrofit-使用例子" class="headerlink" title="Retrofit 使用例子"></a>Retrofit 使用例子</h3><p>下面只展示了异步请求示例<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">Retrofit retrofit = new Retrofit.Builder()</div><div class="line">        .baseUrl(&quot;https://api.github.com&quot;)</div><div class="line">        .build();</div><div class="line"></div><div class="line">GitHubService service = retrofit.create(GitHubService.class);</div><div class="line">service.search().enqueue(new retrofit2.Callback&lt;String&gt;() &#123;</div><div class="line">    @Override</div><div class="line">    public void onResponse(retrofit2.Call&lt;String&gt; call, retrofit2.Response&lt;String&gt; response) &#123;</div><div class="line"></div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    public void onFailure(retrofit2.Call&lt;String&gt; call, Throwable t) &#123;</div><div class="line"></div><div class="line">    &#125;</div><div class="line">&#125;);</div></pre></td></tr></table></figure></p>
+<h3 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h3><p>Retrofit 中使用了 OkHttp, 分析到后面就可以看到。<br>先来看创建 Retrofit 吧：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line">public Retrofit build() &#123;</div><div class="line">	// ...</div><div class="line">	okhttp3.Call.Factory callFactory = this.callFactory;</div><div class="line">	if (callFactory == null) &#123;</div><div class="line">		// 创建 callFactory 对象，也就是 Retrofit 的 callFactory.</div><div class="line">		callFactory = new OkHttpClient();</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	Executor callbackExecutor = this.callbackExecutor;</div><div class="line">	if (callbackExecutor == null) &#123;</div><div class="line">		// 创建 callbackExecutor 对象，platform 是 Android 的实例，其 defaultCallbackExecutor 方法返回的是 ExecutorCallAdapterFactory 对象</div><div class="line">		callbackExecutor = platform.defaultCallbackExecutor();</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	List&lt;CallAdapter.Factory&gt; callAdapterFactories = new ArrayList&lt;&gt;(this.callAdapterFactories);</div><div class="line">	// 把上面创建的 callbackExecutor 添加到 callAdapterFactories 中</div><div class="line">	callAdapterFactories.add(platform.defaultCallAdapterFactory(callbackExecutor));</div><div class="line">	// ...</div><div class="line">	return new Retrofit(callFactory, baseUrl, unmodifiableList(converterFactories),</div><div class="line">	  unmodifiableList(callAdapterFactories), callbackExecutor, validateEagerly);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>上面代码主要创建了 retrofit 对象，还创建了这几个稍等分析会用到的对象，callFactory、callbackExecutor.</p>
+<p>下面接着往下看 retrofit.create 方法，这里使用了代理模式，create 创建的 GitHubService 对象可以调用 search 方法，search 方法的执行就在代理的实现里面，这个就一起分析了。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div></pre></td><td class="code"><pre><div class="line">public &lt;T&gt; T create(final Class&lt;T&gt; service) &#123;</div><div class="line">	Utils.validateServiceInterface(service);</div><div class="line">	if (validateEagerly) &#123;</div><div class="line">	    eagerlyValidateMethods(service);</div><div class="line">	&#125;</div><div class="line">	// 代理实现, service.search 走的就是这里的 invoke 方法</div><div class="line">	return (T) Proxy.newProxyInstance(service.getClassLoader(), new Class&lt;?&gt;[] &#123; service &#125;,</div><div class="line">	    new InvocationHandler() &#123;</div><div class="line">			private final Platform platform = Platform.get();</div><div class="line"></div><div class="line">			@Override public Object invoke(Object proxy, Method method, @Nullable Object[] args)</div><div class="line">			  throws Throwable &#123;</div><div class="line">			// If the method is a method from Object then defer to normal invocation.</div><div class="line">				if (method.getDeclaringClass() == Object.class) &#123;</div><div class="line">				  return method.invoke(this, args);</div><div class="line">				&#125;</div><div class="line">				if (platform.isDefaultMethod(method)) &#123;</div><div class="line">				  return platform.invokeDefaultMethod(method, service, proxy, args);</div><div class="line">				&#125;</div><div class="line">				// 这里是主要内容</div><div class="line">				/* 封装 ServiceMethod 对象，创建 ServiceMethod 对象时创建了 callAdapter 实例，callAdapter 是 retrofit.callAdapter(returnType, annotations), 再往里看就是 retrofit 的成员变量 callAdapterFactories.get(i).get(returnType, annotations, this), callAdapterFactories 是在创建 retrofit 时，里面存的是 ExecutorCallAdapterFactory 对象</div><div class="line">					    return new CallAdapter&lt;Object, Call&lt;?&gt;&gt;() &#123;</div><div class="line">					      @Override public Type responseType() &#123;</div><div class="line">					        return responseType;</div><div class="line">					      &#125;</div><div class="line"></div><div class="line">					      @Override public Call&lt;Object&gt; adapt(Call&lt;Object&gt; call) &#123;</div><div class="line">					        return new ExecutorCallbackCall&lt;&gt;(callbackExecutor, call);</div><div class="line">					      &#125;</div><div class="line">					    &#125;;</div><div class="line">			    这就是 ServiceMethod 的 callAdapter 对象</div><div class="line">				 */</div><div class="line">				ServiceMethod&lt;Object, Object&gt; serviceMethod =</div><div class="line">				    (ServiceMethod&lt;Object, Object&gt;) loadServiceMethod(method);</div><div class="line">				// 创建 OkHttpCall</div><div class="line">				OkHttpCall&lt;Object&gt; okHttpCall = new OkHttpCall&lt;&gt;(serviceMethod, args);</div><div class="line">				// 其中 callAdapter 在封装 ServiceMethod 对象时创建的，执行的 callAdapter.adapt(call) 返回的就是 new ExecutorCallbackCall&lt;&gt;(callbackExecutor, call)</div><div class="line">				return serviceMethod.adapt(okHttpCall);</div><div class="line">			&#125;</div><div class="line">	    &#125;);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>可以看到 service.search 返回的是 ExecutorCallbackCall 对象，它的成员变量 delegate 是上面创建的 OkHttpCall 对象，那么接下来的 enqueue 方法就是 ExecutorCallbackCall 的 enqueue 了。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div></pre></td><td class="code"><pre><div class="line">    @Override public void enqueue(final Callback&lt;T&gt; callback) &#123;</div><div class="line">		checkNotNull(callback, &quot;callback == null&quot;);</div><div class="line">        // 主要看下面这一点，delegata.enqueue, delegate 是 OkHttpCall 对象，那接着看下一个 OkHttpCall 的 enqueue 方法把</div><div class="line">		delegate.enqueue(new Callback&lt;T&gt;() &#123;</div><div class="line">		@Override public void onResponse(Call&lt;T&gt; call, final Response&lt;T&gt; response) &#123;</div><div class="line">		  callbackExecutor.execute(new Runnable() &#123;</div><div class="line">		    @Override public void run() &#123;</div><div class="line">				if (delegate.isCanceled()) &#123;</div><div class="line">					// Emulate OkHttp&apos;s behavior of throwing/delivering an IOException on cancellation.</div><div class="line">					callback.onFailure(ExecutorCallbackCall.this, new IOException(&quot;Canceled&quot;));</div><div class="line">				&#125; else &#123;</div><div class="line">					callback.onResponse(ExecutorCallbackCall.this, response);</div><div class="line">				&#125;</div><div class="line">		    &#125;</div><div class="line">		  &#125;);</div><div class="line">		&#125;</div><div class="line"></div><div class="line">		@Override public void onFailure(Call&lt;T&gt; call, final Throwable t) &#123;</div><div class="line">			callbackExecutor.execute(new Runnable() &#123;</div><div class="line">				@Override public void run() &#123;</div><div class="line">				    callback.onFailure(ExecutorCallbackCall.this, t);</div><div class="line">				&#125;</div><div class="line">			&#125;);</div><div class="line">		&#125;</div><div class="line">		&#125;);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">@Override public void enqueue(final Callback&lt;T&gt; callback) &#123;</div><div class="line">	checkNotNull(callback, &quot;callback == null&quot;);</div><div class="line"></div><div class="line">	okhttp3.Call call;</div><div class="line">	Throwable failure;</div><div class="line"></div><div class="line">	synchronized (this) &#123;</div><div class="line">		if (executed) throw new IllegalStateException(&quot;Already executed.&quot;);</div><div class="line">		executed = true;</div><div class="line"></div><div class="line">		call = rawCall;</div><div class="line">		failure = creationFailure;</div><div class="line">		if (call == null &amp;&amp; failure == null) &#123;</div><div class="line">			try &#123;</div><div class="line">				// 创建 call 对象，serviceMethod.toCall -&gt; callFactory.newCall(callFactory 就是在最开始创建 retrofit 对象的 OkHttpClient 实例) -&gt; okHttpClient.newCall(这里使用的就是 OkHttp 框架的了) -&gt; RealCall</div><div class="line">			    call = rawCall = createRawCall();</div><div class="line">			&#125; catch (Throwable t) &#123;</div><div class="line">			    throwIfFatal(t);</div><div class="line">			    failure = creationFailure = t;</div><div class="line">			&#125;</div><div class="line">		&#125;</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	if (failure != null) &#123;</div><div class="line">		callback.onFailure(this, failure);</div><div class="line">		return;</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	if (canceled) &#123;</div><div class="line">		call.cancel();</div><div class="line">	&#125;</div><div class="line">	// call 是 RealCall 对象，接下来的 enqueue 方法跟分析 OkHttp 的就一样了</div><div class="line">	call.enqueue(new okhttp3.Callback() &#123;</div><div class="line">		@Override public void onResponse(okhttp3.Call call, okhttp3.Response rawResponse) &#123;</div><div class="line">			Response&lt;T&gt; response;</div><div class="line">			try &#123;</div><div class="line">			    response = parseResponse(rawResponse);</div><div class="line">			&#125; catch (Throwable e) &#123;</div><div class="line">			    callFailure(e);</div><div class="line">			    return;</div><div class="line">			&#125;</div><div class="line"></div><div class="line">			try &#123;</div><div class="line">			    callback.onResponse(OkHttpCall.this, response);</div><div class="line">			&#125; catch (Throwable t) &#123;</div><div class="line">			    t.printStackTrace();</div><div class="line">			&#125;</div><div class="line">		&#125;</div><div class="line"></div><div class="line">		@Override public void onFailure(okhttp3.Call call, IOException e) &#123;</div><div class="line">			callFailure(e);</div><div class="line">		&#125;</div><div class="line"></div><div class="line">		private void callFailure(Throwable e) &#123;</div><div class="line">			try &#123;</div><div class="line">			    callback.onFailure(OkHttpCall.this, e);</div><div class="line">			&#125; catch (Throwable t) &#123;</div><div class="line">			    t.printStackTrace();</div><div class="line">			&#125;</div><div class="line">		&#125;</div><div class="line">	&#125;);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
     
       
 
@@ -257,7 +381,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-08-14T21:16:41+08:00">
                 2018-08-14
@@ -386,7 +510,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-08-14T21:15:28+08:00">
                 2018-08-14
@@ -525,7 +649,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-08-12T14:39:43+08:00">
                 2018-08-12
@@ -684,7 +808,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-08-11T23:44:51+08:00">
                 2018-08-11
@@ -809,7 +933,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-08-09T11:04:00+08:00">
                 2018-08-09
@@ -934,7 +1058,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-08-07T18:58:51+08:00">
                 2018-08-07
@@ -1058,7 +1182,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-07-31T11:34:33+08:00">
                 2018-07-31
@@ -1187,7 +1311,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-07-26T14:46:35+08:00">
                 2018-07-26
@@ -1351,7 +1475,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-06-21T15:58:20+08:00">
                 2018-06-21
@@ -1441,144 +1565,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/06/07/java-class-load/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Hexiaosa">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexiaosa">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/06/07/java-class-load/" itemprop="url">类的加载</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-06-07T10:14:00+08:00">
-                2018-06-07
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>更新中……</p>
-<h3 id="类的加载过程"><a href="#类的加载过程" class="headerlink" title="类的加载过程"></a>类的加载过程</h3><h4 id="加载"><a href="#加载" class="headerlink" title="加载"></a>加载</h4><p>由于计算机可以识别的是二进制码，加载过程就是把 .java 文件加载为二进制形式的 .class文件</p>
-<h4 id="验证"><a href="#验证" class="headerlink" title="验证"></a>验证</h4><p>验证过程是为了防止恶意代码破坏虚拟机，进行一系列的队代码，字节码进行验证的过程</p>
-<h4 id="准备"><a href="#准备" class="headerlink" title="准备"></a>准备</h4><p>准备过程是对类变量设置初值，实例变量是在对象初始化时设置初值。类变量和静态常量设置的初始值是不同的<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">private static int a = 12; // 这里面给类变量 a 设置的初始值是 0</div><div class="line">private static final int a = 12; // 这里给静态常量 a 设置的初始值是 12</div></pre></td></tr></table></figure></p>
-<h4 id="解析"><a href="#解析" class="headerlink" title="解析"></a>解析</h4><p>解析是将符号引用转换为直接引用的过程。</p>
-<h4 id="初始化"><a href="#初始化" class="headerlink" title="初始化"></a>初始化</h4><p>初始化的条件：</p>
-<ol>
-<li>遇到 new, putStatic, getStatic, invokeStatic 时对当前类进行初始化</li>
-<li>初始化子类时，如果父类没有初始化，则对父类进行初始化</li>
-<li>对该类进行反射操作时</li>
-<li>调用该类的静态方法时，如果还没有进行初始化，则对该类进行初始化<br>不会初始化的情况：调用子类的静态方法，不会初始化父类；调用常量，不会初始化常量所在的类，因为常量会保存在使用类的常量池；</li>
-</ol>
-<h3 id="类的卸载"><a href="#类的卸载" class="headerlink" title="类的卸载"></a>类的卸载</h3><p>类的卸载，即清除类在方法区的信息<br>类卸载的触发条件：</p>
-<ol>
-<li>该类的实例都已被回收</li>
-<li>没有对该类反射</li>
-<li>加载该类的类加载器都已被回收</li>
-</ol>
-<h3 id="类加载器"><a href="#类加载器" class="headerlink" title="类加载器"></a>类加载器</h3><h5 id="三种类加载器"><a href="#三种类加载器" class="headerlink" title="三种类加载器"></a>三种类加载器</h5><h5 id="双亲委派机制"><a href="#双亲委派机制" class="headerlink" title="双亲委派机制"></a>双亲委派机制</h5><p>每个类加载器在 loadClass 时先交给父类加载器，如果父类加载器处理不了才自己处理。这里的父类加载器是用组合实现的，而不是直接继承。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -1629,8 +1615,8 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">25</span>
-                  <span class="site-state-item-name">posts</span>
+                  <span class="site-state-item-count">26</span>
+                  <span class="site-state-item-name">Artikel</span>
                 </a>
               </div>
             
@@ -1680,7 +1666,7 @@
 </div>
 
 
-  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
 
 
 
