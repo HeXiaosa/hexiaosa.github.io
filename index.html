@@ -181,7 +181,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
             
-            Startseite
+            Accueil
           </a>
         </li>
       
@@ -191,7 +191,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
             
-            Archiv
+            Archives
           </a>
         </li>
       
@@ -214,6 +214,257 @@
           <div id="content" class="content">
             
   <section id="posts" class="posts-expand">
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/08/21/rxjava-theory/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Hexiaosa">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexiaosa">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/08/21/rxjava-theory/" itemprop="url">RxJava 从源码分析流程</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posté le</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-08-21T19:06:32+08:00">
+                2018-08-21
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>以下面这段代码为示例<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line">public void run(final ThreadListener&lt;T&gt; listener) &#123;</div><div class="line">    Observable.create(new ObservableOnSubscribe&lt;T&gt;() &#123;</div><div class="line">        @Override</div><div class="line">        public void subscribe(ObservableEmitter&lt;T&gt; e) throws Exception &#123;</div><div class="line">            listener.start(e);</div><div class="line">        &#125;</div><div class="line">    &#125;).subscribeOn(Schedulers.io())</div><div class="line">            .observeOn(AndroidSchedulers.mainThread())</div><div class="line">            .subscribe(new Observer&lt;T&gt;() &#123;</div><div class="line">                @Override</div><div class="line">                public void onSubscribe(Disposable d) &#123;</div><div class="line"></div><div class="line">                &#125;</div><div class="line"></div><div class="line">                @Override</div><div class="line">                public void onNext(T t) &#123;</div><div class="line">                    listener.onNext(t);</div><div class="line">                &#125;</div><div class="line"></div><div class="line">                @Override</div><div class="line">                public void onError(Throwable e) &#123;</div><div class="line">                    listener.onError(e.getMessage());</div><div class="line">                &#125;</div><div class="line"></div><div class="line">                @Override</div><div class="line">                public void onComplete() &#123;</div><div class="line"></div><div class="line">                &#125;</div><div class="line">            &#125;);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>源码流程就看下面这个手画的图吧：<br><img src="/image/rxjava_flow.jpg" alt="rxjava_flow"></p>
+<p>可以看到类是一层一层被包裹的，那么当 ObservableEmitter 执行 e.next() 时，会调到 ObservableObserveOn 的内部类 ObserveOnObserver 的 onNext 方法, onNext 方法中调了 schedule, schedule 方法如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">void schedule() &#123;</div><div class="line">    if (getAndIncrement() == 0) &#123;</div><div class="line">        worker.schedule(this); // worker 是 HandlerScheduler.createWorker, 返回的是 HandlerScheduler 的内部类 HandlerWorker</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>wordker.schedule 的主要代码如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">public Disposable schedule(Runnable run, long delay, TimeUnit unit) &#123;</div><div class="line">	// 这里的 handler 是 new Handler(Looper.getMainLooper())</div><div class="line">    ScheduledRunnable scheduled = new ScheduledRunnable(handler, run);</div><div class="line"></div><div class="line">    Message message = Message.obtain(handler, scheduled);</div><div class="line">    message.obj = this; // Used as token for batch disposal of this worker&apos;s runnables.</div><div class="line">    // 这里切换到主线程</div><div class="line">    handler.sendMessageDelayed(message, Math.max(0L, unit.toMillis(delay)));</div><div class="line"></div><div class="line">    return scheduled;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>所以接下来会执行 ScheduledRunnable 的 run 方法，接着执行到 run 方法中，会调用 drainNormal<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line">void drainNormal() &#123;</div><div class="line">    // ...</div><div class="line">    final Observer&lt;? super T&gt; a = actual;</div><div class="line">    for (;;) &#123;</div><div class="line">    	// ...</div><div class="line">        for (;;) &#123;</div><div class="line">        	// ...</div><div class="line">            try &#123;</div><div class="line">            	// ...</div><div class="line">            &#125; catch (Throwable ex) &#123;</div><div class="line">                // ...</div><div class="line">                a.onError(ex);</div><div class="line">                return;</div><div class="line">            &#125;</div><div class="line">            // ...</div><div class="line">            // 这里执行 onNext 方法，也就是会执行到我们实现的代码</div><div class="line">            a.onNext(v);</div><div class="line">        &#125;</div><div class="line">        // ...</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/08/21/ReentrantLock-theory/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Hexiaosa">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexiaosa">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/08/21/ReentrantLock-theory/" itemprop="url">ReentrantLock 原理</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posté le</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-08-21T18:29:48+08:00">
+                2018-08-21
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>ReentrantReadWriteLock 是通过加锁来保证线程安全的，它是 Java 源码中内置的加锁的类</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">ReentrantReadWriteLock lock = new ReentrantReadWriteLock();</div><div class="line">try &#123;</div><div class="line">    lock.writeLock().lock();</div><div class="line">&#125; finally &#123;</div><div class="line">    lock.writeLock().unlock();</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>那么它内部是通过什么方式来实现加锁的呢，通过以下源码中的注释便可清楚。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">public ReentrantReadWriteLock() &#123;</div><div class="line">    this(false); // 默认是 false</div><div class="line">&#125;</div><div class="line">public ReentrantReadWriteLock(boolean fair) &#123;</div><div class="line">    // 默认是不公平锁</div><div class="line">    sync = fair ? new FairSync() : new NonfairSync();</div><div class="line">    readerLock = new ReadLock(this);</div><div class="line">    writerLock = new WriteLock(this);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>先来看 WriteLock 的<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div></pre></td><td class="code"><pre><div class="line">// WriteLock</div><div class="line">public void lock() &#123;</div><div class="line">    sync.acquire(1);</div><div class="line">&#125;</div><div class="line">// Sync继承自 AbstractQueuedSynchronizer, acquire 方法是在 AbstractQueuedSynchronizer 里实现的</div><div class="line">public final void acquire(int arg) &#123;</div><div class="line">    // 主要控制同步的逻辑在 tryAcquire</div><div class="line">    if (!tryAcquire(arg) &amp;&amp;</div><div class="line">        acquireQueued(addWaiter(Node.EXCLUSIVE), arg))</div><div class="line">        selfInterrupt(); // 如果没有获取到锁，当前线程中断</div><div class="line">&#125;</div><div class="line">// Sync 类中 tryAcquire 方法的实现</div><div class="line">protected final boolean tryAcquire(int acquires) &#123;</div><div class="line">    Thread current = Thread.currentThread();</div><div class="line">    int c = getState(); // 持有该锁的数量</div><div class="line">    int w = exclusiveCount(c);</div><div class="line">    if (c != 0) &#123;</div><div class="line">        // 已经有持有该锁的</div><div class="line">        if (w == 0 || current != getExclusiveOwnerThread())</div><div class="line">            return false; // 持有锁的线程不是当前线程</div><div class="line">        if (w + exclusiveCount(acquires) &gt; MAX_COUNT)</div><div class="line">            throw new Error(&quot;Maximum lock count exceeded&quot;);</div><div class="line">        // 同一线程，如果是嵌套的，这里就是可重入锁的原理所在</div><div class="line">        setState(c + acquires);</div><div class="line">        return true;</div><div class="line">    &#125;</div><div class="line">    // 还没有持有该锁的，如果写数量失败了，就返回 false</div><div class="line">    if (writerShouldBlock() ||</div><div class="line">        !compareAndSetState(c, c + acquires))</div><div class="line">        return false;</div><div class="line">    // 设置持有锁的线程是当前线程</div><div class="line">    setExclusiveOwnerThread(current);</div><div class="line">    return true;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>到这里加锁主要逻辑就结束了，那么解锁的呢？接着往下看，解锁跟加锁的过程比较类似<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line">// WriteLock</div><div class="line">public void unlock() &#123;</div><div class="line">    sync.release(1);</div><div class="line">&#125;</div><div class="line">// Sync继承自 AbstractQueuedSynchronizer, acquire 方法是在 AbstractQueuedSynchronizer 里实现的</div><div class="line">public final boolean release(int arg) &#123;</div><div class="line">    // 解锁的主要逻辑在 tryRelease</div><div class="line">    if (tryRelease(arg)) &#123;</div><div class="line">        // ...</div><div class="line">        return true;</div><div class="line">    &#125;</div><div class="line">    return false;</div><div class="line">&#125;</div><div class="line">// Sync 类的 tryRelease 实现</div><div class="line">protected final boolean tryRelease(int releases) &#123;</div><div class="line">    // ...</div><div class="line">    int nextc = getState() - releases; // 剩余的锁的数量</div><div class="line">    boolean free = exclusiveCount(nextc) == 0; // 是否已经没有锁</div><div class="line">    if (free)</div><div class="line">        setExclusiveOwnerThread(null); // 如果已经没有锁，则持有线程置为 null</div><div class="line">    setState(nextc); // 设置剩余锁的数量</div><div class="line">    return free; // 返回是否已经不再持有锁</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<blockquote>
+<p>总结：ReentrantLock 就是通过设置当前持有锁的线程和持有锁的数量，加锁时候通过判断这些来决定是否能获取锁，如果暂时不能获取锁，则线程中断。解锁过程是修改相应的持有锁线程和持有锁数量。</p>
+</blockquote>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
     
       
 
@@ -257,7 +508,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posté le</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-08-15T20:55:08+08:00">
                 2018-08-15
@@ -380,7 +631,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posté le</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-08-15T20:47:33+08:00">
                 2018-08-15
@@ -504,7 +755,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posté le</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-08-14T21:16:41+08:00">
                 2018-08-14
@@ -633,7 +884,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posté le</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-08-14T21:15:28+08:00">
                 2018-08-14
@@ -772,7 +1023,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posté le</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-08-12T14:39:43+08:00">
                 2018-08-12
@@ -931,7 +1182,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posté le</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-08-11T23:44:51+08:00">
                 2018-08-11
@@ -1056,7 +1307,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posté le</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-08-09T11:04:00+08:00">
                 2018-08-09
@@ -1181,7 +1432,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posté le</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-08-07T18:58:51+08:00">
                 2018-08-07
@@ -1229,299 +1480,6 @@
 </blockquote>
 <p>上述是否自己处理 onTouchEvent 事件是由 onInterceptTouchEvent() 实现的，return true 则会调自己的 onTouchEvent，否则会到子 View 的 onInterceptTouchEvent/onTouchEvent（根据子 View 是 ViewGroup 还是 View 决定，View 是直接执行 onTouchEvent 的，因为 View 没有 onInterceptTouchEvent, 最后一层是肯定会执行 onTouchEvent 的）</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div></pre></td><td class="code"><pre><div class="line">@Override</div><div class="line">public boolean onInterceptTouchEvent(MotionEvent event) &#123;</div><div class="line">    int intercepted = 0;</div><div class="line">    switch (event.getAction()) &#123;</div><div class="line">    case MotionEvent.ACTION_DOWN: &#123;</div><div class="line">        // ...</div><div class="line">        intercepted = 0;</div><div class="line">        break;</div><div class="line">    &#125;</div><div class="line">    case MotionEvent.ACTION_MOVE: &#123;</div><div class="line">        int deltaX = x - mLastXIntercept;</div><div class="line">        int deltaY = y - mLastYIntercept;</div><div class="line">        if (y &lt;= getHeaderHeight()) &#123;</div><div class="line">        	// 自己不拦截，看子级的实现</div><div class="line">            intercepted = 0;</div><div class="line">        &#125; else if (Math.abs(deltaY) &lt;= Math.abs(deltaX)) &#123;</div><div class="line">        	// 这样认为是横向滑动，不处理 onTouchEvent</div><div class="line">            intercepted = 0;</div><div class="line">            // 否则当滑动距离 &gt; mTouchSlop(滑动的最小距离) 时就处理 onTouchEvent</div><div class="line">        &#125; else if (mStatus == STATUS_EXPANDED &amp;&amp; deltaY &lt;= -mTouchSlop) &#123;</div><div class="line">            intercepted = 1;</div><div class="line">        &#125; else if (deltaY &gt;= mTouchSlop) &#123;</div><div class="line">            intercepted = 1;</div><div class="line">        &#125;</div><div class="line">        break;</div><div class="line">    &#125;</div><div class="line">    case MotionEvent.ACTION_UP: &#123;</div><div class="line">        // ...</div><div class="line">        break;</div><div class="line">    &#125;</div><div class="line">    return intercepted != 0;</div><div class="line">&#125;</div><div class="line"></div><div class="line">@Override</div><div class="line">public boolean onTouchEvent(MotionEvent event) &#123;</div><div class="line">    int x = (int) event.getX();</div><div class="line">    int y = (int) event.getY();</div><div class="line">    switch (event.getAction()) &#123;</div><div class="line">    case MotionEvent.ACTION_DOWN: &#123;</div><div class="line">        break;</div><div class="line">    &#125;</div><div class="line">    case MotionEvent.ACTION_MOVE: &#123;</div><div class="line">        int deltaX = x - mLastX;</div><div class="line">        int deltaY = y - mLastY;</div><div class="line">        // 通过 LayoutParams 实现动画</div><div class="line">        setHeaderHeight(mHeaderHeight);</div><div class="line">        break;</div><div class="line">    &#125;</div><div class="line">    case MotionEvent.ACTION_UP: &#123;</div><div class="line">        // 这里做了下判断，当松开手的时候，会自动向两边滑动，具体向哪边滑，要看当前所处的位置</div><div class="line">        int destHeight = 0;</div><div class="line">        if (mHeaderHeight &lt;= mOriginalHeaderHeight * 0.5) &#123;</div><div class="line">            destHeight = 0;</div><div class="line">            mStatus = STATUS_COLLAPSED;</div><div class="line">        &#125; else &#123;</div><div class="line">            destHeight = mOriginalHeaderHeight;</div><div class="line">            mStatus = STATUS_EXPANDED;</div><div class="line">        &#125;</div><div class="line">        // 慢慢滑向终点</div><div class="line">        this.smoothSetHeaderHeight(mHeaderHeight, destHeight, 500);</div><div class="line">        break;</div><div class="line">    &#125;</div><div class="line">    default:</div><div class="line">        break;</div><div class="line">    &#125;</div><div class="line">    mLastX = x;</div><div class="line">    mLastY = y;</div><div class="line">    return true;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/07/31/GreenDao-Cache/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Hexiaosa">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexiaosa">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/07/31/GreenDao-Cache/" itemprop="url">GreenDao 缓存</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Veröffentlicht am</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-07-31T11:34:33+08:00">
-                2018-07-31
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <blockquote>
-<p>在项目中遇到这样的问题，数据库使用的 GreenDao, 两个 Activity, 分别添加同一个 Fragment, 查本地数据库，实体类中有一个是否选中状态的字段是不保存到数据库的，@transient 标记的，发现会出现这样的现象：在 Activity1 中的 Fragment 查出来，第一个位置选中，到 Activity2 中的 Fragment 查出来的第一个位置也是选中的，what???</p>
-</blockquote>
-<p> 两个 Activity 分别 new Fragment, 这是在两个 Fragment 对象中的，最后 debug 跟踪到原来是在 Activity2 中数据库查出来的数据就是选中的，脑子里闪现出难道是 GreenDao 有缓存，于是搜索 “GreenDao 缓存”，果然是有，网上给出的清除缓存的方式就是调 daoSession.clear(), 这样的话不是把所有的表缓存都给清了吗，怎么让只是这个查询不缓存呢，看下 daoSession.clear() 里面做了什么</p>
- <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">public void clear() &#123;</div><div class="line">    ***DaoConfig.getIdentityScope().clear();</div><div class="line">    ***DaoConfig.getIdentityScope().clear();</div><div class="line">    ***DaoConfig.getIdentityScope().clear();</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>可以看到清除的就是 DaoConfig 的 identityScope，下面看下这个做了什么<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line">public final class DaoConfig implements Cloneable &#123;</div><div class="line"></div><div class="line">    //...</div><div class="line">    private IdentityScope&lt;?, ?&gt; identityScope;</div><div class="line"></div><div class="line">    //...</div><div class="line"></div><div class="line">    // identityScope 在这里被赋值</div><div class="line">    @SuppressWarnings(&quot;rawtypes&quot;)</div><div class="line">    public void initIdentityScope(IdentityScopeType type) &#123;</div><div class="line">        if (type == IdentityScopeType.None) &#123;</div><div class="line">        	// 当 type 是 IdentityScopeType.None 时就没有缓存了</div><div class="line">            identityScope = null;</div><div class="line">        &#125; else if (type == IdentityScopeType.Session) &#123;</div><div class="line">            if (keyIsNumeric) &#123;</div><div class="line">                identityScope = new IdentityScopeLong();</div><div class="line">            &#125; else &#123;</div><div class="line">                identityScope = new IdentityScopeObject();</div><div class="line">            &#125;</div><div class="line">        &#125; else &#123;</div><div class="line">            throw new IllegalArgumentException(&quot;Unsupported type: &quot; + type);</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>设置 identityScope 是在 new Session 时传的，自动生成的 DaoMaster 类有两个 newSession 方法</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"> public class DaoMaster extends AbstractDaoMaster &#123;</div><div class="line">    //...</div><div class="line">    public DaoSession newSession() &#123;</div><div class="line">        return new DaoSession(db, IdentityScopeType.Session, daoConfigMap);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public DaoSession newSession(IdentityScopeType type) &#123;</div><div class="line">        return new DaoSession(db, type, daoConfigMap);</div><div class="line">    &#125;</div><div class="line">    //...</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>所以只要在 newSession 时传 IdentityScopeType.None 就可以不使用缓存了。</p>
-<p>当然，这次遇到的问题是查出来的状态需要是不选中的，也可以再查出来之后是选中状态的话进行修改，具体就要看具体问题适合哪种解决方式了。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/07/26/ActivityStartFlow/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Hexiaosa">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexiaosa">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/07/26/ActivityStartFlow/" itemprop="url">Activity 启动流程</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Veröffentlicht am</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-07-26T14:46:35+08:00">
-                2018-07-26
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>首先大致讲一下 Activity 的启动流程，从 startActivity 会执行到类 Instrumentation, 然后跨进程调用 ActivityManagerService 的 startActivity, 最终会调用 ActivityThread 中的 H 类(一个 Handler)，会执行 handleLaunchActivity, 里面会实际启动和显示 Activity.</p>
-<p>记 Activity 启动流程的流水账。。下面的流程图比较有意义一些</p>
-<p><img src="/image/Activity_Start.png" alt="Activity 启动流程"></p>
-<ol>
-<li><p>开始 startActivity</p>
-</li>
-<li><p>最终都会调用 Activity 的 startActivityForResult 方法</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">startActivityForResult(Intent intent, int requestCode, @Nullable Bundle options) &#123;</div><div class="line">    //...</div><div class="line">    mInstrumentation.execStartActivity(</div><div class="line">                    this, mMainThread.getApplicationThread(), mToken, this,</div><div class="line">                    intent, requestCode, options);</div><div class="line">    //...	</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-</li>
-<li><p>Instrumentation.execStartActivity</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">Instrumentation.execStartActivity(</div><div class="line">            Context who, IBinder contextThread, IBinder token, Activity target,</div><div class="line">            Intent intent, int requestCode, Bundle options) &#123;</div><div class="line">            IApplicationThread whoThread = (IApplicationThread) contextThread;</div><div class="line">            //...</div><div class="line">            ActivityManagerNative.getDefault()</div><div class="line">                .startActivity(whoThread, who.getBasePackageName(), intent,</div><div class="line">                        intent.resolveTypeIfNeeded(who.getContentResolver()),</div><div class="line">                        token, target != null ? target.mEmbeddedID : null,</div><div class="line">                        requestCode, 0, null, options);</div><div class="line">            //...</div><div class="line">        &#125;</div></pre></td></tr></table></figure>
-</li>
-<li><p>看 ActivityManagerNative.getDefault() 得到的是什么</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div></pre></td><td class="code"><pre><div class="line">// getDefault()</div><div class="line">static public IActivityManager getDefault() &#123;</div><div class="line">    return gDefault.get();</div><div class="line">&#125;</div><div class="line"></div><div class="line">// gDefault</div><div class="line">private static final Singleton&lt;IActivityManager&gt; gDefault = new Singleton&lt;IActivityManager&gt;() &#123;</div><div class="line">    protected IActivityManager create() &#123;</div><div class="line">        IBinder b = ServiceManager.getService(&quot;activity&quot;); // 得到的 b 为 ActivityManagerService</div><div class="line">        if (false) &#123;</div><div class="line">            Log.v(&quot;ActivityManager&quot;, &quot;default service binder = &quot; + b);</div><div class="line">        &#125;</div><div class="line">        IActivityManager am = asInterface(b);</div><div class="line">        if (false) &#123;</div><div class="line">            Log.v(&quot;ActivityManager&quot;, &quot;default service = &quot; + am);</div><div class="line">        &#125;</div><div class="line">        return am;</div><div class="line">    &#125;</div><div class="line">&#125;;</div><div class="line"></div><div class="line">// asInterface</div><div class="line">static public IActivityManager asInterface(IBinder obj) &#123;</div><div class="line">    if (obj == null) &#123;</div><div class="line">        return null;</div><div class="line">    &#125;</div><div class="line">    IActivityManager in =</div><div class="line">        (IActivityManager)obj.queryLocalInterface(descriptor);</div><div class="line">    if (in != null) &#123;</div><div class="line">        return in;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    // 所以 ActivityManagerNative.getDefault() 得到的就是 ActivityManagerProxy</div><div class="line">    return new ActivityManagerProxy(obj);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-</li>
-<li><p>ActivityManagerProxy.startActivity, 传参内容看第三步(ActivityManagerProxy 是 ActivityManagerNative 的内部类)</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div></pre></td><td class="code"><pre><div class="line">public int startActivity(IApplicationThread caller, String callingPackage, Intent intent,</div><div class="line">        String resolvedType, IBinder resultTo, String resultWho, int requestCode,</div><div class="line">        int startFlags, ProfilerInfo profilerInfo, Bundle options) throws RemoteException &#123;</div><div class="line">    Parcel data = Parcel.obtain();</div><div class="line">    Parcel reply = Parcel.obtain();</div><div class="line">    data.writeInterfaceToken(IActivityManager.descriptor);</div><div class="line">    data.writeStrongBinder(caller != null ? caller.asBinder() : null);</div><div class="line">    data.writeString(callingPackage);</div><div class="line">    intent.writeToParcel(data, 0);</div><div class="line">    data.writeString(resolvedType);</div><div class="line">    data.writeStrongBinder(resultTo);</div><div class="line">    data.writeString(resultWho);</div><div class="line">    data.writeInt(requestCode);</div><div class="line">    data.writeInt(startFlags);</div><div class="line">    if (profilerInfo != null) &#123;</div><div class="line">        data.writeInt(1);</div><div class="line">        profilerInfo.writeToParcel(data, Parcelable.PARCELABLE_WRITE_RETURN_VALUE);</div><div class="line">    &#125; else &#123;</div><div class="line">        data.writeInt(0);</div><div class="line">    &#125;</div><div class="line">    if (options != null) &#123;</div><div class="line">        data.writeInt(1);</div><div class="line">        options.writeToParcel(data, 0);</div><div class="line">    &#125; else &#123;</div><div class="line">        data.writeInt(0);</div><div class="line">    &#125;</div><div class="line">    mRemote.transact(START_ACTIVITY_TRANSACTION, data, reply, 0);</div><div class="line">    reply.readException();</div><div class="line">    int result = reply.readInt();</div><div class="line">    reply.recycle();</div><div class="line">    data.recycle();</div><div class="line">    return result;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-</li>
-<li><p>ActivityManagerService.onTransact</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div></pre></td><td class="code"><pre><div class="line">@Override</div><div class="line">public boolean onTransact(int code, Parcel data, Parcel reply, int flags)</div><div class="line">        throws RemoteException &#123;</div><div class="line">    if (code == SYSPROPS_TRANSACTION) &#123;</div><div class="line">        //...</div><div class="line">    &#125;</div><div class="line">    //...</div><div class="line">    // 调父类的 onTransact 方法，其父类为 ActivityManagerNative</div><div class="line">    return super.onTransact(code, data, reply, flags);</div><div class="line">    //...</div><div class="line">&#125;</div><div class="line"></div><div class="line">// ActivityManagerNative.onTransact</div><div class="line">@Override</div><div class="line">public boolean onTransact(int code, Parcel data, Parcel reply, int flags)</div><div class="line">        throws RemoteException &#123;</div><div class="line">    switch (code) &#123;</div><div class="line">    case START_ACTIVITY_TRANSACTION:</div><div class="line">    &#123;</div><div class="line">        data.enforceInterface(IActivityManager.descriptor);</div><div class="line">        IBinder b = data.readStrongBinder();</div><div class="line">        IApplicationThread app = ApplicationThreadNative.asInterface(b);</div><div class="line">        String callingPackage = data.readString();</div><div class="line">        Intent intent = Intent.CREATOR.createFromParcel(data);</div><div class="line">        String resolvedType = data.readString();</div><div class="line">        IBinder resultTo = data.readStrongBinder();</div><div class="line">        String resultWho = data.readString();</div><div class="line">        int requestCode = data.readInt();</div><div class="line">        int startFlags = data.readInt();</div><div class="line">        ProfilerInfo profilerInfo = data.readInt() != 0</div><div class="line">                ? ProfilerInfo.CREATOR.createFromParcel(data) : null;</div><div class="line">        Bundle options = data.readInt() != 0</div><div class="line">                ? Bundle.CREATOR.createFromParcel(data) : null;</div><div class="line">        // 关键代码看这里，此方法实现在 ActivityManagerService 中</div><div class="line">        int result = startActivity(app, callingPackage, intent, resolvedType,</div><div class="line">                resultTo, resultWho, requestCode, startFlags, profilerInfo, options);</div><div class="line">        reply.writeNoException();</div><div class="line">        reply.writeInt(result);</div><div class="line">        return true;</div><div class="line">    &#125;</div><div class="line">    //...</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-</li>
-<li><p>ActivityManagerService.startActivity</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line">@Override</div><div class="line">public final int startActivity(IApplicationThread caller, String callingPackage,</div><div class="line">        Intent intent, String resolvedType, IBinder resultTo, String resultWho, int requestCode,</div><div class="line">        int startFlags, ProfilerInfo profilerInfo, Bundle options) &#123;</div><div class="line">    return startActivityAsUser(caller, callingPackage, intent, resolvedType, resultTo,</div><div class="line">        resultWho, requestCode, startFlags, profilerInfo, options,</div><div class="line">        UserHandle.getCallingUserId());</div><div class="line">&#125;</div><div class="line"></div><div class="line">@Override</div><div class="line">public final int startActivityAsUser(IApplicationThread caller, String callingPackage,</div><div class="line">        Intent intent, String resolvedType, IBinder resultTo, String resultWho, int requestCode,</div><div class="line">        int startFlags, ProfilerInfo profilerInfo, Bundle options, int userId) &#123;</div><div class="line">    enforceNotIsolatedCaller(&quot;startActivity&quot;);</div><div class="line">    userId = handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(), userId,</div><div class="line">            false, ALLOW_FULL_ONLY, &quot;startActivity&quot;, null);</div><div class="line">    // TODO: Switch to user app stacks here.</div><div class="line">    return mStackSupervisor.startActivityMayWait(caller, -1, callingPackage, intent,</div><div class="line">            resolvedType, null, null, resultTo, resultWho, requestCode, startFlags,</div><div class="line">            profilerInfo, null, null, options, userId, null, null);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-</li>
-<li><p>ActivityStackSupervisor.startActivityMayWait -&gt; startActivityLocked -&gt; startActivityUncheckedLocked</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div></pre></td><td class="code"><pre><div class="line">final int startActivityMayWait(IApplicationThread caller, int callingUid,</div><div class="line">        String callingPackage, Intent intent, String resolvedType,</div><div class="line">        IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,</div><div class="line">        IBinder resultTo, String resultWho, int requestCode, int startFlags,</div><div class="line">        ProfilerInfo profilerInfo, WaitResult outResult, Configuration config,</div><div class="line">        Bundle options, int userId, IActivityContainer iContainer, TaskRecord inTask) &#123;</div><div class="line">    </div><div class="line">    // ...</div><div class="line"></div><div class="line">        // 启动 Activity, 以上代码都是在构造下面执行需要的参数</div><div class="line">        int res = startActivityLocked(caller, intent, resolvedType, aInfo,</div><div class="line">                voiceSession, voiceInteractor, resultTo, resultWho,</div><div class="line">                requestCode, callingPid, callingUid, callingPackage,</div><div class="line">                realCallingPid, realCallingUid, startFlags, options,</div><div class="line">                componentSpecified, null, container, inTask);</div><div class="line"></div><div class="line">        Binder.restoreCallingIdentity(origId);</div><div class="line"></div><div class="line">        if (stack.mConfigWillChange) &#123;</div><div class="line">            // If the caller also wants to switch to a new configuration,</div><div class="line">            // do so now.  This allows a clean switch, as we are waiting</div><div class="line">            // for the current activity to pause (so we will not destroy</div><div class="line">            // it), and have not yet started the next activity.</div><div class="line">            mService.enforceCallingPermission(android.Manifest.permission.CHANGE_CONFIGURATION,</div><div class="line">                    &quot;updateConfiguration()&quot;);</div><div class="line">            stack.mConfigWillChange = false;</div><div class="line">            if (DEBUG_CONFIGURATION) Slog.v(TAG,</div><div class="line">                    &quot;Updating to new configuration after starting activity.&quot;);</div><div class="line">            mService.updateConfigurationLocked(config, null, false, false);</div><div class="line">        &#125;</div><div class="line">        </div><div class="line">        // ... 启动 Activity 的返回结果</div><div class="line">        </div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line">// 上面方法调用到</div><div class="line">final int startActivityLocked(IApplicationThread caller,</div><div class="line">        Intent intent, String resolvedType, ActivityInfo aInfo,</div><div class="line">        IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,</div><div class="line">        IBinder resultTo, String resultWho, int requestCode,</div><div class="line">        int callingPid, int callingUid, String callingPackage,</div><div class="line">        int realCallingPid, int realCallingUid, int startFlags, Bundle options,</div><div class="line">        boolean componentSpecified, ActivityRecord[] outActivity, ActivityContainer container,</div><div class="line">        TaskRecord inTask) &#123;</div><div class="line">    // ...</div><div class="line">    </div><div class="line">    // 启动 Activity</div><div class="line">    err = startActivityUncheckedLocked(r, sourceRecord, voiceSession, voiceInteractor,</div><div class="line">            startFlags, true, options, inTask);</div><div class="line"></div><div class="line">    if (err &lt; 0) &#123;</div><div class="line">        notifyActivityDrawnForKeyguard();</div><div class="line">    &#125;</div><div class="line">    return err;</div><div class="line">&#125;</div><div class="line"></div><div class="line">// 上面方法调用到</div><div class="line">final int startActivityUncheckedLocked(ActivityRecord r, ActivityRecord sourceRecord,</div><div class="line">        IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor, int startFlags,</div><div class="line">        boolean doResume, Bundle options, TaskRecord inTask) &#123;</div><div class="line">    // ...</div><div class="line"></div><div class="line">    // Should this be considered a new task?</div><div class="line">    if (r.resultTo == null &amp;&amp; inTask == null &amp;&amp; !addingToTask</div><div class="line">            &amp;&amp; (launchFlags &amp; Intent.FLAG_ACTIVITY_NEW_TASK) != 0) &#123;</div><div class="line">        // 处理 FLAG_ACTIVITY_NEW_TASK</div><div class="line">    &#125; else if (sourceRecord != null) &#123;</div><div class="line">        // 当前栈移到 top 来操作</div><div class="line">        if (!addingToTask &amp;&amp; (launchFlags&amp;Intent.FLAG_ACTIVITY_CLEAR_TOP) != 0) &#123;</div><div class="line">            // 处理 FLAG_ACTIVITY_CLEAR_TOP</div><div class="line">            ActivityRecord top = sourceTask.performClearTaskLocked(r, launchFlags);</div><div class="line">            if (top != null) &#123;</div><div class="line">                top.deliverNewIntentLocked(callingUid, r.intent);</div><div class="line">                return ActivityManager.START_DELIVERED_TO_TOP;</div><div class="line">            &#125;</div><div class="line">        &#125; else if (!addingToTask &amp;&amp;</div><div class="line">                (launchFlags&amp;Intent.FLAG_ACTIVITY_REORDER_TO_FRONT) != 0) &#123;</div><div class="line">            // 处理 FLAG_ACTIVITY_REORDER_TO_FRONT</div><div class="line">            final ActivityRecord top = sourceTask.findActivityInHistoryLocked(r);</div><div class="line">            if (top != null) &#123;</div><div class="line">                top.deliverNewIntentLocked(callingUid, r.intent);</div><div class="line">                return ActivityManager.START_DELIVERED_TO_TOP;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125; else if (inTask != null) &#123;</div><div class="line">        // ...</div><div class="line">        // 处理 singleTop 启动方式的</div><div class="line">        ActivityRecord top = inTask.getTopActivity();</div><div class="line">        if (top != null &amp;&amp; top.realActivity.equals(r.realActivity) &amp;&amp; top.userId == r.userId) &#123;</div><div class="line">            if ((launchFlags &amp; Intent.FLAG_ACTIVITY_SINGLE_TOP) != 0</div><div class="line">                    || launchSingleTop || launchSingleTask) &#123;</div><div class="line">                // ...</div><div class="line">                top.deliverNewIntentLocked(callingUid, r.intent);</div><div class="line">                return ActivityManager.START_DELIVERED_TO_TOP;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        //  ...</div><div class="line"></div><div class="line">    &#125; else &#123;</div><div class="line">        // ...</div><div class="line">    &#125;</div><div class="line">    // ...</div><div class="line">    // 启动 Activity</div><div class="line">    targetStack.startActivityLocked(r, newTask, doResume, keepCurTransition, options);</div><div class="line">    return ActivityManager.START_SUCCESS;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-</li>
-<li><p>ActivityStack.startActivityLocked</p>
-</li>
-<li><p>ActivityStackSupervisor.resumeTopActivitiesLocked</p>
-</li>
-<li><p>ActivityStack.resumeTopActivityLocked -&gt; resumeTopActivityLocked -&gt; resumeTopActivityInnerLocked</p>
-</li>
-<li><p>ActivityStackSupervisor.startSpecificActivityLocked -&gt; realStartActivityLocked</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">final boolean realStartActivityLocked(ActivityRecord r,</div><div class="line">        ProcessRecord app, boolean andResume, boolean checkConfig)</div><div class="line">        throws RemoteException &#123;</div><div class="line"></div><div class="line">    // ...</div><div class="line">    // app.thread 为 ActivityThread 中的 ApplicationThread 内部类</div><div class="line">        app.thread.scheduleLaunchActivity(new Intent(r.intent), r.appToken,</div><div class="line">                System.identityHashCode(r), r.info, new Configuration(mService.mConfiguration),</div><div class="line">                r.compat, r.task.voiceInteractor, app.repProcState, r.icicle, r.persistentState,</div><div class="line">                results, newIntents, !andResume, mService.isNextTransitionForward(),</div><div class="line">                profilerInfo);</div><div class="line"></div><div class="line">    // ...</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-</li>
-<li><p>ApplicationThread.scheduleLaunchActivity</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">public final void scheduleLaunchActivity(Intent intent, IBinder token, int ident,</div><div class="line">        ActivityInfo info, Configuration curConfig, CompatibilityInfo compatInfo,</div><div class="line">        IVoiceInteractor voiceInteractor, int procState, Bundle state,</div><div class="line">        PersistableBundle persistentState, List&lt;ResultInfo&gt; pendingResults,</div><div class="line">        List&lt;Intent&gt; pendingNewIntents, boolean notResumed, boolean isForward,</div><div class="line">        ProfilerInfo profilerInfo) &#123;</div><div class="line"></div><div class="line">    // ...</div><div class="line"></div><div class="line">    sendMessage(H.LAUNCH_ACTIVITY, r);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-</li>
-<li><p>上述方法把具体实现传递给 ActivityThread 的内部类 H(继承自 Handler)</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">private class H extends Handler &#123;</div><div class="line"></div><div class="line">    public void handleMessage(Message msg) &#123;</div><div class="line">        switch (msg.what) &#123;</div><div class="line">            case LAUNCH_ACTIVITY: &#123;</div><div class="line">                Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, &quot;activityStart&quot;);</div><div class="line">                final ActivityClientRecord r = (ActivityClientRecord) msg.obj;</div><div class="line"></div><div class="line">                r.packageInfo = getPackageInfoNoCheck(</div><div class="line">                        r.activityInfo.applicationInfo, r.compatInfo);</div><div class="line">                handleLaunchActivity(r, null);</div><div class="line">                Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);</div><div class="line">            &#125; break;</div><div class="line">            // ...</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-</li>
-<li><p>最终实现是 ActivityThread.handleLaunchActivity</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div></pre></td><td class="code"><pre><div class="line">private void handleLaunchActivity(ActivityClientRecord r, Intent customIntent) &#123;</div><div class="line">    // ...</div><div class="line"></div><div class="line">    // 构建 Activity</div><div class="line">    Activity a = performLaunchActivity(r, customIntent);</div><div class="line"></div><div class="line">    if (a != null) &#123;</div><div class="line">        r.createdConfig = new Configuration(mConfiguration);</div><div class="line">        Bundle oldState = r.state;</div><div class="line">        // 调这个方法去显示 Activity</div><div class="line">        handleResumeActivity(r.token, false, r.isForward,</div><div class="line">                !r.activity.mFinished &amp;&amp; !r.startsNotResumed);</div><div class="line"></div><div class="line">        if (!r.activity.mFinished &amp;&amp; r.startsNotResumed) &#123;</div><div class="line">            try &#123;</div><div class="line">                r.activity.mCalled = false;</div><div class="line">                mInstrumentation.callActivityOnPause(r.activity);</div><div class="line">                if (r.isPreHoneycomb()) &#123;</div><div class="line">                    r.state = oldState;</div><div class="line">                &#125;</div><div class="line">            &#125; </div><div class="line">            // ...</div><div class="line">            r.paused = true;</div><div class="line">        &#125;</div><div class="line">    &#125; else &#123;</div><div class="line">        try &#123;</div><div class="line">            ActivityManagerNative.getDefault()</div><div class="line">                .finishActivity(r.token, Activity.RESULT_CANCELED, null, false);</div><div class="line">        &#125; </div><div class="line">        // ...</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line">// 上面方法有调到，构建 Activity 和 ApplicationContext</div><div class="line">private Activity performLaunchActivity(ActivityClientRecord r, Intent customIntent) &#123;</div><div class="line">    // ... </div><div class="line">    // 构建 Activity</div><div class="line">    Activity activity = null;</div><div class="line">    try &#123;</div><div class="line">        java.lang.ClassLoader cl = r.packageInfo.getClassLoader();</div><div class="line">        activity = mInstrumentation.newActivity(</div><div class="line">                cl, component.getClassName(), r.intent);</div><div class="line">        // ...</div><div class="line">    &#125;</div><div class="line">    // ... </div><div class="line"></div><div class="line">    // 构建 Appilication</div><div class="line">    try &#123;</div><div class="line">        // ContextImpl 对象就是在这里创建的</div><div class="line">        Application app = r.packageInfo.makeApplication(false, mInstrumentation);</div><div class="line">        </div><div class="line">        if (activity != null) &#123;</div><div class="line">            Context appContext = createBaseContextForActivity(r, activity);</div><div class="line">            CharSequence title = r.activityInfo.loadLabel(appContext.getPackageManager());</div><div class="line">            Configuration config = new Configuration(mCompatConfiguration);</div><div class="line">            if (DEBUG_CONFIGURATION) Slog.v(TAG, &quot;Launching activity &quot;</div><div class="line">                    + r.activityInfo.name + &quot; with config &quot; + config);</div><div class="line">            activity.attach(appContext, this, getInstrumentation(), r.token,</div><div class="line">                    r.ident, app, r.intent, r.activityInfo, title, r.parent,</div><div class="line">                    r.embeddedID, r.lastNonConfigurationInstances, config,</div><div class="line">                    r.voiceInteractor);</div><div class="line">            // ...</div><div class="line">        &#125;</div><div class="line">        r.paused = true;</div><div class="line">        mActivities.put(r.token, r);</div><div class="line">    &#125;</div><div class="line">    // ...</div><div class="line">    return activity;</div><div class="line">&#125;</div></pre></td></tr></table></figure></li>
-</ol>
-
           
         
       
@@ -1606,8 +1564,8 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">27</span>
-                  <span class="site-state-item-name">Artikel</span>
+                  <span class="site-state-item-count">29</span>
+                  <span class="site-state-item-name">articles</span>
                 </a>
               </div>
             
@@ -1657,7 +1615,7 @@
 </div>
 
 
-  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
 
 
 
@@ -1665,7 +1623,7 @@
 
 
 
-  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+  <div class="theme-info">Thème &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
 
 
 

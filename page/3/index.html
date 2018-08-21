@@ -181,7 +181,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
             
-            Startseite
+            Accueil
           </a>
         </li>
       
@@ -191,7 +191,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
             
-            Archiv
+            Archives
           </a>
         </li>
       
@@ -214,6 +214,269 @@
           <div id="content" class="content">
             
   <section id="posts" class="posts-expand">
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/01/24/java_collection/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Hexiaosa">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexiaosa">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/01/24/java_collection/" itemprop="url">Java 集合简括</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posté le</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-24T17:10:20+08:00">
+                2018-01-24
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>首先放一张全部总结的图<br><img src="/image/Java_collection_sumarize.png" alt="Java_collection_sumarize"></p>
+<h4 id="Map"><a href="#Map" class="headerlink" title="Map"></a>Map</h4><h6 id="HashMap"><a href="#HashMap" class="headerlink" title="HashMap"></a>HashMap</h6><p>HashMap 是一个重复 key 值覆盖，键值对形式的集合。<br>HashMap 是用数组加链表的数据结构，put 时要放到数组的某个位置，这个位置的计算是 key 的 hash &amp; (length-1), put 时如果 key 在集合中存在，则直接覆盖掉旧值并返回旧值。如果 key 在集合中不存在，首先会判断是否 size 是不是已经大于数组长度的3/4, 如果是的话就进行数组扩容。然后判断要插入的位置是否已经有元素存在，是的话则使用头插法将该元素插入到该位置的链表中。</p>
+<blockquote>
+<ol>
+<li>HashMap 的长度<br>hashMap 的初始默认长度是 16, 每次扩容的长度都是原长度的 2 倍。每次的 HashMap 数组的长度都是 2 的整数幂，其原因是取 index 时会跟 length-1 做与操作，length-1 的二进制数每位都是 1, 更能降低重复率。<br>如果能在最初预估长度，最好能指定固定长度，这样就避免了扩容，因为扩容的过程会再新建一个 2 倍长度的数组，再计算位置进行复制</li>
+<li>冲突解决<br>HashMap put 时的冲突解决方法是拉链法，也就是对于冲突使用链表的形式，这样的优点的是插入快，空间不需要连续，节省空间。</li>
+<li>加载因子对性能的影响<br>加载因子默认是 0.75, 其值越大，空间效率越低，冲突越小，查找时间效率越高；其值越小，空间效率越高，冲突越大，查找时间效率越低。</li>
+<li>HashMap 是线程不安全的，想要实现线程安全可以通过 Collections.synchronizedCollection 返回 SynchronizedCollection 对象来实现线程安全，或者使用 java.util.concurrent 包下的 ConcurrentHashMap 来实现。</li>
+</ol>
+</blockquote>
+<h6 id="HashTable"><a href="#HashTable" class="headerlink" title="HashTable"></a>HashTable</h6><p>与 HashMap 相比，支持线程同步，避免多线程同时写而造成的数据不一致，但实现线程同步需要很高的花费，因此不建议用。<br>与 HashMap 相比，其 key, value 不可为 null</p>
+<h6 id="TreeMap"><a href="#TreeMap" class="headerlink" title="TreeMap"></a>TreeMap</h6><p>TreeMap是按 key 值有序，相同 key 重复覆盖，非线程安全，内部使用二叉树结构。</p>
+<h6 id="ConcurrentHashMap"><a href="#ConcurrentHashMap" class="headerlink" title="ConcurrentHashMap"></a>ConcurrentHashMap</h6><p>ConcurrentHashMap 是线程安全的，并且相对于 HashTable 来说具有更高的性能。性能更高的原因是尽量减少了加锁的范围、使用 volitile 关键字、CAS，都增加了保证线程安全的性能。<br>从 JDK8 之后加锁开始使用 synchronized 而不是 ReentrantLock, 因为 synchronized 做了足够的优化了。</p>
+<h4 id="List"><a href="#List" class="headerlink" title="List"></a>List</h4><h6 id="ArrayList"><a href="#ArrayList" class="headerlink" title="ArrayList"></a>ArrayList</h6><p>以数组形式保存，初始化时可以指定数组长度，不指定的话有默认的长度，每次 add 时检测数组长度是否够用，不够用的话即扩容。如果现有长度是数组长度的 3/4 则开始扩容，扩容的长度是 现有长度 + （内部定义的最小长度或现有长度的 2 2倍）<br>查找效率高，插入，删除都需要移动该元素后面的所有元素。</p>
+<h6 id="Vector"><a href="#Vector" class="headerlink" title="Vector"></a>Vector</h6><p>与 ArrayList 相比，支持线程同步，避免多线程同时写而造成的数据不一致，但实现线程同步需要很高的花费，因此不建议用。<br>与 ArrayList 相比，Vector 每次扩容都是现有长度的 2 倍</p>
+<h6 id="LinkedList"><a href="#LinkedList" class="headerlink" title="LinkedList"></a>LinkedList</h6><p>以双链表形式保存，在头尾插入删除效率高；查找指定位置的会根据要查找的位置来判断从头还是尾开始查。</p>
+<h4 id="Set"><a href="#Set" class="headerlink" title="Set"></a>Set</h4><h6 id="HashSet"><a href="#HashSet" class="headerlink" title="HashSet"></a>HashSet</h6><p>无顺序，无重复元素。如果插入的元素已存在，会覆盖已存在的那个。使用的是 HashMap 的 key 来存放。</p>
+<h6 id="TreeSet"><a href="#TreeSet" class="headerlink" title="TreeSet"></a>TreeSet</h6><p>有顺序，无重复元素。如果 add 的元素已存在，会覆盖已存在的那个。实际存的就是 TreeMap 的 key.</p>
+<h4 id="Queue"><a href="#Queue" class="headerlink" title="Queue"></a>Queue</h4><h6 id="PriorityQue"><a href="#PriorityQue" class="headerlink" title="PriorityQue"></a>PriorityQue</h6><p>通过二叉小顶堆实现，保证每次取出的元素都是最小的。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/01/19/ThreadLocal/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Hexiaosa">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexiaosa">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/01/19/ThreadLocal/" itemprop="url">ThreadLocal 详解</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posté le</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-19T10:58:37+08:00">
+                2018-01-19
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h4 id="1-作用"><a href="#1-作用" class="headerlink" title="1. 作用"></a>1. 作用</h4><p>一个 ThreadLocal 对象在每个线程里面能保存一个值，同一个 ThreadLocal 保存同一个实例在不同线程中互不影响<br>为什么要用它 ——&gt; 在一个线程只需要唯一的某一类型实例</p>
+<h4 id="2-怎么用"><a href="#2-怎么用" class="headerlink" title="2. 怎么用"></a>2. 怎么用</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line">public class Test&#123;</div><div class="line">	</div><div class="line">	static ThreadLocal&lt;Integer&gt; local = new ThreadLocal&lt;&gt;();</div><div class="line">	</div><div class="line">	public static void main(String[] args) &#123;</div><div class="line">		local.set(100);</div><div class="line">		new Thread() &#123;</div><div class="line">			public void run() &#123;</div><div class="line">				System.out.println(&quot;new Thread :&quot; + local.get());</div><div class="line">				local.set(200);</div><div class="line">				System.out.println(&quot;new Thread :&quot; + local.get());</div><div class="line">			&#125;;</div><div class="line">		&#125;.start();</div><div class="line">		try &#123;</div><div class="line">			Thread.sleep(10);</div><div class="line">			System.out.println(local.get());</div><div class="line">		&#125; catch (InterruptedException e) &#123;</div><div class="line">			// TODO Auto-generated catch block</div><div class="line">			e.printStackTrace();</div><div class="line">		&#125;</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>上面代码的输出结果如下，可以看出同一个 ThreadLocal 在不同的线程中有各自的值。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">new Thread :null</div><div class="line">new Thread :200</div><div class="line">100</div></pre></td></tr></table></figure></p>
+<h4 id="3-原理"><a href="#3-原理" class="headerlink" title="3. 原理"></a>3. 原理</h4><p>保存数据的类似 key-value 保存的形式。key 就是当前的 ThreadLocal 对象, set 时如果 key 相同则覆盖 value 的值。<br>那么一个 ThreadLocal 对象是怎么保证一个线程只有一个值的呢？因为 Thread 中有一个 ThreadLocal.ThreadLocalMap 对象，每次 get/set 时都会取出这个对象进行操作。<br><img src="/image/ThreadLocal_get.png" alt="ThreadLocal_get"></p>
+<h4 id="4-Android-内源码使用分析"><a href="#4-Android-内源码使用分析" class="headerlink" title="4. Android 内源码使用分析"></a>4. Android 内源码使用分析</h4><p>Looper 在每个线程中只有一个对象，原因在创建 Looper 的源码中有声明一个线程只能有一个 Looper.<br><img src="/image/Looper_prepare.png" alt="Looper_prepare"></p>
+<p>具体为什么这样设计从这张图片可能会找到一些答案，有待更进一步研究。<br><img src="/image/Handle_Looper_Message.png" alt="Handle_Looper_Message"></p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
     
       
 
@@ -257,7 +520,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posté le</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-09T09:56:51+08:00">
                 2018-01-09
@@ -389,7 +652,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posté le</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-12-17T17:32:48+08:00">
                 2017-12-17
@@ -595,7 +858,7 @@ private void sendData() {
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posté le</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-11-09T11:32:48+08:00">
                 2017-11-09
@@ -732,7 +995,7 @@ private void sendData() {
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posté le</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-11-09T09:32:48+08:00">
                 2017-11-09
@@ -860,7 +1123,7 @@ private void sendData() {
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posté le</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-10-19T09:32:48+08:00">
                 2017-10-19
@@ -1033,7 +1296,7 @@ private void sendData() {
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posté le</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-10-11T16:56:51+08:00">
                 2017-10-11
@@ -1161,7 +1424,7 @@ private void sendData() {
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posté le</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-10-09T10:32:48+08:00">
                 2017-10-09
@@ -1293,8 +1556,8 @@ private void sendData() {
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">27</span>
-                  <span class="site-state-item-name">Artikel</span>
+                  <span class="site-state-item-count">29</span>
+                  <span class="site-state-item-name">articles</span>
                 </a>
               </div>
             
@@ -1344,7 +1607,7 @@ private void sendData() {
 </div>
 
 
-  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
 
 
 
@@ -1352,7 +1615,7 @@ private void sendData() {
 
 
 
-  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+  <div class="theme-info">Thème &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
 
 
 
