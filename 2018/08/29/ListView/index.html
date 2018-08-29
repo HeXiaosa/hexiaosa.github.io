@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="ListView 中缓使用了 RecycleBin(AbsListView 的内部类), 它内部有几个重要的成员变量：mScrapViews : 多种 viewType 时，缓存 viewType 个 viewmCurrentScrap : 一种 viewType 时，缓存一个 viewmActiveViews : 缓存屏幕上显示的 view, 用于在 layout 过程中复用 view 首先分析">
+<meta property="og:type" content="article">
+<meta property="og:title" content="从 ListView 源码讲解缓存复用流程">
+<meta property="og:url" content="http://hexiaosa.com/2018/08/29/ListView/index.html">
+<meta property="og:site_name" content="Hexiaosa">
+<meta property="og:description" content="ListView 中缓使用了 RecycleBin(AbsListView 的内部类), 它内部有几个重要的成员变量：mScrapViews : 多种 viewType 时，缓存 viewType 个 viewmCurrentScrap : 一种 viewType 时，缓存一个 viewmActiveViews : 缓存屏幕上显示的 view, 用于在 layout 过程中复用 view 首先分析">
+<meta property="og:updated_time" content="2018-08-29T15:52:33.406Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="从 ListView 源码讲解缓存复用流程">
+<meta name="twitter:description" content="ListView 中缓使用了 RecycleBin(AbsListView 的内部类), 它内部有几个重要的成员变量：mScrapViews : 多种 viewType 时，缓存 viewType 个 viewmCurrentScrap : 一种 viewType 时，缓存一个 viewmActiveViews : 缓存屏幕上显示的 view, 用于在 layout 过程中复用 view 首先分析">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://hexiaosa.com/2018/08/29/ListView/"/>
+
+
+
+
+
+  <title>从 ListView 源码讲解缓存复用流程 | Hexiaosa</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Hexiaosa</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Startseite
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archiv
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/08/29/ListView/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Hexiaosa">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexiaosa">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">从 ListView 源码讲解缓存复用流程</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-08-29T23:50:29+08:00">
+                2018-08-29
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>ListView 中缓使用了 RecycleBin(AbsListView 的内部类), 它内部有几个重要的成员变量：<br>mScrapViews : 多种 viewType 时，缓存 viewType 个 view<br>mCurrentScrap : 一种 viewType 时，缓存一个 view<br>mActiveViews : 缓存屏幕上显示的 view, 用于在 layout 过程中复用 view</p>
+<p>首先分析 ListView 的绘制流程，onLayout 方法重写是在 AbsListView 中，这里会调用 ListView 的 layoutChildren, 主要代码如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div></pre></td><td class="code"><pre><div class="line">@Override</div><div class="line">protected void layoutChildren() &#123;</div><div class="line">	// ...</div><div class="line">    try &#123;</div><div class="line">    	// ...</div><div class="line">        if (mAdapter == null) &#123;</div><div class="line">            // ...</div><div class="line">            return;</div><div class="line">        &#125;</div><div class="line">        // ...</div><div class="line">        // 两次 layout, 第一次 layout 还没有子 View, childCount 是 0, 第二次才有正常的值，屏幕显示的 View 数量</div><div class="line">        final int childCount = getChildCount();</div><div class="line"></div><div class="line">        int index = 0;</div><div class="line">        int delta = 0;</div><div class="line"></div><div class="line">        View sel;</div><div class="line">        View oldSel = null;</div><div class="line">        View oldFirst = null;</div><div class="line">        View newSel = null;</div><div class="line"></div><div class="line">        // Remember stuff we will need down below</div><div class="line">        switch (mLayoutMode) &#123;</div><div class="line">        // ...</div><div class="line">        default: // LAYOUT_NORMAL 执行到这里</div><div class="line">            // 记录之前选中，first 等</div><div class="line">        &#125;</div><div class="line">        // 这里处理 notifyDataSetChanged 时的逻辑</div><div class="line">        boolean dataChanged = mDataChanged;</div><div class="line">        if (dataChanged) &#123;</div><div class="line">            handleDataChanged();</div><div class="line">        &#125;</div><div class="line">        // ...</div><div class="line">        // 开始缓存 View, 使用 RecycleBin</div><div class="line">        final int firstPosition = mFirstPosition;</div><div class="line">        final RecycleBin recycleBin = mRecycler;</div><div class="line">        if (dataChanged) &#123;</div><div class="line">        	// 更新内容时在这里处理</div><div class="line">            for (int i = 0; i &lt; childCount; i++) &#123;</div><div class="line">                recycleBin.addScrapView(getChildAt(i), firstPosition+i);</div><div class="line">            &#125;</div><div class="line">        &#125; else &#123;</div><div class="line">        	// 初始第二次 layout 时执行到这里，fillActiveViews 时除了 header 和 footer 的 显示在屏幕上的 child 都存到 mActiveViews</div><div class="line">            recycleBin.fillActiveViews(childCount, firstPosition);</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        // 清除旧的子 view</div><div class="line">        detachAllViewsFromParent();</div><div class="line">        recycleBin.removeSkippedScrap();</div><div class="line"></div><div class="line">        switch (mLayoutMode) &#123;</div><div class="line">        // ...</div><div class="line">        default: // LAYOUT_NORMAL 的逻辑在 default 中，layout 方法中缓存相关的也就是在这里</div><div class="line">            if (childCount == 0) &#123; // 两次 layout, 第一次时没有 child, 所以在这里处理，填充 View</div><div class="line">                if (!mStackFromBottom) &#123;</div><div class="line">                    final int position = lookForSelectablePosition(0, true);</div><div class="line">                    setSelectedPositionInt(position);</div><div class="line">                    // fillDown -&gt; makeAndAddView -&gt; </div><div class="line">                    // (getActiveView, 没有的话 obtainView&lt;这里调用了 getView 方法，传过去的 convertView 从 transientVStateView/scapeView 中取，convertView 是 null 则自己 inflate&gt;</div><div class="line">                    // , setupChild&lt;layout child, 需要再测量时测量 child&gt;)</div><div class="line">                    sel = fillFromTop(childrenTop); </div><div class="line">                &#125; else &#123;</div><div class="line">                    final int position = lookForSelectablePosition(mItemCount - 1, false);</div><div class="line">                    setSelectedPositionInt(position);</div><div class="line">                    sel = fillUp(mItemCount - 1, childrenBottom);</div><div class="line">                &#125;</div><div class="line">            &#125; else &#123; // 第二次 layout 在这里处理，填充 View, 这里 view 不会再 inflate, 会使用 mActiveView 中缓存的</div><div class="line">                if (mSelectedPosition &gt;= 0 &amp;&amp; mSelectedPosition &lt; mItemCount) &#123;</div><div class="line">                    sel = fillSpecific(mSelectedPosition,</div><div class="line">                            oldSel == null ? childrenTop : oldSel.getTop());</div><div class="line">                &#125; else if (mFirstPosition &lt; mItemCount) &#123;</div><div class="line">                    sel = fillSpecific(mFirstPosition,</div><div class="line">                            oldFirst == null ? childrenTop : oldFirst.getTop());</div><div class="line">                &#125; else &#123;</div><div class="line">                    sel = fillSpecific(0, childrenTop);</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">            break;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        // 把屏幕上显示的 View 转移到废弃 View 的缓存中，由于上面调用 fillSpecific 方法时，会把屏幕显示 View item 已置空，所以这一步废弃 View 并缓存不了东西</div><div class="line">        recycleBin.scrapActiveViews();</div><div class="line"></div><div class="line">        // ...</div><div class="line">        </div><div class="line">        // 设置一些选中，焦点，以及恢复一些默认值</div><div class="line"></div><div class="line">        invokeOnItemScrollListener();</div><div class="line">    &#125; finally &#123;</div><div class="line">        // ...</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>layout 的流程，第一次屏幕上的 view 都是 inflate 得到的，第二次 layout 时，把子 view 存到 mActiveViews 中，取出来重新 layout</p>
+<p>上面就是 layout 的过程，那么滑动中 view 是怎么复用的呢，这是在 onTouchEvent 中控制的，接下来看 onTouchEvent 的流程<br>onTouchEvent -&gt; onTouchMove -&gt; scrollIfNeeded -&gt; trackMotionScroll -&gt; fillGap -&gt; fillDown -&gt; makeAndAddView, 这里 obtainView 就是主要在 scapeView 得到复用 View 了。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/08/22/asynctask-theory/" rel="next" title="AsyncTask 详解与思考">
+                <i class="fa fa-chevron-left"></i> AsyncTask 详解与思考
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Hexiaosa</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">31</span>
+                  <span class="site-state-item-name">Artikel</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Hexiaosa</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

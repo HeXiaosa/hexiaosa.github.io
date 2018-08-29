@@ -228,6 +228,129 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/08/29/ListView/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Hexiaosa">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexiaosa">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/08/29/ListView/" itemprop="url">从 ListView 源码讲解缓存复用流程</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-08-29T23:50:29+08:00">
+                2018-08-29
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>ListView 中缓使用了 RecycleBin(AbsListView 的内部类), 它内部有几个重要的成员变量：<br>mScrapViews : 多种 viewType 时，缓存 viewType 个 view<br>mCurrentScrap : 一种 viewType 时，缓存一个 view<br>mActiveViews : 缓存屏幕上显示的 view, 用于在 layout 过程中复用 view</p>
+<p>首先分析 ListView 的绘制流程，onLayout 方法重写是在 AbsListView 中，这里会调用 ListView 的 layoutChildren, 主要代码如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div></pre></td><td class="code"><pre><div class="line">@Override</div><div class="line">protected void layoutChildren() &#123;</div><div class="line">	// ...</div><div class="line">    try &#123;</div><div class="line">    	// ...</div><div class="line">        if (mAdapter == null) &#123;</div><div class="line">            // ...</div><div class="line">            return;</div><div class="line">        &#125;</div><div class="line">        // ...</div><div class="line">        // 两次 layout, 第一次 layout 还没有子 View, childCount 是 0, 第二次才有正常的值，屏幕显示的 View 数量</div><div class="line">        final int childCount = getChildCount();</div><div class="line"></div><div class="line">        int index = 0;</div><div class="line">        int delta = 0;</div><div class="line"></div><div class="line">        View sel;</div><div class="line">        View oldSel = null;</div><div class="line">        View oldFirst = null;</div><div class="line">        View newSel = null;</div><div class="line"></div><div class="line">        // Remember stuff we will need down below</div><div class="line">        switch (mLayoutMode) &#123;</div><div class="line">        // ...</div><div class="line">        default: // LAYOUT_NORMAL 执行到这里</div><div class="line">            // 记录之前选中，first 等</div><div class="line">        &#125;</div><div class="line">        // 这里处理 notifyDataSetChanged 时的逻辑</div><div class="line">        boolean dataChanged = mDataChanged;</div><div class="line">        if (dataChanged) &#123;</div><div class="line">            handleDataChanged();</div><div class="line">        &#125;</div><div class="line">        // ...</div><div class="line">        // 开始缓存 View, 使用 RecycleBin</div><div class="line">        final int firstPosition = mFirstPosition;</div><div class="line">        final RecycleBin recycleBin = mRecycler;</div><div class="line">        if (dataChanged) &#123;</div><div class="line">        	// 更新内容时在这里处理</div><div class="line">            for (int i = 0; i &lt; childCount; i++) &#123;</div><div class="line">                recycleBin.addScrapView(getChildAt(i), firstPosition+i);</div><div class="line">            &#125;</div><div class="line">        &#125; else &#123;</div><div class="line">        	// 初始第二次 layout 时执行到这里，fillActiveViews 时除了 header 和 footer 的 显示在屏幕上的 child 都存到 mActiveViews</div><div class="line">            recycleBin.fillActiveViews(childCount, firstPosition);</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        // 清除旧的子 view</div><div class="line">        detachAllViewsFromParent();</div><div class="line">        recycleBin.removeSkippedScrap();</div><div class="line"></div><div class="line">        switch (mLayoutMode) &#123;</div><div class="line">        // ...</div><div class="line">        default: // LAYOUT_NORMAL 的逻辑在 default 中，layout 方法中缓存相关的也就是在这里</div><div class="line">            if (childCount == 0) &#123; // 两次 layout, 第一次时没有 child, 所以在这里处理，填充 View</div><div class="line">                if (!mStackFromBottom) &#123;</div><div class="line">                    final int position = lookForSelectablePosition(0, true);</div><div class="line">                    setSelectedPositionInt(position);</div><div class="line">                    // fillDown -&gt; makeAndAddView -&gt; </div><div class="line">                    // (getActiveView, 没有的话 obtainView&lt;这里调用了 getView 方法，传过去的 convertView 从 transientVStateView/scapeView 中取，convertView 是 null 则自己 inflate&gt;</div><div class="line">                    // , setupChild&lt;layout child, 需要再测量时测量 child&gt;)</div><div class="line">                    sel = fillFromTop(childrenTop); </div><div class="line">                &#125; else &#123;</div><div class="line">                    final int position = lookForSelectablePosition(mItemCount - 1, false);</div><div class="line">                    setSelectedPositionInt(position);</div><div class="line">                    sel = fillUp(mItemCount - 1, childrenBottom);</div><div class="line">                &#125;</div><div class="line">            &#125; else &#123; // 第二次 layout 在这里处理，填充 View, 这里 view 不会再 inflate, 会使用 mActiveView 中缓存的</div><div class="line">                if (mSelectedPosition &gt;= 0 &amp;&amp; mSelectedPosition &lt; mItemCount) &#123;</div><div class="line">                    sel = fillSpecific(mSelectedPosition,</div><div class="line">                            oldSel == null ? childrenTop : oldSel.getTop());</div><div class="line">                &#125; else if (mFirstPosition &lt; mItemCount) &#123;</div><div class="line">                    sel = fillSpecific(mFirstPosition,</div><div class="line">                            oldFirst == null ? childrenTop : oldFirst.getTop());</div><div class="line">                &#125; else &#123;</div><div class="line">                    sel = fillSpecific(0, childrenTop);</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">            break;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        // 把屏幕上显示的 View 转移到废弃 View 的缓存中，由于上面调用 fillSpecific 方法时，会把屏幕显示 View item 已置空，所以这一步废弃 View 并缓存不了东西</div><div class="line">        recycleBin.scrapActiveViews();</div><div class="line"></div><div class="line">        // ...</div><div class="line">        </div><div class="line">        // 设置一些选中，焦点，以及恢复一些默认值</div><div class="line"></div><div class="line">        invokeOnItemScrollListener();</div><div class="line">    &#125; finally &#123;</div><div class="line">        // ...</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>layout 的流程，第一次屏幕上的 view 都是 inflate 得到的，第二次 layout 时，把子 view 存到 mActiveViews 中，取出来重新 layout</p>
+<p>上面就是 layout 的过程，那么滑动中 view 是怎么复用的呢，这是在 onTouchEvent 中控制的，接下来看 onTouchEvent 的流程<br>onTouchEvent -&gt; onTouchMove -&gt; scrollIfNeeded -&gt; trackMotionScroll -&gt; fillGap -&gt; fillDown -&gt; makeAndAddView, 这里 obtainView 就是主要在 scapeView 得到复用 View 了。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/08/22/asynctask-theory/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1400,136 +1523,11 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/08/09/LruCache-theory/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Hexiaosa">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexiaosa">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/08/09/LruCache-theory/" itemprop="url">LruCache 原理</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Veröffentlicht am</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-08-09T11:04:00+08:00">
-                2018-08-09
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h3 id="LruCache-的使用"><a href="#LruCache-的使用" class="headerlink" title="LruCache 的使用"></a>LruCache 的使用</h3><p>LruCache 是用于缓存的，缓存的原理是使用近期最少使用的方法，使用例子代码如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">int cacheSize = ((int) (Runtime.getRuntime().maxMemory() / 1024)) / 8; // 最大可缓存的大小</div><div class="line">LruCache&lt;String, Bitmap&gt; lruCache = new LruCache&lt;String, Bitmap&gt;(cacheSize) &#123;</div><div class="line">    @Override</div><div class="line">    protected int sizeOf(String key, Bitmap value) &#123;</div><div class="line">        // 计算每次存放的 value 的大小</div><div class="line">        return value.getRowBytes() * value.getHeight() * 1024;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    protected Bitmap create(String key) &#123;</div><div class="line">        // 自己根据 key 来创建需要的 value, 在 get 方法取不到 key 对应的 value 时会调用该方法</div><div class="line">        // 也可以选择不实现该方法，在取到的 value 是 null 时自己根据需要创建</div><div class="line">        return super.create(key);</div><div class="line">    &#125;</div><div class="line">&#125;;</div><div class="line">// 此处仅作为演示，实际使用时可根据需要优化 bitmap 的加载</div><div class="line">lruCache.put(&quot;test1&quot;, BitmapFactory.decodeResource(getApplicationContext().getResources(), R.mipmap.ic_launcher));</div><div class="line">if (lruCache.get(&quot;test1&quot;) == null) &#123;</div><div class="line">	lruCache.put(&quot;test1&quot;, bitmap);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<h3 id="原理分析"><a href="#原理分析" class="headerlink" title="原理分析"></a>原理分析</h3><p>上面的使用方法中主要的就是 put, get 两个方法，下面具体看这两个方法都做了什么。</p>
-<p>put 方法分析：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div></pre></td><td class="code"><pre><div class="line">public final V put(K key, V value) &#123;</div><div class="line">    // key, value 不可为 null</div><div class="line">    if (key == null || value == null) &#123;</div><div class="line">        throw new NullPointerException(&quot;key == null || value == null&quot;);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    V previous; // key 原有的 value</div><div class="line">    synchronized (this) &#123;</div><div class="line">    	// 存的次数增加</div><div class="line">        putCount++;</div><div class="line">        // 存的 size 增加</div><div class="line">        size += safeSizeOf(key, value);</div><div class="line">        // 实际存 value, 原来的 value 返回</div><div class="line">        previous = map.put(key, value);</div><div class="line">        if (previous != null) &#123;</div><div class="line">        	// 原来的 value 不为 null 则 size 也相应的减少</div><div class="line">            size -= safeSizeOf(key, previous);</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    if (previous != null) &#123;</div><div class="line">    	// 删除了原来的 value, 根据自己需要做相应的操作</div><div class="line">        entryRemoved(false, key, previous, value);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    // 在缓存的大小已经超过 maxSize 时去除近期最少使用的 value</div><div class="line">    trimToSize(maxSize);</div><div class="line">    return previous;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>get 方法分析：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">public final V get(K key) &#123;</div><div class="line">	// key 不可为 null</div><div class="line">    if (key == null) &#123;</div><div class="line">        throw new NullPointerException(&quot;key == null&quot;);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    // 记录查到的 value</div><div class="line">    V mapValue;</div><div class="line">    synchronized (this) &#123;</div><div class="line">        mapValue = map.get(key);</div><div class="line">        if (mapValue != null) &#123;</div><div class="line">        	// 查到缓存的次数加 1</div><div class="line">            hitCount++;</div><div class="line">            return mapValue;</div><div class="line">        &#125;</div><div class="line">        // 没有查到缓存的次数加 1</div><div class="line">        missCount++;</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    V createdValue = create(key);</div><div class="line"></div><div class="line">    // 看自己是否实现了 create 方法，如果没有实现就 return null</div><div class="line">    if (createdValue == null) &#123;</div><div class="line">        return null;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    // create 方法创建过程中可能已经 put 了同样的 key, 如果相同则释放掉 create 方法创建的，保留  put 进去的</div><div class="line">    synchronized (this) &#123;</div><div class="line">    	// create 次数加 1</div><div class="line">        createCount++;</div><div class="line">        // 存 create 的，返回 key 对应的原来的值，也就是在 create 过程中 put 进去了相同 key 的值(mapValue)</div><div class="line">        mapValue = map.put(key, createdValue);</div><div class="line"></div><div class="line">        // mapValue 有值，则以 put 的为主，否则就正常保存 create 的，size 相应增加</div><div class="line">        if (mapValue != null) &#123;</div><div class="line">            map.put(key, mapValue);</div><div class="line">        &#125; else &#123;</div><div class="line">            size += safeSizeOf(key, createdValue);</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    // mapValue 有值，则执行清除 createValue 时根据我们的需要要做的操作，返回 mapValue</div><div class="line">    // 否则就是 create 执行正常，在缓存的大小已经超过 maxSize 时去除近期最少使用的 value, 返回 createValue</div><div class="line">    if (mapValue != null) &#123;</div><div class="line">        entryRemoved(false, key, createdValue, mapValue);</div><div class="line">        return mapValue;</div><div class="line">    &#125; else &#123;</div><div class="line">        trimToSize(maxSize);</div><div class="line">        return createdValue;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>那么最近最少使用原理是怎么实现的呢？就是靠 LinkedHashMap, 在 new LruCache 时创建 map,<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">this.map = new LinkedHashMap&lt;K, V&gt;(0, 0.75f, true);</div></pre></td></tr></table></figure></p>
-<p>这里把 accesssOrder 参数的值赋为 true, accesssOrder 在官方文档的解释是：the ordering mode - true for access-order, false for insertion-order, 也是是设为 true 则表示以访问排序。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
   <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right"></i></a>
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/4/">4</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 
@@ -1575,7 +1573,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">30</span>
+                  <span class="site-state-item-count">31</span>
                   <span class="site-state-item-name">Artikel</span>
                 </a>
               </div>
