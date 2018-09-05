@@ -181,7 +181,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
             
-            Startseite
+            Home
           </a>
         </li>
       
@@ -191,7 +191,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
             
-            Archiv
+            Archives
           </a>
         </li>
       
@@ -257,7 +257,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-08-11T23:44:51+08:00">
                 2018-08-11
@@ -382,7 +382,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-08-09T11:04:00+08:00">
                 2018-08-09
@@ -507,7 +507,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-08-07T18:58:51+08:00">
                 2018-08-07
@@ -631,7 +631,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-07-31T11:34:33+08:00">
                 2018-07-31
@@ -760,7 +760,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-07-26T14:46:35+08:00">
                 2018-07-26
@@ -924,7 +924,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-06-21T15:58:20+08:00">
                 2018-06-21
@@ -1056,7 +1056,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-06-07T10:14:00+08:00">
                 2018-06-07
@@ -1098,8 +1098,7 @@
       
         
           
-            <p>更新中……</p>
-<h3 id="类的加载过程"><a href="#类的加载过程" class="headerlink" title="类的加载过程"></a>类的加载过程</h3><h4 id="加载"><a href="#加载" class="headerlink" title="加载"></a>加载</h4><ol>
+            <h3 id="类的加载过程"><a href="#类的加载过程" class="headerlink" title="类的加载过程"></a>类的加载过程</h3><h4 id="加载"><a href="#加载" class="headerlink" title="加载"></a>加载</h4><ol>
 <li>将 .java 文件转成二进制流</li>
 <li>将类信息存入方法区</li>
 <li>在方法区中生成一个 Class 对象，用于访问该类的接口</li>
@@ -1129,7 +1128,10 @@
 <li>没有对该类反射</li>
 <li>加载该类的类加载器都已被回收</li>
 </ol>
-<h3 id="类加载器"><a href="#类加载器" class="headerlink" title="类加载器"></a>类加载器</h3><h5 id="三种类加载器"><a href="#三种类加载器" class="headerlink" title="三种类加载器"></a>三种类加载器</h5><h5 id="双亲委派机制"><a href="#双亲委派机制" class="headerlink" title="双亲委派机制"></a>双亲委派机制</h5><p>每个类加载器在 loadClass 时先交给父类加载器，如果父类加载器处理不了才自己处理。这里的父类加载器是用组合实现的，而不是直接继承。</p>
+<h3 id="类加载器"><a href="#类加载器" class="headerlink" title="类加载器"></a>类加载器</h3><p>类加载器和类共同唯一决定一个类在 Java 虚拟机中的唯一性。</p>
+<h5 id="三种类加载器"><a href="#三种类加载器" class="headerlink" title="三种类加载器"></a>三种类加载器</h5><p>启动类加载器：负责 &lt;JAVA_HOME&gt;\lib 目录中的，无法被 Java 代码直接引用<br>扩展类加载器：负责 &lt;JAVA_HOME&gt;\lib\ext 目录中的，开发者可以直接使用<br>程序类加载器：我们平时写的类就默认由它来加载</p>
+<h5 id="双亲委派机制"><a href="#双亲委派机制" class="headerlink" title="双亲委派机制"></a>双亲委派机制</h5><p>每个类加载器在 loadClass 时先交给父类加载器，一层层网上传递，如果父类加载器处理不了才自己处理。这里的父类加载器是用组合实现的，而不是直接继承。</p>
+<h5 id="破坏双亲委派机制"><a href="#破坏双亲委派机制" class="headerlink" title="破坏双亲委派机制"></a>破坏双亲委派机制</h5><p>为了实现自定义的类加载器。</p>
 
           
         
@@ -1207,7 +1209,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-06-05T11:10:33+08:00">
                 2018-06-05
@@ -1401,7 +1403,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-05-30T17:25:53+08:00">
                 2018-05-30
@@ -1539,7 +1541,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-05-28T17:37:05+08:00">
                 2018-05-28
@@ -1688,7 +1690,7 @@
                 <a href="/archives/">
               
                   <span class="site-state-item-count">32</span>
-                  <span class="site-state-item-name">Artikel</span>
+                  <span class="site-state-item-name">posts</span>
                 </a>
               </div>
             
@@ -1738,7 +1740,7 @@
 </div>
 
 
-  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
 
 
 

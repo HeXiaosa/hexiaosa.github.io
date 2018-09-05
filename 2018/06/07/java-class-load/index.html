@@ -79,16 +79,16 @@
 
 
 
-<meta name="description" content="更新中…… 类的加载过程加载 将 .java 文件转成二进制流 将类信息存入方法区 在方法区中生成一个 Class 对象，用于访问该类的接口  PS：读取到二进制流的来源，常见的有：ZAR包，运行中动态计算（动态代理），其它文件生成（JSP） 验证验证过程是为了防止恶意代码破坏虚拟机而进行验证的过程。  文件格式验证：该过程是针对二进制流进行的，只有通过了该验证，二进制流才可以进去到方法区中。文件">
+<meta name="description" content="类的加载过程加载 将 .java 文件转成二进制流 将类信息存入方法区 在方法区中生成一个 Class 对象，用于访问该类的接口  PS：读取到二进制流的来源，常见的有：ZAR包，运行中动态计算（动态代理），其它文件生成（JSP） 验证验证过程是为了防止恶意代码破坏虚拟机而进行验证的过程。  文件格式验证：该过程是针对二进制流进行的，只有通过了该验证，二进制流才可以进去到方法区中。文件格式验证交叉">
 <meta property="og:type" content="article">
 <meta property="og:title" content="类的加载">
 <meta property="og:url" content="http://hexiaosa.com/2018/06/07/java-class-load/index.html">
 <meta property="og:site_name" content="Hexiaosa">
-<meta property="og:description" content="更新中…… 类的加载过程加载 将 .java 文件转成二进制流 将类信息存入方法区 在方法区中生成一个 Class 对象，用于访问该类的接口  PS：读取到二进制流的来源，常见的有：ZAR包，运行中动态计算（动态代理），其它文件生成（JSP） 验证验证过程是为了防止恶意代码破坏虚拟机而进行验证的过程。  文件格式验证：该过程是针对二进制流进行的，只有通过了该验证，二进制流才可以进去到方法区中。文件">
-<meta property="og:updated_time" content="2018-09-05T13:06:55.775Z">
+<meta property="og:description" content="类的加载过程加载 将 .java 文件转成二进制流 将类信息存入方法区 在方法区中生成一个 Class 对象，用于访问该类的接口  PS：读取到二进制流的来源，常见的有：ZAR包，运行中动态计算（动态代理），其它文件生成（JSP） 验证验证过程是为了防止恶意代码破坏虚拟机而进行验证的过程。  文件格式验证：该过程是针对二进制流进行的，只有通过了该验证，二进制流才可以进去到方法区中。文件格式验证交叉">
+<meta property="og:updated_time" content="2018-09-05T15:13:50.543Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="类的加载">
-<meta name="twitter:description" content="更新中…… 类的加载过程加载 将 .java 文件转成二进制流 将类信息存入方法区 在方法区中生成一个 Class 对象，用于访问该类的接口  PS：读取到二进制流的来源，常见的有：ZAR包，运行中动态计算（动态代理），其它文件生成（JSP） 验证验证过程是为了防止恶意代码破坏虚拟机而进行验证的过程。  文件格式验证：该过程是针对二进制流进行的，只有通过了该验证，二进制流才可以进去到方法区中。文件">
+<meta name="twitter:description" content="类的加载过程加载 将 .java 文件转成二进制流 将类信息存入方法区 在方法区中生成一个 Class 对象，用于访问该类的接口  PS：读取到二进制流的来源，常见的有：ZAR包，运行中动态计算（动态代理），其它文件生成（JSP） 验证验证过程是为了防止恶意代码破坏虚拟机而进行验证的过程。  文件格式验证：该过程是针对二进制流进行的，只有通过了该验证，二进制流才可以进去到方法区中。文件格式验证交叉">
 
 
 
@@ -184,7 +184,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
             
-            Startseite
+            Home
           </a>
         </li>
       
@@ -194,7 +194,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
             
-            Archiv
+            Archives
           </a>
         </li>
       
@@ -258,7 +258,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-06-07T10:14:00+08:00">
                 2018-06-07
@@ -298,8 +298,7 @@
       
 
       
-        <p>更新中……</p>
-<h3 id="类的加载过程"><a href="#类的加载过程" class="headerlink" title="类的加载过程"></a>类的加载过程</h3><h4 id="加载"><a href="#加载" class="headerlink" title="加载"></a>加载</h4><ol>
+        <h3 id="类的加载过程"><a href="#类的加载过程" class="headerlink" title="类的加载过程"></a>类的加载过程</h3><h4 id="加载"><a href="#加载" class="headerlink" title="加载"></a>加载</h4><ol>
 <li>将 .java 文件转成二进制流</li>
 <li>将类信息存入方法区</li>
 <li>在方法区中生成一个 Class 对象，用于访问该类的接口</li>
@@ -329,7 +328,10 @@
 <li>没有对该类反射</li>
 <li>加载该类的类加载器都已被回收</li>
 </ol>
-<h3 id="类加载器"><a href="#类加载器" class="headerlink" title="类加载器"></a>类加载器</h3><h5 id="三种类加载器"><a href="#三种类加载器" class="headerlink" title="三种类加载器"></a>三种类加载器</h5><h5 id="双亲委派机制"><a href="#双亲委派机制" class="headerlink" title="双亲委派机制"></a>双亲委派机制</h5><p>每个类加载器在 loadClass 时先交给父类加载器，如果父类加载器处理不了才自己处理。这里的父类加载器是用组合实现的，而不是直接继承。</p>
+<h3 id="类加载器"><a href="#类加载器" class="headerlink" title="类加载器"></a>类加载器</h3><p>类加载器和类共同唯一决定一个类在 Java 虚拟机中的唯一性。</p>
+<h5 id="三种类加载器"><a href="#三种类加载器" class="headerlink" title="三种类加载器"></a>三种类加载器</h5><p>启动类加载器：负责 &lt;JAVA_HOME&gt;\lib 目录中的，无法被 Java 代码直接引用<br>扩展类加载器：负责 &lt;JAVA_HOME&gt;\lib\ext 目录中的，开发者可以直接使用<br>程序类加载器：我们平时写的类就默认由它来加载</p>
+<h5 id="双亲委派机制"><a href="#双亲委派机制" class="headerlink" title="双亲委派机制"></a>双亲委派机制</h5><p>每个类加载器在 loadClass 时先交给父类加载器，一层层网上传递，如果父类加载器处理不了才自己处理。这里的父类加载器是用组合实现的，而不是直接继承。</p>
+<h5 id="破坏双亲委派机制"><a href="#破坏双亲委派机制" class="headerlink" title="破坏双亲委派机制"></a>破坏双亲委派机制</h5><p>为了实现自定义的类加载器。</p>
 
       
     </div>
@@ -420,10 +422,10 @@
       
         <ul class="sidebar-nav motion-element">
           <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
-            Inhaltsverzeichnis
+            Table of Contents
           </li>
           <li class="sidebar-nav-overview" data-target="site-overview-wrap">
-            Übersicht
+            Overview
           </li>
         </ul>
       
@@ -444,7 +446,7 @@
                 <a href="/archives/">
               
                   <span class="site-state-item-count">32</span>
-                  <span class="site-state-item-name">Artikel</span>
+                  <span class="site-state-item-name">posts</span>
                 </a>
               </div>
             
@@ -480,7 +482,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#类的加载过程"><span class="nav-number">1.</span> <span class="nav-text">类的加载过程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#加载"><span class="nav-number">1.1.</span> <span class="nav-text">加载</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#验证"><span class="nav-number">1.2.</span> <span class="nav-text">验证</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#准备"><span class="nav-number">1.3.</span> <span class="nav-text">准备</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#解析"><span class="nav-number">1.4.</span> <span class="nav-text">解析</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#初始化"><span class="nav-number">1.5.</span> <span class="nav-text">初始化</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#类的卸载"><span class="nav-number">2.</span> <span class="nav-text">类的卸载</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#类加载器"><span class="nav-number">3.</span> <span class="nav-text">类加载器</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#三种类加载器"><span class="nav-number">3.0.1.</span> <span class="nav-text">三种类加载器</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#双亲委派机制"><span class="nav-number">3.0.2.</span> <span class="nav-text">双亲委派机制</span></a></li></ol></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#类的加载过程"><span class="nav-number">1.</span> <span class="nav-text">类的加载过程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#加载"><span class="nav-number">1.1.</span> <span class="nav-text">加载</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#验证"><span class="nav-number">1.2.</span> <span class="nav-text">验证</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#准备"><span class="nav-number">1.3.</span> <span class="nav-text">准备</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#解析"><span class="nav-number">1.4.</span> <span class="nav-text">解析</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#初始化"><span class="nav-number">1.5.</span> <span class="nav-text">初始化</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#类的卸载"><span class="nav-number">2.</span> <span class="nav-text">类的卸载</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#类加载器"><span class="nav-number">3.</span> <span class="nav-text">类加载器</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#三种类加载器"><span class="nav-number">3.0.1.</span> <span class="nav-text">三种类加载器</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#双亲委派机制"><span class="nav-number">3.0.2.</span> <span class="nav-text">双亲委派机制</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#破坏双亲委派机制"><span class="nav-number">3.0.3.</span> <span class="nav-text">破坏双亲委派机制</span></a></li></ol></li></ol></li></ol></div>
             
 
           </div>
@@ -510,7 +512,7 @@
 </div>
 
 
-  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
 
 
 
