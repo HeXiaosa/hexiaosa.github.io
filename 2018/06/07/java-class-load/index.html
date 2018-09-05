@@ -85,7 +85,7 @@
 <meta property="og:url" content="http://hexiaosa.com/2018/06/07/java-class-load/index.html">
 <meta property="og:site_name" content="Hexiaosa">
 <meta property="og:description" content="更新中…… 类的加载过程加载 将 .java 文件转成二进制流 将类信息存入方法区 在方法区中生成一个 Class 对象，用于访问该类的接口  PS：读取到二进制流的来源，常见的有：ZAR包，运行中动态计算（动态代理），其它文件生成（JSP） 验证验证过程是为了防止恶意代码破坏虚拟机而进行验证的过程。  文件格式验证：该过程是针对二进制流进行的，只有通过了该验证，二进制流才可以进去到方法区中。文件">
-<meta property="og:updated_time" content="2018-09-05T13:01:09.586Z">
+<meta property="og:updated_time" content="2018-09-05T13:06:55.775Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="类的加载">
 <meta name="twitter:description" content="更新中…… 类的加载过程加载 将 .java 文件转成二进制流 将类信息存入方法区 在方法区中生成一个 Class 对象，用于访问该类的接口  PS：读取到二进制流的来源，常见的有：ZAR包，运行中动态计算（动态代理），其它文件生成（JSP） 验证验证过程是为了防止恶意代码破坏虚拟机而进行验证的过程。  文件格式验证：该过程是针对二进制流进行的，只有通过了该验证，二进制流才可以进去到方法区中。文件">
@@ -322,9 +322,7 @@
 <li>含 main() 方法的类在虚拟机启动时，会先初始化这个类</li>
 <li>调用该类的静态方法时，如果还没有进行初始化，则对该类进行初始化<br>不会初始化的情况：调用子类的静态方法，不会初始化父类；调用常量，不会初始化常量所在的类，因为常量会保存在使用类的常量池；</li>
 </ol>
-<p>初始化的过程就是执行<clinit>()的过程。</clinit></p>
-<p><clinit>()是生成的类的构造器，由成员变量的赋值语句和静态语句块组合而成，如果没有需要赋值的变量和静态语句块，那么<clinit>()也可以不存在；<br>虚拟机会保证在执行<clinit>()方法之前，其父类的<clinit>()方法已经执行完毕；</clinit></clinit></clinit></clinit></p>
-<p><clinit>()会保证正确的加锁，同步；<br>接口也同样存在<clinit>()构造方法，接口执行构造方法之前不必先执行父类的<clinit>()</clinit></clinit></clinit></p>
+<p>初始化的过程就是执行 &lt;clinit&gt;()的过程。<br>&lt;clinit&gt;()是生成的类的构造器，由成员变量的赋值语句和静态语句块组合而成，如果没有需要赋值的变量和静态语句块，那么 &lt;clinit&gt;()也可以不存在；<br>虚拟机会保证在执行 &lt;clinit&gt;()方法之前，其父类的 &lt;clinit&gt;()方法已经执行完毕；<br>&lt;clinit&gt;()会保证正确的加锁，同步；<br>接口也同样存在 &lt;clinit&gt;()构造方法，接口执行构造方法之前不必先执行父类的 &lt;clinit&gt;()</p>
 <h3 id="类的卸载"><a href="#类的卸载" class="headerlink" title="类的卸载"></a>类的卸载</h3><p>类的卸载，即清除类在方法区的信息<br>类卸载的触发条件：</p>
 <ol>
 <li>该类的实例都已被回收</li>
