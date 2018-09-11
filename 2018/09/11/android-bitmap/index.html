@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="1. Bitmap 性能相关使用 inSampleSize 来缩放使用方式：12345678910BitmapFactory.Options options = new BitmapFactory.Options();options.inJustDecodeBounds = true; // 设为 true 不会分配内存，用来获取图片宽高BitmapFactory.decodeResource(g">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android 图片处理">
+<meta property="og:url" content="http://hexiaosa.com/2018/09/11/android-bitmap/index.html">
+<meta property="og:site_name" content="Hexiaosa">
+<meta property="og:description" content="1. Bitmap 性能相关使用 inSampleSize 来缩放使用方式：12345678910BitmapFactory.Options options = new BitmapFactory.Options();options.inJustDecodeBounds = true; // 设为 true 不会分配内存，用来获取图片宽高BitmapFactory.decodeResource(g">
+<meta property="og:updated_time" content="2018-09-11T04:11:12.434Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android 图片处理">
+<meta name="twitter:description" content="1. Bitmap 性能相关使用 inSampleSize 来缩放使用方式：12345678910BitmapFactory.Options options = new BitmapFactory.Options();options.inJustDecodeBounds = true; // 设为 true 不会分配内存，用来获取图片宽高BitmapFactory.decodeResource(g">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://hexiaosa.com/2018/09/11/android-bitmap/"/>
+
+
+
+
+
+  <title>Android 图片处理 | Hexiaosa</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Hexiaosa</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Home
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archives
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/09/11/android-bitmap/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Hexiaosa">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexiaosa">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Android 图片处理</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-09-11T12:10:38+08:00">
+                2018-09-11
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="1-Bitmap-性能相关"><a href="#1-Bitmap-性能相关" class="headerlink" title="1. Bitmap 性能相关"></a>1. Bitmap 性能相关</h3><h5 id="使用-inSampleSize-来缩放"><a href="#使用-inSampleSize-来缩放" class="headerlink" title="使用 inSampleSize 来缩放"></a>使用 inSampleSize 来缩放</h5><p>使用方式：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">BitmapFactory.Options options = new BitmapFactory.Options();</div><div class="line">options.inJustDecodeBounds = true; // 设为 true 不会分配内存，用来获取图片宽高</div><div class="line">BitmapFactory.decodeResource(getResources(), R.mipmap.test, options);</div><div class="line">int width = options.outWidth;</div><div class="line">int height = options.outHeight;</div><div class="line">// 根据图片宽高和实际需要宽高计算 inSampleSize, 需要是 2 的次方，inSampleSize 是 2 则图片宽高压缩为原来的 1/2, inSampleSize 小于 1 则置为 1</div><div class="line">// options.inSampleSize = ;</div><div class="line">options.inJustDecodeBounds = false;</div><div class="line">// 按照 inSampleSize 来解析 bitmap</div><div class="line">Bitmap resource = BitmapFactory.decodeResource(getResources(), R.mipmap.test, options);</div></pre></td></tr></table></figure></p>
+<h5 id="使用合适的-Config"><a href="#使用合适的-Config" class="headerlink" title="使用合适的 Config"></a>使用合适的 Config</h5><p>在把资源解析为 Bitmap 过程中通过设置 options.inPreferredConfig, 或者在创建 Bitmap (Bitmap.createBitmap) 时指定 Config, Config 的值有以下几种：</p>
+<p>ALPHA_8:无颜色，只有透明度<br>RGB_565:只有颜色，无透明度<br>ARGB_4444:一个像素占8个字节<br>ARGB_8888:一个像素占4个字节，相比 ARGB_4444, ARGB_8888 更推荐使用</p>
+<p>根据自己需要选择使用</p>
+<h3 id="2-大图加载"><a href="#2-大图加载" class="headerlink" title="2. 大图加载"></a>2. 大图加载</h3><p>大图加载使用的是 BitmapRegionDecoder, 代码如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div><div class="line">113</div><div class="line">114</div><div class="line">115</div><div class="line">116</div><div class="line">117</div><div class="line">118</div><div class="line">119</div><div class="line">120</div><div class="line">121</div><div class="line">122</div><div class="line">123</div><div class="line">124</div><div class="line">125</div><div class="line">126</div><div class="line">127</div><div class="line">128</div><div class="line">129</div><div class="line">130</div><div class="line">131</div><div class="line">132</div><div class="line">133</div><div class="line">134</div><div class="line">135</div><div class="line">136</div><div class="line">137</div><div class="line">138</div><div class="line">139</div><div class="line">140</div></pre></td><td class="code"><pre><div class="line">// 自定义大图加载 View</div><div class="line">public class LongImageView extends View &#123;</div><div class="line"></div><div class="line">    private static BitmapFactory.Options options = new BitmapFactory.Options();</div><div class="line">    private static BitmapRegionDecoder decoder;</div><div class="line">    private Rect rect = new Rect();</div><div class="line"></div><div class="line">    // View 宽高</div><div class="line">    private int mHeight;</div><div class="line">    private int mWidth;</div><div class="line"></div><div class="line">    // 图片宽高</div><div class="line">    private int mImgHeight;</div><div class="line">    private int mImgWidth;</div><div class="line"></div><div class="line">    static &#123;</div><div class="line">        options.inPreferredConfig = Bitmap.Config.RGB_565;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public LongImageView(Context context) &#123;</div><div class="line">        super(context);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public LongImageView(Context context, @Nullable AttributeSet attrs) &#123;</div><div class="line">        super(context, attrs);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public LongImageView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) &#123;</div><div class="line">        super(context, attrs, defStyleAttr);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    private int lastX;</div><div class="line">    private int lastY;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    public boolean onTouchEvent(MotionEvent event) &#123;</div><div class="line">        switch (event.getAction()) &#123;</div><div class="line">            case MotionEvent.ACTION_DOWN:</div><div class="line">                if (lastX == 0) &#123;</div><div class="line">                    lastX = (int) event.getX();</div><div class="line">                &#125;</div><div class="line">                if (lastY == 0) &#123;</div><div class="line">                    lastY = (int) event.getY();</div><div class="line">                &#125;</div><div class="line">                break;</div><div class="line">            case MotionEvent.ACTION_MOVE: // 这里只是简单地处理了手势，待优化</div><div class="line">                int disY = (lastY - (int)event.getY());</div><div class="line">                int disX = (lastX - (int)event.getX());</div><div class="line">                if (mImgWidth &gt; mWidth) &#123;</div><div class="line">                    rect.offset(disX, 0);</div><div class="line">                    checkWidth();</div><div class="line">                    invalidate();</div><div class="line">                &#125;</div><div class="line">                if (mImgHeight &gt; mHeight) &#123;</div><div class="line">                    rect.offset(0, disY);</div><div class="line">                    checkHeight();</div><div class="line">                    invalidate();</div><div class="line">                &#125;</div><div class="line">                lastX = (int) event.getX();</div><div class="line">                lastY = (int) event.getY();</div><div class="line">                break;</div><div class="line">            case MotionEvent.ACTION_UP:</div><div class="line">                lastX = 0;</div><div class="line">                lastY = 0;</div><div class="line">                break;</div><div class="line">        &#125;</div><div class="line">        return true;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    private void checkHeight() &#123;</div><div class="line">        if (rect.top &lt; 0) &#123;</div><div class="line">            rect.top = 0;</div><div class="line">            rect.bottom = mHeight;</div><div class="line">        &#125;</div><div class="line">        if (rect.bottom &gt; mImgHeight) &#123;</div><div class="line">            rect.bottom = mImgHeight;</div><div class="line">            rect.top = mImgHeight - mHeight;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    private void checkWidth() &#123;</div><div class="line">        if (rect.left &lt; 0) &#123;</div><div class="line">            rect.left = 0;</div><div class="line">            rect.right = mWidth;</div><div class="line">        &#125;</div><div class="line">        if (rect.right &gt; mImgWidth) &#123;</div><div class="line">            rect.right = mImgWidth;</div><div class="line">            rect.left = mImgWidth - mWidth;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) &#123;</div><div class="line">        super.onMeasure(widthMeasureSpec, heightMeasureSpec);</div><div class="line">        mWidth = getMeasuredWidth();</div><div class="line">        mHeight = getMeasuredHeight();</div><div class="line">        rect.left = 0;</div><div class="line">        rect.top = 0;</div><div class="line">        rect.right = mWidth;</div><div class="line">        rect.bottom = mHeight;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    protected void onDraw(Canvas canvas) &#123;</div><div class="line">        Bitmap bitmap = decoder.decodeRegion(rect, options);</div><div class="line">        canvas.drawBitmap(bitmap, 0, 0, null);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public void setInputStream(InputStream is) &#123;</div><div class="line">        try &#123;</div><div class="line"></div><div class="line">            decoder = BitmapRegionDecoder.newInstance(is, true);</div><div class="line">            // 直接使用了 decoder 获取宽高，就不能再用 BitmapFactory 来解析 is 获取图片宽高了</div><div class="line">            mImgHeight = decoder.getHeight();</div><div class="line">            mImgWidth = decoder.getWidth();</div><div class="line"></div><div class="line">            requestLayout();</div><div class="line">            invalidate();</div><div class="line">        &#125; catch (IOException e) &#123;</div><div class="line">            e.printStackTrace();</div><div class="line">        &#125; finally &#123;</div><div class="line">            if (is != null) &#123;</div><div class="line">                try &#123;</div><div class="line">                    is.close();</div><div class="line">                &#125; catch (IOException e) &#123;</div><div class="line">                    e.printStackTrace();</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">&#125;</div><div class="line"></div><div class="line">// 使用</div><div class="line">LongImageView liv = (LongImageView) findViewById(R.id.liv);</div><div class="line">Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.test);</div><div class="line">ByteArrayOutputStream baos = new ByteArrayOutputStream();</div><div class="line">bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);</div><div class="line">InputStream isBm = new ByteArrayInputStream(baos.toByteArray());</div><div class="line">liv.setInputStream(isBm);</div></pre></td></tr></table></figure></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/09/01/RecyclerView/" rel="next" title="RecycleView 缓存机制">
+                <i class="fa fa-chevron-left"></i> RecycleView 缓存机制
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Hexiaosa</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">33</span>
+                  <span class="site-state-item-name">posts</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Bitmap-性能相关"><span class="nav-number">1.</span> <span class="nav-text">1. Bitmap 性能相关</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#使用-inSampleSize-来缩放"><span class="nav-number">1.0.1.</span> <span class="nav-text">使用 inSampleSize 来缩放</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#使用合适的-Config"><span class="nav-number">1.0.2.</span> <span class="nav-text">使用合适的 Config</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-大图加载"><span class="nav-number">2.</span> <span class="nav-text">2. 大图加载</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Hexiaosa</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

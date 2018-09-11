@@ -228,6 +228,130 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/09/11/android-bitmap/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Hexiaosa">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexiaosa">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/09/11/android-bitmap/" itemprop="url">Android 图片处理</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-09-11T12:10:38+08:00">
+                2018-09-11
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h3 id="1-Bitmap-性能相关"><a href="#1-Bitmap-性能相关" class="headerlink" title="1. Bitmap 性能相关"></a>1. Bitmap 性能相关</h3><h5 id="使用-inSampleSize-来缩放"><a href="#使用-inSampleSize-来缩放" class="headerlink" title="使用 inSampleSize 来缩放"></a>使用 inSampleSize 来缩放</h5><p>使用方式：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">BitmapFactory.Options options = new BitmapFactory.Options();</div><div class="line">options.inJustDecodeBounds = true; // 设为 true 不会分配内存，用来获取图片宽高</div><div class="line">BitmapFactory.decodeResource(getResources(), R.mipmap.test, options);</div><div class="line">int width = options.outWidth;</div><div class="line">int height = options.outHeight;</div><div class="line">// 根据图片宽高和实际需要宽高计算 inSampleSize, 需要是 2 的次方，inSampleSize 是 2 则图片宽高压缩为原来的 1/2, inSampleSize 小于 1 则置为 1</div><div class="line">// options.inSampleSize = ;</div><div class="line">options.inJustDecodeBounds = false;</div><div class="line">// 按照 inSampleSize 来解析 bitmap</div><div class="line">Bitmap resource = BitmapFactory.decodeResource(getResources(), R.mipmap.test, options);</div></pre></td></tr></table></figure></p>
+<h5 id="使用合适的-Config"><a href="#使用合适的-Config" class="headerlink" title="使用合适的 Config"></a>使用合适的 Config</h5><p>在把资源解析为 Bitmap 过程中通过设置 options.inPreferredConfig, 或者在创建 Bitmap (Bitmap.createBitmap) 时指定 Config, Config 的值有以下几种：</p>
+<p>ALPHA_8:无颜色，只有透明度<br>RGB_565:只有颜色，无透明度<br>ARGB_4444:一个像素占8个字节<br>ARGB_8888:一个像素占4个字节，相比 ARGB_4444, ARGB_8888 更推荐使用</p>
+<p>根据自己需要选择使用</p>
+<h3 id="2-大图加载"><a href="#2-大图加载" class="headerlink" title="2. 大图加载"></a>2. 大图加载</h3><p>大图加载使用的是 BitmapRegionDecoder, 代码如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div><div class="line">113</div><div class="line">114</div><div class="line">115</div><div class="line">116</div><div class="line">117</div><div class="line">118</div><div class="line">119</div><div class="line">120</div><div class="line">121</div><div class="line">122</div><div class="line">123</div><div class="line">124</div><div class="line">125</div><div class="line">126</div><div class="line">127</div><div class="line">128</div><div class="line">129</div><div class="line">130</div><div class="line">131</div><div class="line">132</div><div class="line">133</div><div class="line">134</div><div class="line">135</div><div class="line">136</div><div class="line">137</div><div class="line">138</div><div class="line">139</div><div class="line">140</div></pre></td><td class="code"><pre><div class="line">// 自定义大图加载 View</div><div class="line">public class LongImageView extends View &#123;</div><div class="line"></div><div class="line">    private static BitmapFactory.Options options = new BitmapFactory.Options();</div><div class="line">    private static BitmapRegionDecoder decoder;</div><div class="line">    private Rect rect = new Rect();</div><div class="line"></div><div class="line">    // View 宽高</div><div class="line">    private int mHeight;</div><div class="line">    private int mWidth;</div><div class="line"></div><div class="line">    // 图片宽高</div><div class="line">    private int mImgHeight;</div><div class="line">    private int mImgWidth;</div><div class="line"></div><div class="line">    static &#123;</div><div class="line">        options.inPreferredConfig = Bitmap.Config.RGB_565;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public LongImageView(Context context) &#123;</div><div class="line">        super(context);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public LongImageView(Context context, @Nullable AttributeSet attrs) &#123;</div><div class="line">        super(context, attrs);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public LongImageView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) &#123;</div><div class="line">        super(context, attrs, defStyleAttr);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    private int lastX;</div><div class="line">    private int lastY;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    public boolean onTouchEvent(MotionEvent event) &#123;</div><div class="line">        switch (event.getAction()) &#123;</div><div class="line">            case MotionEvent.ACTION_DOWN:</div><div class="line">                if (lastX == 0) &#123;</div><div class="line">                    lastX = (int) event.getX();</div><div class="line">                &#125;</div><div class="line">                if (lastY == 0) &#123;</div><div class="line">                    lastY = (int) event.getY();</div><div class="line">                &#125;</div><div class="line">                break;</div><div class="line">            case MotionEvent.ACTION_MOVE: // 这里只是简单地处理了手势，待优化</div><div class="line">                int disY = (lastY - (int)event.getY());</div><div class="line">                int disX = (lastX - (int)event.getX());</div><div class="line">                if (mImgWidth &gt; mWidth) &#123;</div><div class="line">                    rect.offset(disX, 0);</div><div class="line">                    checkWidth();</div><div class="line">                    invalidate();</div><div class="line">                &#125;</div><div class="line">                if (mImgHeight &gt; mHeight) &#123;</div><div class="line">                    rect.offset(0, disY);</div><div class="line">                    checkHeight();</div><div class="line">                    invalidate();</div><div class="line">                &#125;</div><div class="line">                lastX = (int) event.getX();</div><div class="line">                lastY = (int) event.getY();</div><div class="line">                break;</div><div class="line">            case MotionEvent.ACTION_UP:</div><div class="line">                lastX = 0;</div><div class="line">                lastY = 0;</div><div class="line">                break;</div><div class="line">        &#125;</div><div class="line">        return true;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    private void checkHeight() &#123;</div><div class="line">        if (rect.top &lt; 0) &#123;</div><div class="line">            rect.top = 0;</div><div class="line">            rect.bottom = mHeight;</div><div class="line">        &#125;</div><div class="line">        if (rect.bottom &gt; mImgHeight) &#123;</div><div class="line">            rect.bottom = mImgHeight;</div><div class="line">            rect.top = mImgHeight - mHeight;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    private void checkWidth() &#123;</div><div class="line">        if (rect.left &lt; 0) &#123;</div><div class="line">            rect.left = 0;</div><div class="line">            rect.right = mWidth;</div><div class="line">        &#125;</div><div class="line">        if (rect.right &gt; mImgWidth) &#123;</div><div class="line">            rect.right = mImgWidth;</div><div class="line">            rect.left = mImgWidth - mWidth;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) &#123;</div><div class="line">        super.onMeasure(widthMeasureSpec, heightMeasureSpec);</div><div class="line">        mWidth = getMeasuredWidth();</div><div class="line">        mHeight = getMeasuredHeight();</div><div class="line">        rect.left = 0;</div><div class="line">        rect.top = 0;</div><div class="line">        rect.right = mWidth;</div><div class="line">        rect.bottom = mHeight;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    protected void onDraw(Canvas canvas) &#123;</div><div class="line">        Bitmap bitmap = decoder.decodeRegion(rect, options);</div><div class="line">        canvas.drawBitmap(bitmap, 0, 0, null);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public void setInputStream(InputStream is) &#123;</div><div class="line">        try &#123;</div><div class="line"></div><div class="line">            decoder = BitmapRegionDecoder.newInstance(is, true);</div><div class="line">            // 直接使用了 decoder 获取宽高，就不能再用 BitmapFactory 来解析 is 获取图片宽高了</div><div class="line">            mImgHeight = decoder.getHeight();</div><div class="line">            mImgWidth = decoder.getWidth();</div><div class="line"></div><div class="line">            requestLayout();</div><div class="line">            invalidate();</div><div class="line">        &#125; catch (IOException e) &#123;</div><div class="line">            e.printStackTrace();</div><div class="line">        &#125; finally &#123;</div><div class="line">            if (is != null) &#123;</div><div class="line">                try &#123;</div><div class="line">                    is.close();</div><div class="line">                &#125; catch (IOException e) &#123;</div><div class="line">                    e.printStackTrace();</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">&#125;</div><div class="line"></div><div class="line">// 使用</div><div class="line">LongImageView liv = (LongImageView) findViewById(R.id.liv);</div><div class="line">Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.test);</div><div class="line">ByteArrayOutputStream baos = new ByteArrayOutputStream();</div><div class="line">bitmap.compress(Bitmap.CompressFormat.PNG, 100, baos);</div><div class="line">InputStream isBm = new ByteArrayInputStream(baos.toByteArray());</div><div class="line">liv.setInputStream(isBm);</div></pre></td></tr></table></figure></p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/09/01/RecyclerView/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1363,165 +1487,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/08/12/ThreadPool/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Hexiaosa">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexiaosa">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/08/12/ThreadPool/" itemprop="url">线程池简介和源码分析</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-08-12T14:39:43+08:00">
-                2018-08-12
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h3 id="线程池的介绍和使用"><a href="#线程池的介绍和使用" class="headerlink" title="线程池的介绍和使用"></a>线程池的介绍和使用</h3><p>线程池的优点：提高性能，提高线程的利用率，可控制线程的最大并发数，方便线程管理。<br>线程池的核心类是 ThreadPoolExecutor, 可通过 Executors 中的几个方法创建线程池，分别是：</p>
-<ol>
-<li><p>CachedThreadPool<br>核心线程数为 0, 线程数量无上限</p>
-</li>
-<li><p>FixedThreadPool<br>核心线程数由使用者自己指定，无非核心线程，线程空闲时不会被回收，除非线程池被关闭</p>
-</li>
-<li><p>ScheduledThreadPool<br>指定数量的核心线程数，线程数无上限，非核心线程空闲时会被回收</p>
-</li>
-<li><p>SingleThreadExecutor<br>核心线程为 1, 无非核心线程，线程空闲时不会被回收。意义在于使得任务都放在同一线程处理，不必考虑线程同步问题。</p>
-</li>
-</ol>
-<h3 id="线程池构造方法参数介绍"><a href="#线程池构造方法参数介绍" class="headerlink" title="线程池构造方法参数介绍"></a>线程池构造方法参数介绍</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">public ThreadPoolExecutor(int corePoolSize,</div><div class="line">                          int maximumPoolSize,</div><div class="line">                          long keepAliveTime,</div><div class="line">                          TimeUnit unit,</div><div class="line">                          BlockingQueue&lt;Runnable&gt; workQueue,</div><div class="line">                          ThreadFactory threadFactory,</div><div class="line">                          RejectedExecutionHandler handler) &#123;</div><div class="line">    // ...</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>上面是线程池的构造方法，分析一下创建线程池的七个参数的含义：</p>
-<ol>
-<li><p>corePoolSize<br>核心线程数，在空闲时不会被回收，在线程池关闭后才会被回收（allowCoreThreadTimeOut 被设为 true 除外）。</p>
-</li>
-<li><p>maximunPoolSize<br>线程数上限，可利用该参数控制线程最大并发数，非核心线程在空闲时会被回收。</p>
-</li>
-<li><p>keepAliveTime<br>非核心线程的闲置时长，超过这个时长就会被回收，当 allowCoreThreadTimeOut 被设为 true 后，这个时长也同样作用于核心线程。</p>
-</li>
-<li><p>unit<br>keepAliveTime 的时间单位。</p>
-</li>
-<li><p>workQueue<br>保存核心线程的队列。</p>
-</li>
-<li><p>threadFactory<br>用于创建新的线程。</p>
-</li>
-<li><p>handler<br>如果执行（添加）任务失败，则会执行 handler.rejectedExecution(command, this); 这个方法在需要处理拒绝后的操作时由我们自己实现来处理。</p>
-</li>
-</ol>
-<h3 id="线程池原理"><a href="#线程池原理" class="headerlink" title="线程池原理"></a>线程池原理</h3><p>线程池创建过后执行会调用 ThreadPoolExecutor 的 execute(Runnable) 方法来执行线程，步骤如下：</p>
-<ol>
-<li><p>如果当前线程数小于核心线程，则创建新的线程保存到核心线程并执行；</p>
-</li>
-<li><p>否则，核心线程数已满，则插入到任务队列中等待</p>
-</li>
-<li><p>插入到任务队列失败，则启动非核心线程来执行</p>
-</li>
-<li><p>启动非核心线程失败，则 reject.</p>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -1572,7 +1537,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">32</span>
+                  <span class="site-state-item-count">33</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>

@@ -228,6 +228,165 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/08/12/ThreadPool/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Hexiaosa">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexiaosa">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/08/12/ThreadPool/" itemprop="url">线程池简介和源码分析</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-08-12T14:39:43+08:00">
+                2018-08-12
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h3 id="线程池的介绍和使用"><a href="#线程池的介绍和使用" class="headerlink" title="线程池的介绍和使用"></a>线程池的介绍和使用</h3><p>线程池的优点：提高性能，提高线程的利用率，可控制线程的最大并发数，方便线程管理。<br>线程池的核心类是 ThreadPoolExecutor, 可通过 Executors 中的几个方法创建线程池，分别是：</p>
+<ol>
+<li><p>CachedThreadPool<br>核心线程数为 0, 线程数量无上限</p>
+</li>
+<li><p>FixedThreadPool<br>核心线程数由使用者自己指定，无非核心线程，线程空闲时不会被回收，除非线程池被关闭</p>
+</li>
+<li><p>ScheduledThreadPool<br>指定数量的核心线程数，线程数无上限，非核心线程空闲时会被回收</p>
+</li>
+<li><p>SingleThreadExecutor<br>核心线程为 1, 无非核心线程，线程空闲时不会被回收。意义在于使得任务都放在同一线程处理，不必考虑线程同步问题。</p>
+</li>
+</ol>
+<h3 id="线程池构造方法参数介绍"><a href="#线程池构造方法参数介绍" class="headerlink" title="线程池构造方法参数介绍"></a>线程池构造方法参数介绍</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">public ThreadPoolExecutor(int corePoolSize,</div><div class="line">                          int maximumPoolSize,</div><div class="line">                          long keepAliveTime,</div><div class="line">                          TimeUnit unit,</div><div class="line">                          BlockingQueue&lt;Runnable&gt; workQueue,</div><div class="line">                          ThreadFactory threadFactory,</div><div class="line">                          RejectedExecutionHandler handler) &#123;</div><div class="line">    // ...</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>上面是线程池的构造方法，分析一下创建线程池的七个参数的含义：</p>
+<ol>
+<li><p>corePoolSize<br>核心线程数，在空闲时不会被回收，在线程池关闭后才会被回收（allowCoreThreadTimeOut 被设为 true 除外）。</p>
+</li>
+<li><p>maximunPoolSize<br>线程数上限，可利用该参数控制线程最大并发数，非核心线程在空闲时会被回收。</p>
+</li>
+<li><p>keepAliveTime<br>非核心线程的闲置时长，超过这个时长就会被回收，当 allowCoreThreadTimeOut 被设为 true 后，这个时长也同样作用于核心线程。</p>
+</li>
+<li><p>unit<br>keepAliveTime 的时间单位。</p>
+</li>
+<li><p>workQueue<br>保存核心线程的队列。</p>
+</li>
+<li><p>threadFactory<br>用于创建新的线程。</p>
+</li>
+<li><p>handler<br>如果执行（添加）任务失败，则会执行 handler.rejectedExecution(command, this); 这个方法在需要处理拒绝后的操作时由我们自己实现来处理。</p>
+</li>
+</ol>
+<h3 id="线程池原理"><a href="#线程池原理" class="headerlink" title="线程池原理"></a>线程池原理</h3><p>线程池创建过后执行会调用 ThreadPoolExecutor 的 execute(Runnable) 方法来执行线程，步骤如下：</p>
+<ol>
+<li><p>如果当前线程数小于核心线程，则创建新的线程保存到核心线程并执行；</p>
+</li>
+<li><p>否则，核心线程数已满，则插入到任务队列中等待</p>
+</li>
+<li><p>插入到任务队列失败，则启动非核心线程来执行</p>
+</li>
+<li><p>启动非核心线程失败，则 reject.</p>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/08/11/Activity-setContentView/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1499,146 +1658,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/05/28/android-performance-optimize/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Hexiaosa">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexiaosa">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/05/28/android-performance-optimize/" itemprop="url">Android 性能优化</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-05-28T17:37:05+08:00">
-                2018-05-28
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>下面将从布局优化、绘制优化、Bitmap、内存泄漏几个方面讲解 Android 性能优化。</p>
-<h4 id="Android-中布局优化"><a href="#Android-中布局优化" class="headerlink" title="Android 中布局优化"></a>Android 中布局优化</h4><ol>
-<li>加载可能性小的布局使用 ViewStub, 在需要使用的时候再动态加载，因为 ViewStub 默认是 VISIBLE_GONE, 不去加载布局，在主动调用 inflate() 或 setVisible() 方法时才会渲染布局。</li>
-<li>尽可能减少布局的层级，比如一般情况下使用 RelativeLayout 可减少层级，在可使用的时候使用 merge 减少层级</li>
-<li>尽可能复用布局，比如 title 布局，使复用性提高</li>
-<li>在适当情况下复用 style, dimen, color 等，以方便维护</li>
-<li>自定义 View 不在 onDraw() 方法中做耗时操作，不得超过 16ms, 系统的每次渲染时间是 16ms, onDraw() 方法超过这个时间，则会导致该 View 没有完全画完。</li>
-</ol>
-<h4 id="内存泄漏"><a href="#内存泄漏" class="headerlink" title="内存泄漏"></a>内存泄漏</h4><p>内存泄漏的原因：忘记释放内存，持有已不再使用对象的强引用，导致结果是不再使用的内存回收不掉，严重则会导致 OOM.</p>
-<ol>
-<li><p>忘记释放内存<br>比如使用完 cursor 没有调 close(), 使用完 BroadcastReceiver 没有调 unregisterReceiver().</p>
-</li>
-<li><p>持有已不再使用对象的强引用<br>这种问题一般都是在 Activity 里使用非静态内部类或匿名内部类导致的，因为非静态内部类持有外部类的强引用，当 Activity 被销毁后，还被内部类引用，导致 Activitiy 不能被回收，解决方法就是使用静态内部类来替代。<br>比如使用 Handler 导致的，会 new 一个匿名内部类，解决方法就是把 Handler 对象改成静态的。<br>比如使用动画时在 onDestroy() 方法中没有取消动画，导致 View 一直引用着 Actvitiy, 解决方法是在 onDestroy() 方法中取消动画。</p>
-</li>
-</ol>
-<h4 id="Bitmap-高效加载"><a href="#Bitmap-高效加载" class="headerlink" title="Bitmap 高效加载"></a>Bitmap 高效加载</h4><p>如果一个图片过大，直接加载可能就会导致 OOM, 那么有什么方法来使图片加载更加高效呢，比较常用的就是设置 Options.inSampleSize.<br>BitmapFactory.decode… 方法可以将资源文件，本地文件，指定的二进制流，文件流加载成 Bitmap, 在加载的过程中有一个参数 Options, 可以通过设置 inSampleSize 对图片进行压缩。</p>
-<blockquote>
-<p>规定 inSampleSize 需要是 2 的整数幂，如果不是，将会自动向下取整，且 inSampleSize 需大于 1, 如果不是，则修改为 1。<br>若 inSampleSize 设置为 2, 加载后的 Bitmap 宽高是原图的 1/2, 以此类推。</p>
-</blockquote>
-<p>计算 inSampleSize 的方法：<br>Options 还有一个参数 inJustDecodeBounds, 设置为 true 调用 BitmapFactory.decode…方法不会加载 Bitmap, 且返回值为 null, 只会解析 Bitmap 的宽高并赋值给 Options 的 outWidth 和 outHeight 参数，然后将 Options.inJustDecodeBounds 设为 false, 再根据需要设置 inSampleSize, 然后再加载图片。示例代码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">BitmapFactory.Options opt = new BitmapFactory.Options();</div><div class="line">opt.inJustDecodeBounds = true;</div><div class="line">BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher, opt);</div><div class="line">Log.e(&quot;TAG&quot;, &quot;outWidth:&quot; + opt.outWidth + &quot;, outHeight:&quot; + opt.outHeight);</div><div class="line">opt.inJustDecodeBounds = false;</div><div class="line">// 根据实际需要计算</div><div class="line">opt.inSampleSize = 4;</div><div class="line">Bitmap bitmapScale = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher, opt);</div></pre></td></tr></table></figure></p>
-<p>完善中</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -1689,7 +1708,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">32</span>
+                  <span class="site-state-item-count">33</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
