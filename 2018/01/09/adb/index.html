@@ -85,7 +85,7 @@
 <meta property="og:url" content="http://hexiaosa.com/2018/01/09/adb/index.html">
 <meta property="og:site_name" content="Hexiaosa">
 <meta property="og:description" content="adb 命令和 adb shell 命令的区别： adb 命令是 adb 程序自带的命令，adb shell 命令是 Android 程序的命令，/system/bin/下的命令  一些 adb 命令 adb devices adb push local remote adb pull remote local adb install [文件路径] adb uninstall [package">
-<meta property="og:updated_time" content="2018-01-09T02:48:04.272Z">
+<meta property="og:updated_time" content="2018-09-14T02:46:04.037Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="ADB (Android Debug Bridge)">
 <meta name="twitter:description" content="adb 命令和 adb shell 命令的区别： adb 命令是 adb 程序自带的命令，adb shell 命令是 Android 程序的命令，/system/bin/下的命令  一些 adb 命令 adb devices adb push local remote adb pull remote local adb install [文件路径] adb uninstall [package">
@@ -303,7 +303,7 @@
 </li>
 <li><p>一些 adb 命令<br> adb devices<br> adb push local remote<br> adb pull remote local<br> adb install [文件路径]<br> adb uninstall [package name]</p>
 </li>
-<li><p>一些 adb shell 命令<br> adb shell pm … (list packages, path [package], )<br> adb shell am … (start -a android.intent.action.MAIN [包名]/[路径activity], )<br> adb shell screencap /sdcard/s.png  截屏<br> adb shell screenrecord /sdcard/s.mp4 录制视频，可以指定分辨率等参数<br> adb shell dumpsys activity 查看 activity 任务栈<br> adb shell logcat … (-f [文件路径]&lt;抓日志保存到该文件&gt;, )</p>
+<li><p>一些 adb shell 命令<br> adb shell pm … (list packages, path [package], )<br> adb shell am … (start -a android.intent.action.MAIN [包名]/[路径activity], )<br> adb shell screencap /sdcard/s.png  截屏<br> adb shell screenrecord /sdcard/s.mp4 录制视频，可以指定分辨率等参数<br> adb shell dumpsys activity top  查看栈顶 activity, 可以用来获取包名<br> adb shell dumpsys activity 查看 activity 任务栈<br> adb shell dumpsys activity services [包名] 查看某个包下正在运行的 service<br> adb shell logcat … (-f [文件路径]&lt;抓日志保存到该文件&gt;, )</p>
 </li>
 <li><p>adb 用在 android 程序中</p>
  <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">Process p = Runtime.getRuntime().exec(&quot;su/sh&quot;); // su表示root, sh普通用户</div><div class="line">DataOutputStream dataStream = new DataOutputStream(p.getOutputStream());</div><div class="line">dataStream.write(&quot;&quot;.getBytes());// 主要执行的 adb shell 命令</div><div class="line">datastream.writeBytes(&quot;\n&quot;);</div><div class="line"></div><div class="line">dataStream.writeBytes(&quot;exit\n&quot;);</div><div class="line">dataStream.flush();</div><div class="line"></div><div class="line">process.waitFor();</div><div class="line"></div><div class="line">process.getInputStream(); // 成功后输出的信息会放在这里面</div><div class="line">process.getErrorStream(); // 出错后错误信息会放在这里面</div></pre></td></tr></table></figure>

@@ -85,7 +85,7 @@
 <meta property="og:url" content="http://hexiaosa.com/2018/05/28/android-performance-optimize/index.html">
 <meta property="og:site_name" content="Hexiaosa">
 <meta property="og:description" content="下面将从布局优化、绘制优化、Bitmap、内存泄漏几个方面讲解 Android 性能优化。 Android 中布局优化 加载可能性小的布局使用 ViewStub, 在需要使用的时候再动态加载，因为 ViewStub 默认是 VISIBLE_GONE, 不去加载布局，在主动调用 inflate() 或 setVisible() 方法时才会渲染布局。 尽可能减少布局的层级，比如一般情况下使用 Rela">
-<meta property="og:updated_time" content="2018-05-29T03:45:07.109Z">
+<meta property="og:updated_time" content="2018-09-26T07:04:08.653Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Android 性能优化">
 <meta name="twitter:description" content="下面将从布局优化、绘制优化、Bitmap、内存泄漏几个方面讲解 Android 性能优化。 Android 中布局优化 加载可能性小的布局使用 ViewStub, 在需要使用的时候再动态加载，因为 ViewStub 默认是 VISIBLE_GONE, 不去加载布局，在主动调用 inflate() 或 setVisible() 方法时才会渲染布局。 尽可能减少布局的层级，比如一般情况下使用 Rela">
@@ -306,11 +306,11 @@
 <li>在适当情况下复用 style, dimen, color 等，以方便维护</li>
 <li>自定义 View 不在 onDraw() 方法中做耗时操作，不得超过 16ms, 系统的每次渲染时间是 16ms, onDraw() 方法超过这个时间，则会导致该 View 没有完全画完。</li>
 </ol>
-<h4 id="内存泄漏"><a href="#内存泄漏" class="headerlink" title="内存泄漏"></a>内存泄漏</h4><p>内存泄漏的原因：忘记释放内存，持有已不再使用对象的强引用，导致结果是不再使用的内存回收不掉，严重则会导致 OOM.</p>
+<h4 id="内存泄漏"><a href="#内存泄漏" class="headerlink" title="内存泄漏"></a>内存泄漏</h4><p>内存泄漏的原因：已不再使用的对象被生命周期更长的强引用对象持有，导致结果是不再使用的内存回收不掉，严重则会导致 OOM.</p>
 <ol>
 <li><p>忘记释放内存<br>比如使用完 cursor 没有调 close(), 使用完 BroadcastReceiver 没有调 unregisterReceiver().</p>
 </li>
-<li><p>持有已不再使用对象的强引用<br>这种问题一般都是在 Activity 里使用非静态内部类或匿名内部类导致的，因为非静态内部类持有外部类的强引用，当 Activity 被销毁后，还被内部类引用，导致 Activitiy 不能被回收，解决方法就是使用静态内部类来替代。<br>比如使用 Handler 导致的，会 new 一个匿名内部类，解决方法就是把 Handler 对象改成静态的。<br>比如使用动画时在 onDestroy() 方法中没有取消动画，导致 View 一直引用着 Actvitiy, 解决方法是在 onDestroy() 方法中取消动画。</p>
+<li><p>持有已不再使用对象的强引用<br>这种问题一般都是在 Activity 里使用非静态内部类或匿名内部类导致的，因为非静态内部类持有外部类的强引用，当 Activity 被销毁后，还被内部类引用，导致 Activitiy 不能被回收，解决方法就是使用静态内部类来替代，静态内部类不持有外部类引用，若需要 Activity 引用，则在静态内部类中声明一个弱引用成员变量，创建对象时把 Activity 引用赋值，使用时判空。<br>比如使用 Handler 导致的，会 new 一个匿名内部类，解决方法就是把 Handler 对象改成静态的。<br>比如使用动画时在 onDestroy() 方法中没有取消动画，导致 View 一直引用着 Actvitiy, 解决方法是在 onDestroy() 方法中取消动画。</p>
 </li>
 </ol>
 <h4 id="Bitmap-高效加载"><a href="#Bitmap-高效加载" class="headerlink" title="Bitmap 高效加载"></a>Bitmap 高效加载</h4><p>如果一个图片过大，直接加载可能就会导致 OOM, 那么有什么方法来使图片加载更加高效呢，比较常用的就是设置 Options.inSampleSize.<br>BitmapFactory.decode… 方法可以将资源文件，本地文件，指定的二进制流，文件流加载成 Bitmap, 在加载的过程中有一个参数 Options, 可以通过设置 inSampleSize 对图片进行压缩。</p>
