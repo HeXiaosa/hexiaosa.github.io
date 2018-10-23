@@ -299,7 +299,9 @@
       
         
           
-            <p>&gt;<br>本文所用源码：<a href="https://github.com/HeXiaosa/ItemDeletableListView" target="_blank" rel="external">https://github.com/HeXiaosa/ItemDeletableListView</a><br>本文由看这篇文章 <a href="https://blog.csdn.net/lmj623565791/article/details/22961279" target="_blank" rel="external">https://blog.csdn.net/lmj623565791/article/details/22961279</a> 以及结合 Andorid 开发艺术探索而来。</p>
+            <blockquote>
+<p>本文所用源码：<a href="https://github.com/HeXiaosa/ItemDeletableListView" target="_blank" rel="external">https://github.com/HeXiaosa/ItemDeletableListView</a><br>本文由看这篇文章 <a href="https://blog.csdn.net/lmj623565791/article/details/22961279" target="_blank" rel="external">https://blog.csdn.net/lmj623565791/article/details/22961279</a> 以及结合 Andorid 开发艺术探索而来。</p>
+</blockquote>
 <h3 id="事件分发概述"><a href="#事件分发概述" class="headerlink" title="事件分发概述"></a>事件分发概述</h3><p>Android 中触摸事件主要由 dispatchTouchEvent, onInterceptTouchEvent, onTouchEvent 来控制。</p>
 <p>触摸屏幕时，首先会触发 ViewGroup 的 dispathTouchEvent 方法，自定义 View 时，如果它在 ACTION_DOWN 返回 false, 则表示不再继续向下执行，事件到此结束，如果返回了 true, 则下次继续执行 dispatchTouchEvent 方法，返回 super.dispatchTouchEvent(ev) 则会执行 onInterceptTouchEvent/onTouchEvent.</p>
 <p>View 是没有 onInterceptTouchEvent 方法的，因为事件传递到 View 之后是一定交给自己处理了。ViewGroup 的 onInterceptTouchEvent 方法 返回 true 表示 要拦截事件，给自己处理，返回 false 表示不拦截，传递给子 View 处理，执行子 View 的 dispatchTouchEvent 方法。</p>
