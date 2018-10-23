@@ -228,6 +228,136 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/10/23/TouchEvent/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Hexiaosa">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexiaosa">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/10/23/TouchEvent/" itemprop="url">自定义View —— 可删除 item 的 ListView (事件分发)</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-10-23T15:11:44+08:00">
+                2018-10-23
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>&gt;<br>本文所用源码：<a href="https://github.com/HeXiaosa/ItemDeletableListView" target="_blank" rel="external">https://github.com/HeXiaosa/ItemDeletableListView</a><br>本文由看这篇文章 <a href="https://blog.csdn.net/lmj623565791/article/details/22961279" target="_blank" rel="external">https://blog.csdn.net/lmj623565791/article/details/22961279</a> 以及结合 Andorid 开发艺术探索而来。</p>
+<h3 id="事件分发概述"><a href="#事件分发概述" class="headerlink" title="事件分发概述"></a>事件分发概述</h3><p>Android 中触摸事件主要由 dispatchTouchEvent, onInterceptTouchEvent, onTouchEvent 来控制。</p>
+<p>触摸屏幕时，首先会触发 ViewGroup 的 dispathTouchEvent 方法，自定义 View 时，如果它在 ACTION_DOWN 返回 false, 则表示不再继续向下执行，事件到此结束，如果返回了 true, 则下次继续执行 dispatchTouchEvent 方法，返回 super.dispatchTouchEvent(ev) 则会执行 onInterceptTouchEvent/onTouchEvent.</p>
+<p>View 是没有 onInterceptTouchEvent 方法的，因为事件传递到 View 之后是一定交给自己处理了。ViewGroup 的 onInterceptTouchEvent 方法 返回 true 表示 要拦截事件，给自己处理，返回 false 表示不拦截，传递给子 View 处理，执行子 View 的 dispatchTouchEvent 方法。</p>
+<p>执行到 onTouchEvent 方法，返回 true 表示不再给它的 ViewGroup 处理，自己处理完就结束，返回 false 表示自己可以做一些操作，再执行它的 ViewGroup 的 onTouchEvent 方法。</p>
+<h3 id="可删除-item-的-ListView-思路"><a href="#可删除-item-的-ListView-思路" class="headerlink" title="可删除 item 的 ListView 思路"></a>可删除 item 的 ListView 思路</h3><p>理解上面的描述之后，就可以结合上面文章中的例子来自己动手实现一个</p>
+<ol>
+<li>从右向左滑动时，需要我们来处理（弹出PopupWindow），其余的交由 ListView 处理</li>
+<li>PopupWindow 是弹出状态时，再次触摸，则需要消失 PopupWindow, 事件到此结束</li>
+</ol>
+<p>这里贴出 dispatchTouchEvent 和 onTouchEvent 的代码：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div></pre></td><td class="code"><pre><div class="line">@Override</div><div class="line">public boolean dispatchTouchEvent(MotionEvent ev) &#123;</div><div class="line">    Log.e(&quot;ItemDeletableListView&quot;, &quot;dispatchTouchEvent action : &quot; + ev.getAction() + &quot;, handleTouchEvent:&quot; + handleTouchEvent + &quot;, isPopupShow:&quot; + isPopupShow);</div><div class="line">    Log.e(&quot;ItemDeletableListView&quot;, &quot;dispatchTouchEvent mPwDelete.isShowing:&quot; + mPwDelete.isShowing());</div><div class="line">    if (!handleTouchEvent) &#123;</div><div class="line">        // 如果不需要处理触摸事件，那么久不做处理</div><div class="line">        return super.dispatchTouchEvent(ev);</div><div class="line">    &#125;</div><div class="line">    switch (ev.getAction()) &#123;</div><div class="line">        case MotionEvent.ACTION_DOWN:</div><div class="line">            if (isPopupShow) &#123;</div><div class="line">                // 已经展示了 popup 的话，再次触发 down 事件，则消失，并不再分发事件</div><div class="line">                mPwDelete.dismiss();</div><div class="line">                isPopupShow = false;</div><div class="line">                return false;</div><div class="line">            &#125;</div><div class="line">            downX = ev.getX();</div><div class="line">            downY = ev.getY();</div><div class="line">            downPosition = pointToPosition(((int) downX), ((int) downY));</div><div class="line">            break;</div><div class="line">        case MotionEvent.ACTION_MOVE:</div><div class="line">            if (isPopupShow) &#123;</div><div class="line">                // 如果 move 过程中展示了 popupwindow, 那么不再分发事件</div><div class="line">                return false;</div><div class="line">            &#125;</div><div class="line">            x = ev.getX();</div><div class="line">            y = ev.getY();</div><div class="line">            if (downX-x &gt; touchSlop &amp;&amp; downX-x &gt; Math.abs(downY-y)) &#123;</div><div class="line">                isSliding = true;</div><div class="line">            &#125; else &#123;</div><div class="line">                isSliding = false;</div><div class="line">            &#125;</div><div class="line">            break;</div><div class="line">        case MotionEvent.ACTION_UP:</div><div class="line">            isSliding = false;</div><div class="line">            break;</div><div class="line">    &#125;</div><div class="line">    return super.dispatchTouchEvent(ev);</div><div class="line">&#125;</div><div class="line"></div><div class="line">@Override</div><div class="line">public boolean onTouchEvent(MotionEvent ev) &#123;</div><div class="line">    Log.e(&quot;ItemDeletableListView&quot;, &quot;onTouchEvent action : &quot; + ev.getAction() + &quot;, isSliding:&quot; + isSliding + &quot;, downPosition:&quot; + downPosition);</div><div class="line">    switch (ev.getAction()) &#123;</div><div class="line">        case MotionEvent.ACTION_MOVE:</div><div class="line">            if (isSliding) &#123;</div><div class="line">                View child = getChildAt(downPosition);</div><div class="line">                if (child == null) &#123;</div><div class="line">                    return super.onTouchEvent(ev);</div><div class="line">                &#125;</div><div class="line">                isPopupShow = true;</div><div class="line">                int x = getWidth()/2+mPwDelete.getWidth()/2;</div><div class="line">                int y = child.getTop()+child.getHeight()/2;</div><div class="line">                Log.e(&quot;TAG&quot;, &quot;popup x:&quot; + x + &quot;, y:&quot; + y);</div><div class="line">                mPwDelete.showAtLocation(child, Gravity.TOP | Gravity.LEFT, x, y);</div><div class="line">                mPwDelete.update();</div><div class="line">                mTvDelete.setOnClickListener(new OnClickListener() &#123;</div><div class="line">                    @Override</div><div class="line">                    public void onClick(View v) &#123;</div><div class="line">                        mDeleteItemListener.deleteItem(downPosition);</div><div class="line">                        mPwDelete.dismiss();</div><div class="line">                        isPopupShow = false;</div><div class="line">                    &#125;</div><div class="line">                &#125;);</div><div class="line">            &#125;</div><div class="line">            break;</div><div class="line">        case MotionEvent.ACTION_UP:</div><div class="line">            break;</div><div class="line">    &#125;</div><div class="line">    return super.onTouchEvent(ev);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/09/11/android-bitmap/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1348,145 +1478,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/08/14/toast/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Hexiaosa">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexiaosa">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/08/14/toast/" itemprop="url">Toast 源码分析</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-08-14T21:15:28+08:00">
-                2018-08-14
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h3 id="思考"><a href="#思考" class="headerlink" title="思考"></a>思考</h3><p>在分析源码之前有两个问题</p>
-<ol>
-<li><p>子线程直接使用 Toast 时会抛出异常 “Can’t create handler inside thread that has not called Looper.prepare()”, 在 Toast 类里搜 “Looper” 并搜不到。是哪里抛出的这个异常呢？</p>
-</li>
-<li><p>在子线程中这样使用 Toast:</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">Looper.prepare();</div><div class="line">Toast.makeText(getApplicationContext(), &quot;test toast&quot;, Toast.LENGTH_SHORT).show();</div><div class="line">Looper.loop();</div></pre></td></tr></table></figure>
-</li>
-</ol>
-<p>像上面这种调用是在主线程显示 Toast 吗</p>
-<h3 id="Toast-源码分析"><a href="#Toast-源码分析" class="headerlink" title="Toast 源码分析"></a>Toast 源码分析</h3><p>先看 Toast 的 makeText 和 show 方法：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div></pre></td><td class="code"><pre><div class="line">public static Toast makeText(Context context, CharSequence text, @Duration int duration) &#123;</div><div class="line">	// 创建 TN(Toast 的内置对象)，用于展示 Toast 的主要类</div><div class="line">    Toast result = new Toast(context);</div><div class="line"></div><div class="line">    // 加载 Toast 的展示内容</div><div class="line">    LayoutInflater inflate = (LayoutInflater)</div><div class="line">            context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);</div><div class="line">    View v = inflate.inflate(com.android.internal.R.layout.transient_notification, null);</div><div class="line">    TextView tv = (TextView)v.findViewById(com.android.internal.R.id.message);</div><div class="line">    tv.setText(text);</div><div class="line">    </div><div class="line">    // 赋值一些属性</div><div class="line">    result.mNextView = v;</div><div class="line">    result.mDuration = duration;</div><div class="line"></div><div class="line">    return result;</div><div class="line">&#125;</div><div class="line"></div><div class="line">public void show() &#123;</div><div class="line">	// 校验显示内容</div><div class="line">    if (mNextView == null) &#123;</div><div class="line">        throw new RuntimeException(&quot;setView must have been called&quot;);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    INotificationManager service = getService(); // NotificationManagerService 的成员变量 mService 是 INotificationManager.Stub 的实现类</div><div class="line">    String pkg = mContext.getOpPackageName();</div><div class="line">    TN tn = mTN;</div><div class="line">    // 展示内容属性赋值给 tn 的属性</div><div class="line">    tn.mNextView = mNextView;</div><div class="line"></div><div class="line">    try &#123;</div><div class="line">    	// 调用 NotificationManagerService 中 mService 的 enqueueToast 方法</div><div class="line">        service.enqueueToast(pkg, tn, mDuration);</div><div class="line">    &#125; catch (RemoteException e) &#123;</div><div class="line">        // Empty</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>下面来看 NotificationManagerService 中 mService 的 enqueueToast 方法：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div></pre></td><td class="code"><pre><div class="line">// callback 就是 TN 实例</div><div class="line">@Override</div><div class="line">public void enqueueToast(String pkg, ITransientNotification callback, int duration)</div><div class="line">&#123;</div><div class="line">    // ...</div><div class="line"></div><div class="line">    synchronized (mToastQueue) &#123;</div><div class="line">        int callingPid = Binder.getCallingPid();</div><div class="line">        long callingId = Binder.clearCallingIdentity();</div><div class="line">        try &#123;</div><div class="line">            ToastRecord record;</div><div class="line">            int index = indexOfToastLocked(pkg, callback);</div><div class="line">            // If it&apos;s already in the queue, we update it in place, we don&apos;t</div><div class="line">            // move it to the end of the queue.</div><div class="line">            if (index &gt;= 0) &#123;</div><div class="line">                record = mToastQueue.get(index);</div><div class="line">                record.update(duration);</div><div class="line">            &#125; else &#123;</div><div class="line">                // ...</div><div class="line"></div><div class="line">                Binder token = new Binder();</div><div class="line">                mWindowManagerInternal.addWindowToken(token,</div><div class="line">                        WindowManager.LayoutParams.TYPE_TOAST);</div><div class="line">                // 创建 ToastRecord 对象</div><div class="line">                record = new ToastRecord(callingPid, pkg, callback, duration, token);</div><div class="line">                // mToastQueue 添加记录</div><div class="line">                mToastQueue.add(record);</div><div class="line">                index = mToastQueue.size() - 1;</div><div class="line">                keepProcessAliveIfNeededLocked(callingPid);</div><div class="line">            &#125;</div><div class="line">            if (index == 0) &#123;</div><div class="line">                showNextToastLocked();</div><div class="line">            &#125;</div><div class="line">        &#125; finally &#123;</div><div class="line">            Binder.restoreCallingIdentity(callingId);</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>上面代码可以看到有往 mToastQueue 中添加记录，那么什么时候执行呢，全局搜 “mToastQueue.get(“ 看到在 showNextToastLocked 方法中取出 mToastQueue 的第 0 个元素，调用 record.callback.show(record.token), record.callback 就是 TN 对象，也就是这里调了 TN 的 show 方法。下面就来看一下 TN 的 show 方法做了什么：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">public void show(IBinder windowToken) &#123;</div><div class="line">    if (localLOGV) Log.v(TAG, &quot;SHOW: &quot; + this);</div><div class="line">    // 交给 mHandler 处理</div><div class="line">    mHandler.obtainMessage(0, windowToken).sendToTarget();</div><div class="line">&#125;</div><div class="line"></div><div class="line">// TN 的 mHandler</div><div class="line">final Handler mHandler = new Handler() &#123;</div><div class="line">    @Override</div><div class="line">    public void handleMessage(Message msg) &#123;</div><div class="line">    	// 所以 TN 的 show 方法处理的是这里</div><div class="line">        IBinder token = (IBinder) msg.obj;</div><div class="line">        handleShow(token);</div><div class="line">    &#125;</div><div class="line">&#125;;</div></pre></td></tr></table></figure></p>
-<p>下面来看核心展示 Toast 的方法，也就是 TN 的 handleShow() 方法<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div></pre></td><td class="code"><pre><div class="line">public void handleShow(IBinder windowToken) &#123;</div><div class="line">    if (localLOGV) Log.v(TAG, &quot;HANDLE SHOW: &quot; + this + &quot; mView=&quot; + mView</div><div class="line">            + &quot; mNextView=&quot; + mNextView);</div><div class="line">    if (mView != mNextView) &#123;</div><div class="line">        handleHide();</div><div class="line">        mView = mNextView;</div><div class="line">        // ...</div><div class="line">        // 展示使用的是 WindowManager</div><div class="line">        mWM = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);</div><div class="line">        </div><div class="line">        // 下面配置的是位置参数</div><div class="line">        final Configuration config = mView.getContext().getResources().getConfiguration();</div><div class="line">        final int gravity = Gravity.getAbsoluteGravity(mGravity, config.getLayoutDirection());</div><div class="line">        mParams.gravity = gravity;</div><div class="line">        if ((gravity &amp; Gravity.HORIZONTAL_GRAVITY_MASK) == Gravity.FILL_HORIZONTAL) &#123;</div><div class="line">            mParams.horizontalWeight = 1.0f;</div><div class="line">        &#125;</div><div class="line">        if ((gravity &amp; Gravity.VERTICAL_GRAVITY_MASK) == Gravity.FILL_VERTICAL) &#123;</div><div class="line">            mParams.verticalWeight = 1.0f;</div><div class="line">        &#125;</div><div class="line">        mParams.x = mX;</div><div class="line">        mParams.y = mY;</div><div class="line">        mParams.verticalMargin = mVerticalMargin;</div><div class="line">        mParams.horizontalMargin = mHorizontalMargin;</div><div class="line">        mParams.packageName = packageName;</div><div class="line">        mParams.hideTimeoutMilliseconds = mDuration ==</div><div class="line">            Toast.LENGTH_LONG ? LONG_DURATION_TIMEOUT : SHORT_DURATION_TIMEOUT;</div><div class="line">        mParams.token = windowToken;</div><div class="line">        if (mView.getParent() != null) &#123;</div><div class="line">            if (localLOGV) Log.v(TAG, &quot;REMOVE! &quot; + mView + &quot; in &quot; + this);</div><div class="line">            mWM.removeView(mView);</div><div class="line">        &#125;</div><div class="line">        if (localLOGV) Log.v(TAG, &quot;ADD! &quot; + mView + &quot; in &quot; + this);</div><div class="line">        // 展示 Toast, 由此也可以看出，Toast 是被添加在 Window 下的</div><div class="line">        mWM.addView(mView, mParams);</div><div class="line">        trySendAccessibilityEvent();</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>Toast 是先调用 makeText 创建要展示的 view, 调用 show 方法时内部跨进程通知 NotificationManagerService, 再通知到 TN 执行 show 方法，最终通过 handler 添加到 Window 下。<br>再看下最开始的思考，</p>
-<ol>
-<li><p>makeText 会 new Toast, Toast 构造方法里创建 TN 对象，TN 有一个成员变量 mHandler, 在创建 Handler 时需要该线程有 Looper 对象，主线程的 ActivityThread 的 main() 方法有创建 Looper 对象，但子线程并没有 Looper 对象，所以会抛异常。</p>
-</li>
-<li><p>如果在子线程调 Looper.prepare(), 会是在主线程展示的 Toast 吗，看上面的代码很明显不是，因为 Toast, TN 都是在子线程创建的，所以 mHandler 也是在子线程创建的，处理消息时的 Looper 也是子线程创建的，所以展示也是在子线程的。</p>
-</li>
-</ol>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -1537,7 +1528,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">33</span>
+                  <span class="site-state-item-count">34</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>

@@ -228,6 +228,134 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2017/11/09/event_dispatch/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Hexiaosa">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexiaosa">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2017/11/09/event_dispatch/" itemprop="url">事件分发</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-11-09T09:32:48+08:00">
+                2017-11-09
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>事件分发中设计到的几个方法：dispatchTouchEvent(), onInterceptTouchEvent(), onTouchEvent(), 这几个都有返回值 boolean 类型，默认情况下都返回 false, </p>
+<p>若有 A(B(MyView)), 则事件的默认传递：</p>
+<p>A dispatch<br>A onIntercept<br>B dispatch<br>B onIntercept<br>MyView dispatch<br>MyView onTouch<br>B onTouch<br>A onTouch</p>
+<p>当 dispatchTouchEvent 返回 true 时，上面的分发流程就此中止；<br>当 onInterceptTouchEvent 返回 true 时，事件不再往子 View 传递，其余都还正常；<br>当 onTouchEvent 返回 true 时，onTouchEvent 由自己处理，不再交给父级处理。</p>
+<p>由上面的分析看来已经很清晰了，有下面这些特殊情况：</p>
+<ol>
+<li>这几个事件中，ACTION_DOWN 返回 true 和整个事件返回 true 的效果一样。也就是该次 event 一旦返回 true 表示之后的事件都返回 true。</li>
+<li>PS: onInterceptTouchEvent() 中有事件返回 true, 则之后的事件该方法不会再被调用，直到本次事件结束。</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2017/10/19/note/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -690,7 +818,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">33</span>
+                  <span class="site-state-item-count">34</span>
                   <span class="site-state-item-name">posts</span>
                 </a>
               </div>
