@@ -181,7 +181,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
             
-            Home
+            Startseite
           </a>
         </li>
       
@@ -191,7 +191,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
             
-            Archives
+            Archiv
           </a>
         </li>
       
@@ -214,6 +214,266 @@
           <div id="content" class="content">
             
   <section id="posts" class="posts-expand">
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/10/24/CountDownLatch/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Hexiaosa">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexiaosa">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/10/24/CountDownLatch/" itemprop="url">并发编程 —— CountDownLatch 讲解</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-10-24T16:37:22+08:00">
+                2018-10-24
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h4 id="CountDownLatch-介绍"><a href="#CountDownLatch-介绍" class="headerlink" title="CountDownLatch 介绍"></a>CountDownLatch 介绍</h4><p>CountDownLatch 是用于等待线程的执行，等待线程数量为 0 后，则结束等待，执行该线程等待后所要执行的代码。</p>
+<p>例子如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div></pre></td><td class="code"><pre><div class="line">private static CountDownLatch caDownLatch = new CountDownLatch(2);</div><div class="line"></div><div class="line">public static void main(String[] args) &#123;</div><div class="line">	new Thread()&#123;</div><div class="line">		public void run() &#123;</div><div class="line">			System.out.println(&quot;线程&quot; + Thread.currentThread().getName() + &quot;开始&quot;);</div><div class="line">			System.out.println(&quot;线程&quot; + Thread.currentThread().getName() + &quot;等待其它两个线程执行结束&quot;);</div><div class="line">			try &#123;</div><div class="line">				caDownLatch.await();</div><div class="line">			&#125; catch (InterruptedException e) &#123;</div><div class="line">				e.printStackTrace();</div><div class="line">			&#125;</div><div class="line">			System.out.println(&quot;其它两个线程执行结束&quot;);</div><div class="line">			System.out.println(&quot;线程&quot; + Thread.currentThread().getName() + &quot;结束&quot;);</div><div class="line">		&#125;;</div><div class="line">	&#125;.start();</div><div class="line">	new Thread()&#123;</div><div class="line">		public void run() &#123;</div><div class="line">			System.out.println(&quot;线程&quot; + Thread.currentThread().getName() + &quot;执行&quot;);</div><div class="line">			try &#123;</div><div class="line">				Thread.sleep(500);</div><div class="line">			&#125; catch (InterruptedException e) &#123;</div><div class="line">				e.printStackTrace();</div><div class="line">			&#125;</div><div class="line">			caDownLatch.countDown();</div><div class="line">		&#125;;</div><div class="line">	&#125;.start();</div><div class="line">	new Thread()&#123;</div><div class="line">		public void run() &#123;</div><div class="line">			System.out.println(&quot;线程&quot; + Thread.currentThread().getName() + &quot;执行&quot;);</div><div class="line">			try &#123;</div><div class="line">				Thread.sleep(500);</div><div class="line">			&#125; catch (InterruptedException e) &#123;</div><div class="line">				e.printStackTrace();</div><div class="line">			&#125;</div><div class="line">			caDownLatch.countDown();</div><div class="line">		&#125;;</div><div class="line">	&#125;.start();</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>执行结果为：</p>
+<blockquote>
+<p>线程Thread-0开始<br>线程Thread-0等待其它两个线程执行结束<br>线程Thread-1执行<br>线程Thread-2执行<br>其它两个线程执行结束<br>线程Thread-0结束</p>
+</blockquote>
+<h4 id="CountDownLatch-源码分析"><a href="#CountDownLatch-源码分析" class="headerlink" title="CountDownLatch 源码分析"></a>CountDownLatch 源码分析</h4><p>CountDownLatch 内部通过标记和阻塞线程和唤醒线程来实现功能。</p>
+<p>首先分析 await() 方法：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line">public void await() throws InterruptedException &#123;</div><div class="line">    sync.acquireSharedInterruptibly(1);</div><div class="line">&#125;</div><div class="line">public final void acquireSharedInterruptibly(int arg)</div><div class="line">        throws InterruptedException &#123;</div><div class="line">    if (Thread.interrupted())</div><div class="line">        throw new InterruptedException();</div><div class="line">    if (tryAcquireShared(arg) &lt; 0) // 如果指定等待的数量不等于 0</div><div class="line">        doAcquireSharedInterruptibly(arg);</div><div class="line">&#125;</div><div class="line"></div><div class="line"></div><div class="line">private void doAcquireSharedInterruptibly(int arg)</div><div class="line">    throws InterruptedException &#123;</div><div class="line">    // 插入该线程节点</div><div class="line">    final Node node = addWaiter(Node.SHARED);</div><div class="line">    boolean failed = true;</div><div class="line">    try &#123;</div><div class="line">        for (;;) &#123;</div><div class="line">            // ...</div><div class="line">            // parkAndCheckInterrupt 用于阻塞线程并判断是否被中断，内部调用 LockSupport.park 来实现</div><div class="line">            if (shouldParkAfterFailedAcquire(p, node) &amp;&amp;</div><div class="line">                parkAndCheckInterrupt())</div><div class="line">                throw new InterruptedException();</div><div class="line">        &#125;</div><div class="line">    &#125; finally &#123;</div><div class="line">        if (failed) // 如果失败，就恢复</div><div class="line">            cancelAcquire(node);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>接下来看 countDown() 方法：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div></pre></td><td class="code"><pre><div class="line">public void countDown() &#123;</div><div class="line">    sync.releaseShared(1);</div><div class="line">&#125;</div><div class="line">public final boolean releaseShared(int arg) &#123;</div><div class="line">    // tryReleaseShared 对标记减一，已经没有等待的线程时返回 true</div><div class="line">    if (tryReleaseShared(arg)) &#123;</div><div class="line">        doReleaseShared();</div><div class="line">        return true;</div><div class="line">    &#125;</div><div class="line">    return false;</div><div class="line">&#125;</div><div class="line"></div><div class="line">private void doReleaseShared() &#123;</div><div class="line">    for (;;) &#123;</div><div class="line">        Node h = head;</div><div class="line">        if (h != null &amp;&amp; h != tail) &#123;</div><div class="line">            int ws = h.waitStatus;</div><div class="line">            if (ws == Node.SIGNAL) &#123;</div><div class="line">                // 恢复节点状态</div><div class="line">                if (!compareAndSetWaitStatus(h, Node.SIGNAL, 0))</div><div class="line">                    continue;            // loop to recheck cases</div><div class="line">                // 唤醒阻塞的线程，继续执行，通过 LockSupport.unpark</div><div class="line">                unparkSuccessor(h);</div><div class="line">            &#125;</div><div class="line">            // ...</div><div class="line">        &#125;</div><div class="line">        // ...</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/10/24/CyclicBarrier/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Hexiaosa">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexiaosa">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/10/24/CyclicBarrier/" itemprop="url">并发编程 —— CyclicBarrier 讲解</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-10-24T15:03:59+08:00">
+                2018-10-24
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h4 id="CyclicBarrier-介绍"><a href="#CyclicBarrier-介绍" class="headerlink" title="CyclicBarrier 介绍"></a>CyclicBarrier 介绍</h4><p>CyclicBarrier 是用于阻塞固定数量的线程，数量达到时就继续这些线程的执行，并可以指定继续执行这些线程之前执行 Runnable, 这个 Runnable 是在到达临界数量的那个线程执行的。</p>
+<p>例子如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div></pre></td><td class="code"><pre><div class="line">private static CyclicBarrier caBarrier = new CyclicBarrier(3, new Runnable() &#123;</div><div class="line">	</div><div class="line">	@Override</div><div class="line">	public void run() &#123;</div><div class="line">		System.out.println(&quot;阻塞结束，继续执行&quot;);</div><div class="line">	&#125;</div><div class="line">&#125;);</div><div class="line"></div><div class="line">public static void main(String[] args) &#123;</div><div class="line">	new Thread()&#123;</div><div class="line">		public void run() &#123;</div><div class="line">			System.out.println(&quot;线程一开始&quot;);</div><div class="line">			System.out.println(&quot;线程一等待执行&quot;);</div><div class="line">			try &#123;</div><div class="line">				caBarrier.await();</div><div class="line">			&#125; catch (InterruptedException e) &#123;</div><div class="line">				e.printStackTrace();</div><div class="line">			&#125; catch (BrokenBarrierException e) &#123;</div><div class="line">				e.printStackTrace();</div><div class="line">			&#125;</div><div class="line">			System.out.println(&quot;线程一继续执行&quot;);</div><div class="line">			System.out.println(&quot;线程一结束&quot;);</div><div class="line">		&#125;;</div><div class="line">	&#125;.start();</div><div class="line">	new Thread()&#123;</div><div class="line">		public void run() &#123;</div><div class="line">			System.out.println(&quot;线程二开始&quot;);</div><div class="line">			System.out.println(&quot;线程二等待执行&quot;);</div><div class="line">			try &#123;</div><div class="line">				caBarrier.await();</div><div class="line">			&#125; catch (InterruptedException e) &#123;</div><div class="line">				e.printStackTrace();</div><div class="line">			&#125; catch (BrokenBarrierException e) &#123;</div><div class="line">				e.printStackTrace();</div><div class="line">			&#125;</div><div class="line">			System.out.println(&quot;线程二继续执行&quot;);</div><div class="line">			System.out.println(&quot;线程二结束&quot;);</div><div class="line">		&#125;;</div><div class="line">	&#125;.start();</div><div class="line">	new Thread()&#123;</div><div class="line">		public void run() &#123;</div><div class="line">			System.out.println(&quot;线程三开始&quot;);</div><div class="line">			System.out.println(&quot;线程三等待执行&quot;);</div><div class="line">			try &#123;</div><div class="line">				caBarrier.await();</div><div class="line">			&#125; catch (InterruptedException e) &#123;</div><div class="line">				e.printStackTrace();</div><div class="line">			&#125; catch (BrokenBarrierException e) &#123;</div><div class="line">				e.printStackTrace();</div><div class="line">			&#125;</div><div class="line">			System.out.println(&quot;线程三继续执行&quot;);</div><div class="line">			System.out.println(&quot;线程三结束&quot;);</div><div class="line">		&#125;;</div><div class="line">	&#125;.start();</div></pre></td></tr></table></figure></p>
+<p>打印结果：</p>
+<blockquote>
+<p>线程一开始<br>线程一等待执行<br>线程二开始<br>线程二等待执行<br>线程三开始<br>线程三等待执行<br>阻塞结束，继续执行<br>线程三继续执行<br>线程三结束<br>线程二继续执行<br>线程二结束<br>线程一继续执行<br>线程一结束</p>
+</blockquote>
+<p>CyclicBarrier 内部是通过记录一个阻塞线程的数量，每次调用 await() 都会减 1, 判断当前阻塞数量是否为 0, 为 0 则放开阻塞，await() 方法内部使用了 Lock 加锁来保证线程安全。<br>且 CyclicBarrier 是可重用的，这一轮的线程数量限制完之后，会再开始新的一轮的限制，例如把上面 caBarrier 创建时构造函数第一个参数改成 1, 执行结果如下：</p>
+<blockquote>
+<p>线程一开始<br>线程一等待执行<br>阻塞结束，继续执行<br>线程一继续执行<br>线程一结束<br>线程二开始<br>线程二等待执行<br>阻塞结束，继续执行<br>线程二继续执行<br>线程二结束<br>线程三开始<br>线程三等待执行<br>阻塞结束，继续执行<br>线程三继续执行<br>线程三结束</p>
+</blockquote>
+<h4 id="CyclicBarrier-源码分析"><a href="#CyclicBarrier-源码分析" class="headerlink" title="CyclicBarrier 源码分析"></a>CyclicBarrier 源码分析</h4><p>创建 CyclicBarrier 对象时会指定线程的数量，以及等待数量完成后执行的 Runnable 对象，构造方法如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">public CyclicBarrier(int parties, Runnable barrierAction) &#123;</div><div class="line">    if (parties &lt;= 0) throw new IllegalArgumentException();</div><div class="line">    this.parties = parties;</div><div class="line">    this.count = parties;</div><div class="line">    this.barrierCommand = barrierAction;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>CyclicBarrier 在调用 await() 方法时会执行 doWait(false, 0L)<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div></pre></td><td class="code"><pre><div class="line">private int dowait(boolean timed, long nanos)</div><div class="line">    throws InterruptedException, BrokenBarrierException,</div><div class="line">           TimeoutException &#123;</div><div class="line">    // 通过 ReentrantLock 加锁保证多个线程同时调用问题</div><div class="line">    final ReentrantLock lock = this.lock;</div><div class="line">    lock.lock();</div><div class="line">    try &#123;</div><div class="line">        final Generation g = generation;</div><div class="line">        // ...</div><div class="line">        int index = --count;</div><div class="line">        if (index == 0) &#123;  // 当执行到最后一个线程的 wait 方法时会走到这里</div><div class="line">            boolean ranAction = false;</div><div class="line">            try &#123;</div><div class="line">                // barrierCommand 是创建对象时指定的，所以这里可以看出是在最后一个 wait 的线程执行的</div><div class="line">                final Runnable command = barrierCommand;</div><div class="line">                if (command != null)</div><div class="line">                    command.run();</div><div class="line">                ranAction = true;</div><div class="line">                // 唤醒所有等待的线程，通过 LockSupport.unpark()</div><div class="line">                nextGeneration();</div><div class="line">                return 0;</div><div class="line">            &#125; finally &#123;</div><div class="line">                // ...</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        // loop until tripped, broken, interrupted, or timed out</div><div class="line">        for (;;) &#123;</div><div class="line">            try &#123;</div><div class="line">                if (!timed)</div><div class="line">                    // 阻塞当前线程，通过调用 LockSupport.park()</div><div class="line">                    trip.await();</div><div class="line">                else if (nanos &gt; 0L)</div><div class="line">                    nanos = trip.awaitNanos(nanos);</div><div class="line">            &#125; catch (InterruptedException ie) &#123;</div><div class="line">                // ...</div><div class="line">            &#125;</div><div class="line">            // ...</div><div class="line">        &#125;</div><div class="line">    &#125; finally &#123;</div><div class="line">        lock.unlock();</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
     
       
 
@@ -257,7 +517,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-10-23T15:11:44+08:00">
                 2018-10-23
@@ -389,7 +649,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-09-11T12:10:38+08:00">
                 2018-09-11
@@ -513,7 +773,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-09-01T23:06:37+08:00">
                 2018-09-01
@@ -638,7 +898,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-08-29T23:50:29+08:00">
                 2018-08-29
@@ -761,7 +1021,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-08-22T18:24:03+08:00">
                 2018-08-22
@@ -895,7 +1155,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-08-21T19:06:32+08:00">
                 2018-08-21
@@ -1009,7 +1269,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2018/08/21/ReentrantLock-theory/" itemprop="url">ReentrantLock 原理</a></h1>
+                <a class="post-title-link" href="/2018/08/21/ReentrantLock-theory/" itemprop="url">并发编程 —— ReentrantLock 原理</a></h1>
         
 
         <div class="post-meta">
@@ -1019,7 +1279,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-08-21T18:29:48+08:00">
                 2018-08-21
@@ -1146,7 +1406,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-08-15T20:55:08+08:00">
                 2018-08-15
@@ -1192,259 +1452,6 @@
 <p>这样的效果实现的方式很容易想到的就是重写 onDraw 方法，给定一组 float 值，分别画点、线，那么下面有颜色的阴影部分是用什么画呢，就用到了 Path, 一个点一个点相连成一个封闭的图形，便可画出这个图形。如果先画点，再画阴影部分，是会把点遮住一部分的，所以实现的时候先画完了阴影部分，再画线和点。不过这样子在 onDraw 方法里就有两个 for 循环，如果有好的办法欢迎提出。（邮箱：hexiaosa91@163.com）<br>下面直接贴出 View 的整个代码，代码不多</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div></pre></td><td class="code"><pre><div class="line">/**</div><div class="line"> * @author hexiaosa</div><div class="line"> * @date 2018/8/15</div><div class="line"> */</div><div class="line"></div><div class="line">public class CustomLineChart extends View &#123;</div><div class="line"></div><div class="line">    private int width; // 宽</div><div class="line">    private int height; // 高</div><div class="line">    private int pointNum; // 折点个数</div><div class="line">    private int lineColor; // 折线颜色</div><div class="line">    private int shadowColor; // 阴影颜色</div><div class="line">    private float[] percents; // 百分比，可以理解为任务完成百分比</div><div class="line">    private int itemWidth;</div><div class="line">    private Path path; // 避免在 onDraw 方法内创建多个对象，所以在这里声明一个成员变量</div><div class="line"></div><div class="line">    public CustomLineChart(Context context) &#123;</div><div class="line">        this(context, null);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public CustomLineChart(Context context, @Nullable AttributeSet attrs) &#123;</div><div class="line">        this(context, attrs, 0);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public CustomLineChart(Context context, @Nullable AttributeSet attrs, int defStyleAttr) &#123;</div><div class="line">        super(context, attrs, defStyleAttr);</div><div class="line"></div><div class="line">        // 线颜色，阴影颜色，折点个数</div><div class="line">        TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.CustomLineChart);</div><div class="line">        lineColor = typedArray.getColor(R.styleable.CustomLineChart_lineColor, Color.BLACK);</div><div class="line">        shadowColor = typedArray.getColor(R.styleable.CustomLineChart_shadowColor, Color.BLACK);</div><div class="line">        pointNum = typedArray.getInteger(R.styleable.CustomLineChart_pointNum, 0);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    protected void onDraw(Canvas canvas) &#123;</div><div class="line">        if (pointNum == 0) &#123;</div><div class="line">            return;</div><div class="line">        &#125;</div><div class="line">        if (percents == null || percents.length != pointNum) &#123;</div><div class="line">            return;</div><div class="line">        &#125;</div><div class="line">        if (width == 0) &#123;</div><div class="line">            width = getMeasuredWidth();</div><div class="line">        &#125;</div><div class="line">        if (height == 0) &#123;</div><div class="line">            height = getMeasuredHeight();</div><div class="line">        &#125;</div><div class="line">        if (path == null) &#123;</div><div class="line">            path = new Path();</div><div class="line">        &#125;</div><div class="line">        itemWidth = width/(pointNum-1);</div><div class="line">        Paint paint = new Paint();</div><div class="line">        paint.setStrokeWidth(5);</div><div class="line">        // 阴影部分使用 Path 连接成一个封闭图形</div><div class="line">        path.reset();</div><div class="line">        path.moveTo(0, height);</div><div class="line">        path.lineTo(0, height*(1-percents[0]));</div><div class="line">        for (int i = 1; i &lt; percents.length; i++) &#123;</div><div class="line">            // 连接阴影</div><div class="line">            path.lineTo(itemWidth*i, height*(1-percents[i]));</div><div class="line">        &#125;</div><div class="line">        path.lineTo(width, height);</div><div class="line">        path.lineTo(0, height);</div><div class="line">        paint.setColor(shadowColor);</div><div class="line">        // 画阴影</div><div class="line">        canvas.drawPath(path, paint);</div><div class="line">        path.close();</div><div class="line"></div><div class="line">        paint.setColor(lineColor);</div><div class="line">        canvas.drawCircle(0, height*(1-percents[0]), 10, paint);</div><div class="line">        for (int i = 1; i &lt; percents.length; i++) &#123;</div><div class="line">            // 画线</div><div class="line">            canvas.drawLine(itemWidth*(i-1), height*(1-percents[i-1]), itemWidth*i, height*(1-percents[i]), paint);</div><div class="line">            // 画点</div><div class="line">            canvas.drawCircle(itemWidth*i, height*(1-percents[i]), 10, paint);</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        canvas.save();</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    public void setPercents(float[] percents) &#123;</div><div class="line">        this.percents = percents;</div><div class="line">        invalidate();</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public void setLineColor(int lineColor) &#123;</div><div class="line">        this.lineColor = lineColor;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public void setShadowColor(int shadowColor) &#123;</div><div class="line">        this.shadowColor = shadowColor;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public void setPointNum(int pointNum) &#123;</div><div class="line">        this.pointNum = pointNum;</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line">// attr.xml</div><div class="line">    &lt;declare-styleable name=&quot;CustomLineChart&quot;&gt;</div><div class="line">        &lt;attr name=&quot;lineColor&quot; format=&quot;color&quot;/&gt;</div><div class="line">        &lt;attr name=&quot;shadowColor&quot; format=&quot;color&quot;/&gt;</div><div class="line">        &lt;attr name=&quot;pointNum&quot; format=&quot;integer&quot;/&gt;</div><div class="line">    &lt;/declare-styleable&gt;</div></pre></td></tr></table></figure>
 <p>使用示例：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">CustomLineChart clc = (CustomLineChart) findViewById(R.id.clc);</div><div class="line">// 必须设置，还有 pointNum 在布局或代码设置至少有一个地方设置，且 pointNum 需等于 percents.length</div><div class="line">clc.setPercents(new float[]&#123;0.5f, 0.3f, 0.4f, 0.7f, 0.1f, 0.2f, 0.6f, 0.8f, 0.9f, 1f&#125;);</div></pre></td></tr></table></figure></p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/08/15/retrofit/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Hexiaosa">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexiaosa">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/08/15/retrofit/" itemprop="url">Retrofit 源码分析</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-08-15T20:47:33+08:00">
-                2018-08-15
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h3 id="Retrofit-使用例子"><a href="#Retrofit-使用例子" class="headerlink" title="Retrofit 使用例子"></a>Retrofit 使用例子</h3><p>下面只展示了异步请求示例<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">Retrofit retrofit = new Retrofit.Builder()</div><div class="line">        .baseUrl(&quot;https://api.github.com&quot;)</div><div class="line">        .build();</div><div class="line"></div><div class="line">GitHubService service = retrofit.create(GitHubService.class);</div><div class="line">service.search().enqueue(new retrofit2.Callback&lt;String&gt;() &#123;</div><div class="line">    @Override</div><div class="line">    public void onResponse(retrofit2.Call&lt;String&gt; call, retrofit2.Response&lt;String&gt; response) &#123;</div><div class="line"></div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    public void onFailure(retrofit2.Call&lt;String&gt; call, Throwable t) &#123;</div><div class="line"></div><div class="line">    &#125;</div><div class="line">&#125;);</div></pre></td></tr></table></figure></p>
-<h3 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h3><p>Retrofit 中使用了 OkHttp, 分析到后面就可以看到。<br>先来看创建 Retrofit 吧：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line">public Retrofit build() &#123;</div><div class="line">	// ...</div><div class="line">	okhttp3.Call.Factory callFactory = this.callFactory;</div><div class="line">	if (callFactory == null) &#123;</div><div class="line">		// 创建 callFactory 对象，也就是 Retrofit 的 callFactory.</div><div class="line">		callFactory = new OkHttpClient();</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	Executor callbackExecutor = this.callbackExecutor;</div><div class="line">	if (callbackExecutor == null) &#123;</div><div class="line">		// 创建 callbackExecutor 对象，platform 是 Android 的实例，其 defaultCallbackExecutor 方法返回的是 ExecutorCallAdapterFactory 对象</div><div class="line">		callbackExecutor = platform.defaultCallbackExecutor();</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	List&lt;CallAdapter.Factory&gt; callAdapterFactories = new ArrayList&lt;&gt;(this.callAdapterFactories);</div><div class="line">	// 把上面创建的 callbackExecutor 添加到 callAdapterFactories 中</div><div class="line">	callAdapterFactories.add(platform.defaultCallAdapterFactory(callbackExecutor));</div><div class="line">	// ...</div><div class="line">	return new Retrofit(callFactory, baseUrl, unmodifiableList(converterFactories),</div><div class="line">	  unmodifiableList(callAdapterFactories), callbackExecutor, validateEagerly);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>上面代码主要创建了 retrofit 对象，还创建了这几个稍等分析会用到的对象，callFactory、callbackExecutor.</p>
-<p>下面接着往下看 retrofit.create 方法，这里使用了代理模式，create 创建的 GitHubService 对象可以调用 search 方法，search 方法的执行就在代理的实现里面，这个就一起分析了。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div></pre></td><td class="code"><pre><div class="line">public &lt;T&gt; T create(final Class&lt;T&gt; service) &#123;</div><div class="line">	Utils.validateServiceInterface(service);</div><div class="line">	if (validateEagerly) &#123;</div><div class="line">	    eagerlyValidateMethods(service);</div><div class="line">	&#125;</div><div class="line">	// 代理实现, service.search 走的就是这里的 invoke 方法</div><div class="line">	return (T) Proxy.newProxyInstance(service.getClassLoader(), new Class&lt;?&gt;[] &#123; service &#125;,</div><div class="line">	    new InvocationHandler() &#123;</div><div class="line">			private final Platform platform = Platform.get();</div><div class="line"></div><div class="line">			@Override public Object invoke(Object proxy, Method method, @Nullable Object[] args)</div><div class="line">			  throws Throwable &#123;</div><div class="line">			// If the method is a method from Object then defer to normal invocation.</div><div class="line">				if (method.getDeclaringClass() == Object.class) &#123;</div><div class="line">				  return method.invoke(this, args);</div><div class="line">				&#125;</div><div class="line">				if (platform.isDefaultMethod(method)) &#123;</div><div class="line">				  return platform.invokeDefaultMethod(method, service, proxy, args);</div><div class="line">				&#125;</div><div class="line">				// 这里是主要内容</div><div class="line">				/* 封装 ServiceMethod 对象，创建 ServiceMethod 对象时创建了 callAdapter 实例，callAdapter 是 retrofit.callAdapter(returnType, annotations), 再往里看就是 retrofit 的成员变量 callAdapterFactories.get(i).get(returnType, annotations, this), callAdapterFactories 是在创建 retrofit 时，里面存的是 ExecutorCallAdapterFactory 对象</div><div class="line">					    return new CallAdapter&lt;Object, Call&lt;?&gt;&gt;() &#123;</div><div class="line">					      @Override public Type responseType() &#123;</div><div class="line">					        return responseType;</div><div class="line">					      &#125;</div><div class="line"></div><div class="line">					      @Override public Call&lt;Object&gt; adapt(Call&lt;Object&gt; call) &#123;</div><div class="line">					        return new ExecutorCallbackCall&lt;&gt;(callbackExecutor, call);</div><div class="line">					      &#125;</div><div class="line">					    &#125;;</div><div class="line">			    这就是 ServiceMethod 的 callAdapter 对象</div><div class="line">				 */</div><div class="line">				ServiceMethod&lt;Object, Object&gt; serviceMethod =</div><div class="line">				    (ServiceMethod&lt;Object, Object&gt;) loadServiceMethod(method);</div><div class="line">				// 创建 OkHttpCall</div><div class="line">				OkHttpCall&lt;Object&gt; okHttpCall = new OkHttpCall&lt;&gt;(serviceMethod, args);</div><div class="line">				// 其中 callAdapter 在封装 ServiceMethod 对象时创建的，执行的 callAdapter.adapt(call) 返回的就是 new ExecutorCallbackCall&lt;&gt;(callbackExecutor, call)</div><div class="line">				return serviceMethod.adapt(okHttpCall);</div><div class="line">			&#125;</div><div class="line">	    &#125;);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>可以看到 service.search 返回的是 ExecutorCallbackCall 对象，它的成员变量 delegate 是上面创建的 OkHttpCall 对象，那么接下来的 enqueue 方法就是 ExecutorCallbackCall 的 enqueue 了。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div></pre></td><td class="code"><pre><div class="line">    @Override public void enqueue(final Callback&lt;T&gt; callback) &#123;</div><div class="line">		checkNotNull(callback, &quot;callback == null&quot;);</div><div class="line">        // 主要看下面这一点，delegata.enqueue, delegate 是 OkHttpCall 对象，那接着看下一个 OkHttpCall 的 enqueue 方法把</div><div class="line">		delegate.enqueue(new Callback&lt;T&gt;() &#123;</div><div class="line">		@Override public void onResponse(Call&lt;T&gt; call, final Response&lt;T&gt; response) &#123;</div><div class="line">		  callbackExecutor.execute(new Runnable() &#123;</div><div class="line">		    @Override public void run() &#123;</div><div class="line">				if (delegate.isCanceled()) &#123;</div><div class="line">					// Emulate OkHttp&apos;s behavior of throwing/delivering an IOException on cancellation.</div><div class="line">					callback.onFailure(ExecutorCallbackCall.this, new IOException(&quot;Canceled&quot;));</div><div class="line">				&#125; else &#123;</div><div class="line">					callback.onResponse(ExecutorCallbackCall.this, response);</div><div class="line">				&#125;</div><div class="line">		    &#125;</div><div class="line">		  &#125;);</div><div class="line">		&#125;</div><div class="line"></div><div class="line">		@Override public void onFailure(Call&lt;T&gt; call, final Throwable t) &#123;</div><div class="line">			callbackExecutor.execute(new Runnable() &#123;</div><div class="line">				@Override public void run() &#123;</div><div class="line">				    callback.onFailure(ExecutorCallbackCall.this, t);</div><div class="line">				&#125;</div><div class="line">			&#125;);</div><div class="line">		&#125;</div><div class="line">		&#125;);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">@Override public void enqueue(final Callback&lt;T&gt; callback) &#123;</div><div class="line">	checkNotNull(callback, &quot;callback == null&quot;);</div><div class="line"></div><div class="line">	okhttp3.Call call;</div><div class="line">	Throwable failure;</div><div class="line"></div><div class="line">	synchronized (this) &#123;</div><div class="line">		if (executed) throw new IllegalStateException(&quot;Already executed.&quot;);</div><div class="line">		executed = true;</div><div class="line"></div><div class="line">		call = rawCall;</div><div class="line">		failure = creationFailure;</div><div class="line">		if (call == null &amp;&amp; failure == null) &#123;</div><div class="line">			try &#123;</div><div class="line">				// 创建 call 对象，serviceMethod.toCall -&gt; callFactory.newCall(callFactory 就是在最开始创建 retrofit 对象的 OkHttpClient 实例) -&gt; okHttpClient.newCall(这里使用的就是 OkHttp 框架的了) -&gt; RealCall</div><div class="line">			    call = rawCall = createRawCall();</div><div class="line">			&#125; catch (Throwable t) &#123;</div><div class="line">			    throwIfFatal(t);</div><div class="line">			    failure = creationFailure = t;</div><div class="line">			&#125;</div><div class="line">		&#125;</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	if (failure != null) &#123;</div><div class="line">		callback.onFailure(this, failure);</div><div class="line">		return;</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	if (canceled) &#123;</div><div class="line">		call.cancel();</div><div class="line">	&#125;</div><div class="line">	// call 是 RealCall 对象，接下来的 enqueue 方法跟分析 OkHttp 的就一样了</div><div class="line">	call.enqueue(new okhttp3.Callback() &#123;</div><div class="line">		@Override public void onResponse(okhttp3.Call call, okhttp3.Response rawResponse) &#123;</div><div class="line">			Response&lt;T&gt; response;</div><div class="line">			try &#123;</div><div class="line">			    response = parseResponse(rawResponse);</div><div class="line">			&#125; catch (Throwable e) &#123;</div><div class="line">			    callFailure(e);</div><div class="line">			    return;</div><div class="line">			&#125;</div><div class="line"></div><div class="line">			try &#123;</div><div class="line">			    callback.onResponse(OkHttpCall.this, response);</div><div class="line">			&#125; catch (Throwable t) &#123;</div><div class="line">			    t.printStackTrace();</div><div class="line">			&#125;</div><div class="line">		&#125;</div><div class="line"></div><div class="line">		@Override public void onFailure(okhttp3.Call call, IOException e) &#123;</div><div class="line">			callFailure(e);</div><div class="line">		&#125;</div><div class="line"></div><div class="line">		private void callFailure(Throwable e) &#123;</div><div class="line">			try &#123;</div><div class="line">			    callback.onFailure(OkHttpCall.this, e);</div><div class="line">			&#125; catch (Throwable t) &#123;</div><div class="line">			    t.printStackTrace();</div><div class="line">			&#125;</div><div class="line">		&#125;</div><div class="line">	&#125;);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/08/14/OkHttp/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Hexiaosa">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexiaosa">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/08/14/OkHttp/" itemprop="url">OkHttp 源码分析</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-08-14T21:16:41+08:00">
-                2018-08-14
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h3 id="OkHttp-使用代码实例"><a href="#OkHttp-使用代码实例" class="headerlink" title="OkHttp 使用代码实例"></a>OkHttp 使用代码实例</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line">private static final MediaType JSON</div><div class="line">        = MediaType.parse(&quot;application/json; charset=utf-8&quot;);</div><div class="line">OkHttpClient client = new OkHttpClient();</div><div class="line"></div><div class="line">String post(String url, String json) throws IOException &#123;</div><div class="line">    RequestBody body = RequestBody.create(JSON, json);</div><div class="line">    Request request = new Request.Builder()</div><div class="line">            .url(url)</div><div class="line">            .post(body)</div><div class="line">            .build();</div><div class="line">    // 同步调用</div><div class="line">    Response response = client.newCall(request).execute();</div><div class="line">    // 异步调用</div><div class="line">    client.newCall(request).enqueue(new Callback() &#123;</div><div class="line">        @Override</div><div class="line">        public void onFailure(Call call, IOException e) &#123;</div><div class="line"></div><div class="line">        &#125;</div><div class="line"></div><div class="line">        @Override</div><div class="line">        public void onResponse(Call call, Response response) throws IOException &#123;</div><div class="line"></div><div class="line">        &#125;</div><div class="line">    &#125;);</div><div class="line">    return response.body().string();</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h3 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h3><p>先来看 new OkHttpClient()<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line">public OkHttpClient() &#123;</div><div class="line">this(new Builder());</div><div class="line">&#125;</div><div class="line"></div><div class="line">public Builder() &#123;</div><div class="line">    // 创建了 Dispatcher 对象</div><div class="line">	dispatcher = new Dispatcher();</div><div class="line">	protocols = DEFAULT_PROTOCOLS;</div><div class="line">	connectionSpecs = DEFAULT_CONNECTION_SPECS;</div><div class="line">	eventListenerFactory = EventListener.factory(EventListener.NONE);</div><div class="line">	proxySelector = ProxySelector.getDefault();</div><div class="line">	cookieJar = CookieJar.NO_COOKIES;</div><div class="line">	socketFactory = SocketFactory.getDefault();</div><div class="line">	hostnameVerifier = OkHostnameVerifier.INSTANCE;</div><div class="line">	certificatePinner = CertificatePinner.DEFAULT;</div><div class="line">	proxyAuthenticator = Authenticator.NONE;</div><div class="line">	authenticator = Authenticator.NONE;</div><div class="line">	connectionPool = new ConnectionPool();</div><div class="line">	dns = Dns.SYSTEM;</div><div class="line">	followSslRedirects = true;</div><div class="line">	followRedirects = true;</div><div class="line">	retryOnConnectionFailure = true;</div><div class="line">	connectTimeout = 10_000;</div><div class="line">	readTimeout = 10_000;</div><div class="line">	writeTimeout = 10_000;</div><div class="line">	pingInterval = 0;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>然后 clien.newCall(request) 创建了 RealCall 对象，这也是 OkHttp 中一个重要的类，先来分析异步执行的源码吧，因为同步执行跟异步的后半段没什么区别了。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">@Override public void enqueue(Callback responseCallback) &#123;</div><div class="line">	synchronized (this) &#123;</div><div class="line">		if (executed) throw new IllegalStateException(&quot;Already Executed&quot;);</div><div class="line">		executed = true;</div><div class="line">	&#125;</div><div class="line">	captureCallStackTrace();</div><div class="line">	eventListener.callStart(this);</div><div class="line">	// 执行 dispatcher 的 enqueue 方法，dispatcher 是在创建 HttpClient 对象时 new 的。注意这里传过去是的 new AsyncCall(responseCallback)</div><div class="line">	client.dispatcher().enqueue(new AsyncCall(responseCallback));</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>AsyncCall 是实现了 NamedRunnable<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">public abstract class NamedRunnable implements Runnable &#123;</div><div class="line">	// ...</div><div class="line">	@Override public final void run() &#123;</div><div class="line">		// ...</div><div class="line">		try &#123;</div><div class="line">			execute();</div><div class="line">		&#125; finally &#123;</div><div class="line">		    Thread.currentThread().setName(oldName);</div><div class="line">		&#125;</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	protected abstract void execute();</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>可以看到就是实现的 Runnable 接口，如果在一个线程里执行，执行的就是 execute 方法。再接着看 dispatcher  的 enqueue 方法<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">synchronized void enqueue(AsyncCall call) &#123;</div><div class="line">	if (runningAsyncCalls.size() &lt; maxRequests &amp;&amp; runningCallsForHost(call) &lt; maxRequestsPerHost) &#123;</div><div class="line">		// 添加到执行队列</div><div class="line">	    runningAsyncCalls.add(call);</div><div class="line">	    // 在子线程执行方法，executorService 就是创建了线程池。</div><div class="line">	    executorService().execute(call);</div><div class="line">	&#125; else &#123;</div><div class="line">		// 添加到等待队列</div><div class="line">	    readyAsyncCalls.add(call);</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>AsyncCall 执行的是 execute 方法，下面接着看这里<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div></pre></td><td class="code"><pre><div class="line">@Override protected void execute() &#123;</div><div class="line">	boolean signalledCallback = false;</div><div class="line">	try &#123;</div><div class="line">		// 责任链模式，链式调用的地方</div><div class="line">		Response response = getResponseWithInterceptorChain();</div><div class="line">		if (retryAndFollowUpInterceptor.isCanceled()) &#123;</div><div class="line">			signalledCallback = true;</div><div class="line">			// 返回回调失败</div><div class="line">			responseCallback.onFailure(RealCall.this, new IOException(&quot;Canceled&quot;));</div><div class="line">		&#125; else &#123;</div><div class="line">			signalledCallback = true;</div><div class="line">			// 返回回调成功</div><div class="line">			responseCallback.onResponse(RealCall.this, response);</div><div class="line">		&#125;</div><div class="line">	&#125; catch (IOException e) &#123;</div><div class="line">		if (signalledCallback) &#123;</div><div class="line">		    // Do not signal the callback twice!</div><div class="line">		    Platform.get().log(INFO, &quot;Callback failure for &quot; + toLoggableString(), e);</div><div class="line">		&#125; else &#123;</div><div class="line">		    eventListener.callFailed(RealCall.this, e);</div><div class="line">		    // 返回回调失败</div><div class="line">		    responseCallback.onFailure(RealCall.this, e);</div><div class="line">		&#125;</div><div class="line">	&#125; finally &#123;</div><div class="line">		// 从 dispatcher 的运行队列中清除该 Runnable</div><div class="line">		client.dispatcher().finished(this);</div><div class="line">	&#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line">Response getResponseWithInterceptorChain() throws IOException &#123;</div><div class="line">	// Build a full stack of interceptors.</div><div class="line">	List&lt;Interceptor&gt; interceptors = new ArrayList&lt;&gt;();</div><div class="line">	// 添加自己定义的 interceptor</div><div class="line">	interceptors.addAll(client.interceptors());</div><div class="line">	// 重试</div><div class="line">	interceptors.add(retryAndFollowUpInterceptor);</div><div class="line">	// 转换</div><div class="line">	interceptors.add(new BridgeInterceptor(client.cookieJar()));</div><div class="line">	// 缓存</div><div class="line">	interceptors.add(new CacheInterceptor(client.internalCache()));</div><div class="line">	// 连接</div><div class="line">	interceptors.add(new ConnectInterceptor(client));</div><div class="line">	if (!forWebSocket) &#123;</div><div class="line">	    interceptors.addAll(client.networkInterceptors());</div><div class="line">	&#125;</div><div class="line">	// 请求服务器</div><div class="line">	interceptors.add(new CallServerInterceptor(forWebSocket));</div><div class="line"></div><div class="line">    // 开始链式调用</div><div class="line">	Interceptor.Chain chain = new RealInterceptorChain(interceptors, null, null, null, 0,</div><div class="line">	    originalRequest, this, eventListener, client.connectTimeoutMillis(),</div><div class="line">	    client.readTimeoutMillis(), client.writeTimeoutMillis());</div><div class="line">	return chain.proceed(originalRequest);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>来一个链式调用的例子吧，<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div></pre></td><td class="code"><pre><div class="line">// 实际执行</div><div class="line">public static void main(String[] args) &#123;</div><div class="line">	List&lt;Interceptor&gt; interceptors = new ArrayList&lt;&gt;();</div><div class="line">	interceptors.add(new Interceptor1());</div><div class="line">	interceptors.add(new Interceptor2());</div><div class="line">	InterceptorChain chain = new InterceptorChain(interceptors, 0);</div><div class="line">	chain.proceed();</div><div class="line">&#125;</div><div class="line"></div><div class="line">// 执行链</div><div class="line">public class InterceptorChain &#123;</div><div class="line">	</div><div class="line">	private List&lt;Interceptor&gt; interceptors;</div><div class="line">	private int index;</div><div class="line">	</div><div class="line">	public InterceptorChain(List&lt;Interceptor&gt; interceptors, int index) &#123;</div><div class="line">		this.interceptors = interceptors;</div><div class="line">		this.index = index;</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	public void proceed() &#123;</div><div class="line">		if (index &gt;= interceptors.size()) &#123;</div><div class="line">			System.out.println(&quot;调用完&quot;);</div><div class="line">			return;</div><div class="line">		&#125;</div><div class="line">		InterceptorChain chain = new InterceptorChain(interceptors, index+1);</div><div class="line">		Interceptor interceptor = interceptors.get(index);</div><div class="line">		interceptor.proceed(chain);</div><div class="line">	&#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line">// Interceptor</div><div class="line">public interface Interceptor &#123;</div><div class="line">	String proceed(InterceptorChain chain);</div><div class="line">&#125;</div><div class="line"></div><div class="line">public class Interceptor1 implements Interceptor &#123;</div><div class="line"></div><div class="line">	@Override</div><div class="line">	public String proceed(InterceptorChain chain) &#123;</div><div class="line">		System.out.println(&quot;Interceptor1 start&quot;);</div><div class="line">		chain.proceed();</div><div class="line">		System.out.println(&quot;Interceptor1 end&quot;);</div><div class="line">		return &quot;Interceptor1&quot;;</div><div class="line">	&#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line">public class Interceptor2 implements Interceptor &#123;</div><div class="line"></div><div class="line">	@Override</div><div class="line">	public String proceed(InterceptorChain chain) &#123;</div><div class="line">		System.out.println(&quot;Interceptor2 start&quot;);</div><div class="line">		chain.proceed();</div><div class="line">		System.out.println(&quot;Interceptor2 end&quot;);</div><div class="line">		return &quot;Interceptor2&quot;;</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>最终的执行结果是：<br>Interceptor1 start<br>Interceptor2 start<br>调用完<br>Interceptor2 end<br>Interceptor1 end</p>
-<p>可以看到 1 先执行，在 1 里面调 2 的执行，2 执行完的返回结果，1 可以再进行处理。<br>来一张图解释下吧<br><img src="/image/interceptor_chain.jpg" alt="interceptor_chain"></p>
-<p>OkHttp 的调用过程用下面的图来简介一下<br><img src="/image/OkHttp_chain.png" alt="OkHttp_chain"></p>
 
           
         
@@ -1530,8 +1537,8 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">34</span>
-                  <span class="site-state-item-name">posts</span>
+                  <span class="site-state-item-count">35</span>
+                  <span class="site-state-item-name">Artikel</span>
                 </a>
               </div>
             
@@ -1581,7 +1588,7 @@
 </div>
 
 
-  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
 
 
 

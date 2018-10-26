@@ -181,7 +181,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
             
-            Home
+            Startseite
           </a>
         </li>
       
@@ -191,7 +191,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
             
-            Archives
+            Archiv
           </a>
         </li>
       
@@ -228,6 +228,353 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/06/07/java-class-load/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Hexiaosa">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexiaosa">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/06/07/java-class-load/" itemprop="url">类的加载</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-06-07T10:14:00+08:00">
+                2018-06-07
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h3 id="类的加载过程"><a href="#类的加载过程" class="headerlink" title="类的加载过程"></a>类的加载过程</h3><h4 id="加载"><a href="#加载" class="headerlink" title="加载"></a>加载</h4><ol>
+<li>将 .java 文件转成二进制流</li>
+<li>将类信息存入方法区</li>
+<li>在方法区中生成一个 Class 对象，用于访问该类的接口</li>
+</ol>
+<p>PS：<br>读取到二进制流的来源，常见的有：ZAR包，运行中动态计算（动态代理），其它文件生成（JSP）</p>
+<h4 id="验证"><a href="#验证" class="headerlink" title="验证"></a>验证</h4><p>验证过程是为了防止恶意代码破坏虚拟机而进行验证的过程。</p>
+<ol>
+<li>文件格式验证：该过程是针对二进制流进行的，只有通过了该验证，二进制流才可以进去到方法区中。文件格式验证交叉在加载过程中。</li>
+<li>元数据验证</li>
+<li>字节码验证：针对数据流和控制流的验证</li>
+<li>符号引用验证，该阶段发生在解析过程中</li>
+</ol>
+<h4 id="准备"><a href="#准备" class="headerlink" title="准备"></a>准备</h4><p>准备过程是对类变量、常量设置初值，类变量和静态常量设置的初始值是不同的<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">private static int a = 12; // 这里面给类变量 a 设置的初始值是 0</div><div class="line">private static final int a = 12; // 这里给静态常量 a 设置的初始值是 12</div></pre></td></tr></table></figure></p>
+<h4 id="解析"><a href="#解析" class="headerlink" title="解析"></a>解析</h4><p>解析是将符号引用转换为直接引用的过程。</p>
+<h4 id="初始化"><a href="#初始化" class="headerlink" title="初始化"></a>初始化</h4><p>初始化的条件：</p>
+<ol>
+<li>遇到 new, putStatic, getStatic, invokeStatic 时对当前类进行初始化</li>
+<li>初始化子类时，如果父类没有初始化，则对父类进行初始化</li>
+<li>对该类进行反射操作时</li>
+<li>含 main() 方法的类在虚拟机启动时，会先初始化这个类</li>
+<li>调用该类的静态方法时，如果还没有进行初始化，则对该类进行初始化<br>不会初始化的情况：调用子类的静态方法，不会初始化父类；调用常量，不会初始化常量所在的类，因为常量会保存在使用类的常量池；</li>
+</ol>
+<p>初始化的过程就是执行 &lt;clinit&gt;()的过程。<br>&lt;clinit&gt;()是生成的类的构造器，由成员变量的赋值语句和静态语句块组合而成，如果没有需要赋值的变量和静态语句块，那么 &lt;clinit&gt;()也可以不存在；<br>虚拟机会保证在执行 &lt;clinit&gt;()方法之前，其父类的 &lt;clinit&gt;()方法已经执行完毕；<br>&lt;clinit&gt;()会保证正确的加锁，同步；<br>接口也同样存在 &lt;clinit&gt;()构造方法，接口执行构造方法之前不必先执行父类的 &lt;clinit&gt;()</p>
+<h3 id="类的卸载"><a href="#类的卸载" class="headerlink" title="类的卸载"></a>类的卸载</h3><p>类的卸载，即清除类在方法区的信息<br>类卸载的触发条件：</p>
+<ol>
+<li>该类的实例都已被回收</li>
+<li>没有对该类反射</li>
+<li>加载该类的类加载器都已被回收</li>
+</ol>
+<h3 id="类加载器"><a href="#类加载器" class="headerlink" title="类加载器"></a>类加载器</h3><p>类加载器和类共同唯一决定一个类在 Java 虚拟机中的唯一性。</p>
+<h5 id="三种类加载器"><a href="#三种类加载器" class="headerlink" title="三种类加载器"></a>三种类加载器</h5><p>启动类加载器：负责 &lt;JAVA_HOME&gt;\lib 目录中的，无法被 Java 代码直接引用<br>扩展类加载器：负责 &lt;JAVA_HOME&gt;\lib\ext 目录中的，开发者可以直接使用<br>程序类加载器：我们平时写的类就默认由它来加载</p>
+<h5 id="双亲委派机制"><a href="#双亲委派机制" class="headerlink" title="双亲委派机制"></a>双亲委派机制</h5><p>每个类加载器在 loadClass 时先交给父类加载器，一层层网上传递，如果父类加载器处理不了才自己处理。这里的父类加载器是用组合实现的，而不是直接继承。</p>
+<h5 id="破坏双亲委派机制"><a href="#破坏双亲委派机制" class="headerlink" title="破坏双亲委派机制"></a>破坏双亲委派机制</h5><p>为了实现自定义的类加载器。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/06/05/JVM-GC/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Hexiaosa">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexiaosa">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/06/05/JVM-GC/" itemprop="url">JVM 垃圾回收</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-06-05T11:10:33+08:00">
+                2018-06-05
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h4 id="Java-内存模型"><a href="#Java-内存模型" class="headerlink" title="Java 内存模型"></a>Java 内存模型</h4><p>Java 内存模型分为 5 个部分，程序计数器，虚拟机栈，本地方法栈，堆，方法区</p>
+<ol>
+<li><p>程序计数器：线程私有，每个线程都有自己的程序计数器，指向正在执行的字节码地址。这个内存区也是 Java 内存模型中唯一一个不会发生内存溢出的区域。</p>
+</li>
+<li><p>虚拟机栈：线程私有，方法的执行都会涉及到虚拟机栈的入栈出栈操作。包含局部变量表、操作数栈、动态连接栈，局部变量表保存方法参数和方法内部变量，对于实例方法来说，局部变量表还保存着当前类的引用 this. 动态连接表，是用于指向常量池的。</p>
+</li>
+<li><p>本地方法栈：线程私有，保存 native 方法的信息。</p>
+</li>
+<li><p>堆：线程共享，保存 new 出的对象实例和数组，该区域也是垃圾回收的主要对象。</p>
+</li>
+<li><p>方法区：线程共享，保存的是类信息，常量，静态变量等数据，该区域也会进行垃圾回收，属于长久代的内存区域。运行时常量池就是方法区的一部分，保存编译期间的常量，不过并不只是编译器可以保存，在运行期也可以保存，比如 String 的 intern() 方法，如果常量池不存在该字符串常量，则将该字符串常量放入常量池。</p>
+</li>
+</ol>
+<h4 id="四种引用"><a href="#四种引用" class="headerlink" title="四种引用"></a>四种引用</h4><ol>
+<li><p>强引用，就是我们平时使用的最常见直接 new 处的对象。强引用的对象只有在不可达时才会被回收。</p>
+</li>
+<li><p>软引用，是在内存不足时才会被回收，内存够用的时候不会被回收</p>
+</li>
+<li><p>弱引用，是每次发生 GC 时就会被回收，不管内存是否够用</p>
+</li>
+<li><p>虚引用，随时都有可能会被回收，主要用于跟踪对象被垃圾回收时的活动</p>
+</li>
+</ol>
+<h4 id="怎样判断垃圾需要回收"><a href="#怎样判断垃圾需要回收" class="headerlink" title="怎样判断垃圾需要回收"></a>怎样判断垃圾需要回收</h4><ol>
+<li>引用计数<br>引用计数是给每个对象一个标记，每增加一个引用，标记就加 1, 在垃圾回收时标记是 0 则对其进行回收。<br>这样的算法有一个缺点就是假如有下面这样的代码<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">String a = new String(&quot;123&quot;);</div><div class="line">String b = a + &quot;ab&quot;;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>这之后就没有再引用 a, b 的地方了，但是由于 a 的标记值为 1, 所以一直不能被回收。</p>
+<ol>
+<li><p>可达性分析<br>只要是没有被 GC Root 引用的对象就可以回收，可作为 GC Root 的引用为：虚拟机栈中引用的对象，方法区中常量池的对象，方法区中类静态属性对象，本地方法栈 JNI 引用的对象。</p>
+</li>
+<li><p>方法区回收的判断<br>常量：没有再被引用<br>类：<br>1) 该类的所有的实例都已经被回收<br>2) 该类的类加载器已经被回收<br>3) 没有任何对该类的引用，也没有对该类的反射</p>
+</li>
+</ol>
+<h4 id="垃圾回收算法"><a href="#垃圾回收算法" class="headerlink" title="垃圾回收算法"></a>垃圾回收算法</h4><ol>
+<li><p>标记清除算法<br>标记清除分为标记阶段和清除阶段，标记可回收的对象，在清除阶段对其进行回收，这样的算法缺点就是会产生空间碎片较多，若给大对象分配内存空间时，就有可能提前触发 GC.</p>
+</li>
+<li><p>复制算法<br>复制算法把内存空间分为一块 Eden 区域和两块 Suvivor 区域，其比例是 8:1:1, 有对象生成时优先分配到 Eden 区域，第一次发生 GC, 把 Eden 区域的存活的对象复制到 S1, 然后清除掉 Eden 区域所有的对象，再有新对象生成还是优先分配到 Eden 区域，第二次 GC 时，把 Eden 区域和 S1 区域存活的对象复制到 S2, 然后清除掉 Eden 区域和 S1 区域的对象。之后再发生 GC S1 和 S2 区域的就会来回倒腾。<br>复制算法适用于新生代的对象，因为新生代对象存活的时间都较短。</p>
+</li>
+<li><p>标记整理算法<br>不直接对不可用对象进行回收，先把可用对象整理到一边，再清理边界外的不可用对象。</p>
+</li>
+<li><p>分代收集<br>针对新生代和老年代使用不同的回收算法。</p>
+</li>
+</ol>
+<h4 id="垃圾回收器"><a href="#垃圾回收器" class="headerlink" title="垃圾回收器"></a>垃圾回收器</h4><ol>
+<li><p>Serial : 新生代（复制算法），单线程，需暂停用户线程</p>
+</li>
+<li><p>Serial Old : 老年代（标记-整理），单线程，需暂停用户线程</p>
+</li>
+<li><p>Parallel Savenge : 新生代（复制算法），多线程，需暂停用户线程。吞吐量优先，两个参数：MaxGCPauseMills(GC停顿时间)，GCTimeRation(GC吞吐量倒数，自适应调节策略)</p>
+</li>
+<li><p>Parallel Old : 老年代（标记-整理），多线程，需暂停用户线程，吞吐量优先。</p>
+</li>
+<li><p>ParNew : 新生代（复制算法），多线程，需暂停用户线程。Serial 的多线程版本。</p>
+</li>
+<li><p>CMS : 以获取最短回收时间为目标，老年代（标记-清除）<br>过程：<br>初始标记，需 stop the world, 标记直接与 GC Root 关联的对象；<br>并发标记，可与用户线程并发执行，标记所有被 GC Root 引用的对象；<br>重新标记，需 stop the world, 修改用户线程执行过程中已被标记的对象重新被引用的；<br>并发清除，可与用户线程并发执行，清除被标记的对象。</p>
+<blockquote>
+<p>由于回收算法使用的是标记-清除，所以就会导致有碎片产生，可通过设置 UseCMSCompactAtFullCollection(Full GC 时是否开启碎片整理，默认开启), CMSFullGCsBeforeCompaction(设置执行多少次 GC 不压缩后，执行一次碎片整理，默认是 0, 每次都整理碎片)<br>由于并发，无法处理浮动垃圾，也就是在 GC 进行过程中用户线程还在执行产生的垃圾，GC 运行中需要预留一部分空间供用户线程使用，如果预留空间不足，则会触发 “Concurrent Mode Failure”, 临时启动 Serial Old 来重新进行老年代垃圾收集。<br>由于并发，会导致用户线程变慢，于是出现了“增量式并发收集器”，GC 与用户线程交替执行，效果很一般，已不提倡使用。</p>
+</blockquote>
+</li>
+<li><p>G1 收集器<br>G1 收集器实现了分代收集，采用并行和并发，充分利用了多 CPU、多核，目标是低停顿，还建立了可预测的停顿时间模型，可指定在 M 时间内，GC 的时间小于 N.</p>
+</li>
+</ol>
+<h4 id="JVM-内存分配策略"><a href="#JVM-内存分配策略" class="headerlink" title="JVM 内存分配策略"></a>JVM 内存分配策略</h4><ol>
+<li><p>对象优先在新生代 Eden 区分配，当 Eden 区没有内存可分配时，触发一次 Minor GC.</p>
+</li>
+<li><p>大对象直接进入老年代，其中有一个参数 PretenureSizeThreShord, 大于改值的对象直接进入老年代。</p>
+</li>
+<li><p>长期存活对象进入老年代，Eden 区的对象，经过一个 Minor GC 后依然存活的进入 Survivor 区，且年龄设为 1, 此后每经过一次 Minor GC, 年龄加 1, 当年龄大于 MaxTenuringThreShold 时进入老年代。</p>
+</li>
+<li><p>动态对象年龄判定：当大于等于某一年龄的对象大小总和大于所有空间的一半时，大于等于某一年龄的对象进入老年代。</p>
+</li>
+<li><p>空间分配担保：当 Survivor 上没有足够的空间存 Eden 区经过 Minor GC 存活下来的对象时，这些对象将直接通过空间分配担保进入老年代。</p>
+</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/05/30/about-thread-safe/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -247,7 +594,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2018/05/30/about-thread-safe/" itemprop="url">线程安全相关</a></h1>
+                <a class="post-title-link" href="/2018/05/30/about-thread-safe/" itemprop="url">并发编程 —— 线程安全相关</a></h1>
         
 
         <div class="post-meta">
@@ -257,7 +604,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-05-30T17:25:53+08:00">
                 2018-05-30
@@ -398,7 +745,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-05-28T17:37:05+08:00">
                 2018-05-28
@@ -538,7 +885,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-05-24T16:13:41+08:00">
                 2018-05-24
@@ -670,7 +1017,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-30T09:17:37+08:00">
                 2018-01-30
@@ -797,7 +1144,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-29T11:20:58+08:00">
                 2018-01-29
@@ -935,7 +1282,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-24T17:10:20+08:00">
                 2018-01-24
@@ -1073,7 +1420,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-19T10:58:37+08:00">
                 2018-01-19
@@ -1198,7 +1545,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-09T09:56:51+08:00">
                 2018-01-09
@@ -1288,349 +1635,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2017/12/17/bluetooth_details/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Hexiaosa">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexiaosa">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/12/17/bluetooth_details/" itemprop="url">Android 蓝牙详解</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-12-17T17:32:48+08:00">
-                2017-12-17
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>蓝牙4.0提出了低功耗蓝牙的模式。<br>蓝牙4.0的传输分为: Single Mode 和 Dual Mode; Single Mode 只支持与 4.0 的相互传输，Dual Mode 支持与 4.0 以及 3.0, 2.1, 2.0 传输.<br>相关代码如下：</p>
-<pre><code>//获取蓝牙适配器，系统只有一个蓝牙适配器，若 adapter 为 null, 则说明系统不支持蓝牙功能
-BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
-
-//表示蓝牙是否打开
-adapter.isEnabled();
-
-//获取已配对的蓝牙设备
-Set&lt;BluetoothDevice&gt; devices = adapter.getBondedDevices();
-
-BluetoothDevice device = null;
-if (devices.iterator().hasNext()) {
-    device = devices.iterator().next();
-}
-if (device == null) {
-    //没有已配对的设备
-} else {
-    //有已配对的设备，连接，发送数据
-    //4.0 的传输跟之前的版本有不同，看要连接的设备是否是4.0，是否支持4.0之前的来决定用什么代码来连接
-}
-</code></pre><p>经典蓝牙连接</p>
-<pre><code>权限：
-&lt;uses-permission android:name=&quot;android.permission.BLUETOOTH&quot; /&gt;
-&lt;uses-permission android:name=&quot;android.permission.BLUETOOTH_ADMIN&quot; /&gt;
-
-BluetoothSocket socket = adapter.createRfcommSocketToServiceRecord(NAME, MY_UUID);
-new Thread(
-    @Override
-    public void run() {
-        // 向服务端发送连接
-        socket.connect();
-        // 获取到输出流，向外写数据
-        os = clientSocket.getOutputStream();
-        // 判断是否拿到输出流
-        if (os != null) {
-            // 需要发送的信息
-            String text = &quot;open&quot;;
-            // 以utf-8的格式发送出去
-            os.write(text.getBytes(&quot;UTF-8&quot;));
-        }
-    }
-).start();
-</code></pre><p>低功耗蓝牙连接</p>
-<pre><code>权限：
-&lt;uses-permission android:name=&quot;android.permission.BLUETOOTH&quot; /&gt;
-&lt;uses-permission android:name=&quot;android.permission.BLUETOOTH_ADMIN&quot; /&gt;
-&lt;uses-permission android:name=&quot;android.permission.ACCESS_COARSE_LOCATION&quot; /&gt;
-&lt;uses-permission android:name=&quot;android.permission.ACCESS_FINE_LOCATION&quot; /&gt;
-&lt;uses-feature
-    android:name=&quot;android.hardware.bluetooth_le&quot;
-    android:required=&quot;true&quot; /&gt;
-
-BluetoothGatt gatt = device.connGatt(context, autoConnect, BluetoothGattCallback);
-//连接蓝牙，连接后将会回调到 BluetoothGattCallback 的 onConnectChanged 方法中
-@Override
-public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
-    super.onConnectionStateChange(gatt, status, newState);
-    if (newState == BluetoothProfile.STATE_CONNECTED) {
-        //即表示连接成功
-        gatt.discoverServices();//该方法之后将会调用 onServiceDiscovered() 方法中
-    }
-}
-@Override
-public void onServicesDiscovered(BluetoothGatt gatt, int status) {
-    super.onServicesDiscovered(gatt, status);
-    //开始发送数据
-    sendData();
-}
-
-//发送数据，具体怎么发送，要看设备方的要求(怎么接受)，还有需要注意的是 获取服务和获取写入数据的需要设备方提供的UUID与设备相匹配
-private void sendData() {
-    BluetoothGattService service = mBluetoothGatt.getService(RX_SERVICE_UUID);
-    BluetoothGattCharacteristic characteristic = service.getCharacteristic(RX_CHAR_UUID);
-    byte[] value = new byte[4];
-    value[0] = (byte) &apos;o&apos;;
-    value[1] = (byte) &apos;p&apos;;
-    value[2] = (byte) &apos;e&apos;;
-    value[3] = (byte) &apos;n&apos;;
-    characteristic.setValue(value);
-    Log.e(&quot;TAG&quot;, &quot;send value -&gt; &quot; + Arrays.toString(characteristic.getValue()));
-    boolean isWrite = mBluetoothGatt.writeCharacteristic(characteristic);
-    if (isWrite) {
-        Log.e(&quot;TAG&quot;, &quot;发送数据成功&quot;);
-    } else {
-        Log.e(&quot;TAG&quot;, &quot;发送数据失败&quot;);
-    }
-}
-</code></pre>
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2017/11/09/about_string/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Hexiaosa">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexiaosa">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/11/09/about_string/" itemprop="url">字符串、整型内存相关</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-11-09T11:32:48+08:00">
-                2017-11-09
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h4 id="1-StringBuilder-和字符串连接符"><a href="#1-StringBuilder-和字符串连接符" class="headerlink" title="1. StringBuilder 和字符串连接符"></a>1. StringBuilder 和字符串连接符</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">String s = &quot;abc&quot;;</div><div class="line">s += &quot;d&quot;;</div></pre></td></tr></table></figure>
-<p>上述代码上，编译器会自动生成更高效的 StringBuilder, 调用 append() 方法来实现。</p>
-<p>那么是否表示可以完全信任编译器呢，再看下面代码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">String s = &quot;a&quot;;</div><div class="line">for (int i = 0; i &lt; 5; i++) &#123;</div><div class="line">	s += &quot;a&quot;;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>这种形式的，编译器会在循环体内创建 StringBuilder, 像这种操作，我们应该手动创建 StringBuilder 对象，而不仅仅是依赖编译器。</p>
-<p>当然也要避免类似以下的代码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">StringBuilder s = new StringBuilder();</div><div class="line">for (int i = 0; i &lt; 10; i++) &#123;</div><div class="line">	s.append(&quot;a&quot; + i + &quot;b&quot;);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>这种代码在循环里面依然有字符串的连接，依然会创建多个 StringBuilder 对象。</p>
-<h4 id="2-字符串存储"><a href="#2-字符串存储" class="headerlink" title="2. 字符串存储"></a>2. 字符串存储</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">String s1 = &quot;a&quot;;</div><div class="line">String s2 = &quot;b&quot;;</div><div class="line">String s3 = &quot;a&quot; + &quot;b&quot;;</div><div class="line">System.out.println(&quot;ab == s1+s2&quot; + (&quot;ab&quot; == s1+s2));</div><div class="line">System.out.println(&quot;ab == s3&quot; + (&quot;ab&quot; == s3));</div></pre></td></tr></table></figure>
-<p>输出结果：<br>false<br>true<br>直接用引号包裹的字符串相加产生的新对象会放到常量池中，对象相加的不会放到常量池中。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">public static final String A = &quot;ab&quot;; // 常量A</div><div class="line">public static final String B = &quot;cd&quot;; // 常量B</div><div class="line">// A+B 会放到常量池中，因为 A, B 都是常量，在类编译时已经确定了。</div></pre></td></tr></table></figure>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">public static final A;</div><div class="line">public static final B;</div><div class="line">static &#123;</div><div class="line">	A = &quot;a&quot;;</div><div class="line">	B = &quot;b&quot;;</div><div class="line">&#125;</div><div class="line">// A+B 不会放到常量池中，虽然被 final 修饰，但是在后来被赋值，并不是在一开始编译时就确定的。</div></pre></td></tr></table></figure>
-<p>intern()方法表示，如果字符串在常量池中存在，就取常量池中的。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">String hello = &quot;hello&quot;, lo = &quot;lo&quot;;</div><div class="line">hello == &quot;hel&quot; + &quot;lo&quot;; //true</div><div class="line">hello == &quot;hel&quot; + lo; //false</div><div class="line">hello == (&quot;hel&quot; + lo).intern();  //true</div></pre></td></tr></table></figure></p>
-<h4 id="3-Integer-内存分析"><a href="#3-Integer-内存分析" class="headerlink" title="3. Integer 内存分析"></a>3. Integer 内存分析</h4><p>定义一个 Integer 类型，赋值方式</p>
-<ol>
-<li>Integer i = new Integer(10);</li>
-<li>Integer i = 10;</li>
-</ol>
-<p>对于 -128~127 之间的数，使用第二种赋值方式时如果值相同，则两个变量 “==” true;<br>其它范围的数，两种赋值方式比较结果都为 false.</p>
-<p>原因：<br>-128~127 之间的数会存储在常量池中，比较的直接就是存在在常量池中的对象，而其它数都是新建的对象。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -1681,8 +1685,8 @@ private void sendData() {
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">34</span>
-                  <span class="site-state-item-name">posts</span>
+                  <span class="site-state-item-count">35</span>
+                  <span class="site-state-item-name">Artikel</span>
                 </a>
               </div>
             
@@ -1732,7 +1736,7 @@ private void sendData() {
 </div>
 
 
-  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
 
 
 
