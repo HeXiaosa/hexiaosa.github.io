@@ -79,16 +79,19 @@
 
 
 
-<meta name="description" content="直接对 data 中的号码拨号 : Intent.ACTION_CALL(android.intent.action.CALL)设置号码（必须）使用此功能注意权限 android.permission.CALL_PHONE 1234Intent intent = new Intent();intent.setAction(Intent.ACTION_CALL);intent.setData(Ur">
+<meta name="description" content="简介在可以使用 AIDL 进行进程间通信后，AIDL 是基于 Binder 的，来通过 AIDL 分析一下 Binder。 使用 AIDL 的过程中会有这样的疑问：Server onBind 方法返回的是一个 IMyInterface.Stub 对象，为什么客户端接收到的是 BinderProxy 对象呢 首先对过程中出现的类进行解释IMyInterface : 自定义的 AIDL 接口，实现了">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Intent 的一些 Action 总结">
-<meta property="og:url" content="http://hexiaosa.com/2018/01/29/Intent_Action/index.html">
+<meta property="og:title" content="进程间通信 —— Binder 深入理解">
+<meta property="og:url" content="http://hexiaosa.com/2018/11/29/binder/index.html">
 <meta property="og:site_name" content="Hexiaosa">
-<meta property="og:description" content="直接对 data 中的号码拨号 : Intent.ACTION_CALL(android.intent.action.CALL)设置号码（必须）使用此功能注意权限 android.permission.CALL_PHONE 1234Intent intent = new Intent();intent.setAction(Intent.ACTION_CALL);intent.setData(Ur">
-<meta property="og:updated_time" content="2018-01-29T03:23:38.211Z">
+<meta property="og:description" content="简介在可以使用 AIDL 进行进程间通信后，AIDL 是基于 Binder 的，来通过 AIDL 分析一下 Binder。 使用 AIDL 的过程中会有这样的疑问：Server onBind 方法返回的是一个 IMyInterface.Stub 对象，为什么客户端接收到的是 BinderProxy 对象呢 首先对过程中出现的类进行解释IMyInterface : 自定义的 AIDL 接口，实现了">
+<meta property="og:image" content="http://hexiaosa.com/image/bindService.png">
+<meta property="og:image" content="http://hexiaosa.com/image/ipc_process.png">
+<meta property="og:updated_time" content="2018-11-29T06:13:46.180Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Intent 的一些 Action 总结">
-<meta name="twitter:description" content="直接对 data 中的号码拨号 : Intent.ACTION_CALL(android.intent.action.CALL)设置号码（必须）使用此功能注意权限 android.permission.CALL_PHONE 1234Intent intent = new Intent();intent.setAction(Intent.ACTION_CALL);intent.setData(Ur">
+<meta name="twitter:title" content="进程间通信 —— Binder 深入理解">
+<meta name="twitter:description" content="简介在可以使用 AIDL 进行进程间通信后，AIDL 是基于 Binder 的，来通过 AIDL 分析一下 Binder。 使用 AIDL 的过程中会有这样的疑问：Server onBind 方法返回的是一个 IMyInterface.Stub 对象，为什么客户端接收到的是 BinderProxy 对象呢 首先对过程中出现的类进行解释IMyInterface : 自定义的 AIDL 接口，实现了">
+<meta name="twitter:image" content="http://hexiaosa.com/image/bindService.png">
 
 
 
@@ -118,13 +121,13 @@
 
 
 
-  <link rel="canonical" href="http://hexiaosa.com/2018/01/29/Intent_Action/"/>
+  <link rel="canonical" href="http://hexiaosa.com/2018/11/29/binder/"/>
 
 
 
 
 
-  <title>Intent 的一些 Action 总结 | Hexiaosa</title>
+  <title>进程间通信 —— Binder 深入理解 | Hexiaosa</title>
   
 
 
@@ -231,7 +234,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/01/29/Intent_Action/">
+    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/11/29/binder/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Hexiaosa">
@@ -248,7 +251,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">Intent 的一些 Action 总结</h1>
+          <h1 class="post-title" itemprop="name headline">进程间通信 —— Binder 深入理解</h1>
         
 
         <div class="post-meta">
@@ -260,8 +263,8 @@
               
                 <span class="post-meta-item-text">Posted on</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-29T11:20:58+08:00">
-                2018-01-29
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-11-29T10:47:28+08:00">
+                2018-11-29
               </time>
             
 
@@ -298,25 +301,16 @@
       
 
       
-        <ol>
-<li><p>直接对 data 中的号码拨号 : Intent.ACTION_CALL(android.intent.action.CALL)<br>设置号码（必须）<br>使用此功能注意权限 android.permission.CALL_PHONE</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">Intent intent = new Intent();</div><div class="line">intent.setAction(Intent.ACTION_CALL);</div><div class="line">intent.setData(Uri.parse(&quot;tel:22222222&quot;));</div><div class="line">startActivity(intent);</div></pre></td></tr></table></figure>
-</li>
-<li><p>跳转拨号页面，并且号码是展示的 data 中的 : Intent.ACTION_DIAL(android.intent.action.DIAL)<br>设置号码（可以不设置，不设置就是跳转到拨号界面，不指定号码）</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">Intent intent = new Intent();</div><div class="line">intent.setAction(Intent.ACTION_DIAL);</div><div class="line">intent.setData(Uri.parse(&quot;tel:手机号&quot;));</div><div class="line">startActivity(intent);</div></pre></td></tr></table></figure>
-</li>
-<li><p>相当于点击拨号：Intent.ACTION_CALL_BUTTON(android.intent.action.CALL_BUTTON)，直接启动就可以，不用设置其它。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">Intent intent = new Intent();</div><div class="line">intent.setAction(Intent.ACTION_CALL_BUTTON);</div><div class="line">startActivity(intent);</div></pre></td></tr></table></figure>
-</li>
-<li><p>发送短信，Intent.ACTION_SENDTO(android.intent.action.SENDTO) 用法如下：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">Intent intent = new Intent();</div><div class="line">intent.setAction(Intent.ACTION_SENDTO);</div><div class="line">intent.setData(Uri.parse(&quot;smsto:收信人&quot;));</div><div class="line">intent.putExtra(&quot;sms_body&quot;, &quot;信息内容：test&quot;);</div><div class="line">startActivity(intent);</div></pre></td></tr></table></figure>
-</li>
-<li><p>调用系统相机，MediaStore.ACTION_IMAGE_CAPTURE(android.media.action.IMAGE_CAPTURE)</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">Intent intent = new Intent();</div><div class="line">intent.setAction(MediaStore.ACTION_IMAGE_CAPTURE);</div><div class="line">startActivityForResult(intent, requestCode);</div><div class="line"></div><div class="line">@Override</div><div class="line">protected void onActivityResult(int requestCode, int resultCode, Intent data) &#123;</div><div class="line">    super.onActivityResult(requestCode, resultCode, data);</div><div class="line">    // 获取到拍的照片</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-</li>
-<li><p>调用安装应用</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">Intent install = new Intent(Intent.ACTION_VIEW);</div><div class="line">install.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);</div><div class="line">File apkFile = new File(Environment.getExternalStorageDirectory() + &quot;/download/&quot; + &quot;app.apk&quot;;</div><div class="line">install.setDataAndType(Uri.fromFile(apkFile)), &quot;application/vnd.android.package-archive&quot;);</div><div class="line">startActivity(install)</div></pre></td></tr></table></figure></li>
+        <h3 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h3><p>在可以使用 AIDL 进行进程间通信后，AIDL 是基于 Binder 的，来通过 AIDL 分析一下 Binder。</p>
+<p>使用 AIDL 的过程中会有这样的疑问：<br>Server onBind 方法返回的是一个 IMyInterface.Stub 对象，为什么客户端接收到的是 BinderProxy 对象呢</p>
+<h6 id="首先对过程中出现的类进行解释"><a href="#首先对过程中出现的类进行解释" class="headerlink" title="首先对过程中出现的类进行解释"></a>首先对过程中出现的类进行解释</h6><p>IMyInterface : 自定义的 AIDL 接口，实现了 IInterface 接口；<br>IMyInterface$Stub : IMyInterface 的内部类，继承 Binder, 实现了 IMyInterface 接口，Service 中返回的就是自己实现的这个对象，重写了它的里面自定义 AIDL 的方法；<br>IMyInterface$Stub$Proxy : Stub 的内部类，封装了 Binder 对象<br>BinderProxy : Binder 的内部类，进程间通信时传递的类型</p>
+<h6 id="几个方法的解释"><a href="#几个方法的解释" class="headerlink" title="几个方法的解释"></a>几个方法的解释</h6><p>IMyInterface$Stub.asInterface : 如果是相同进程，则返回该对象，不同进程就是把</p>
+<h3 id="客户端获取服务端的对象"><a href="#客户端获取服务端的对象" class="headerlink" title="客户端获取服务端的对象"></a>客户端获取服务端的对象</h3><ol>
+<li>客户端 binderService, 服务端 Service onBind 方法返回了一个 Stub 对象，当这一过程是跨进程时，返回的 Stub 对象会被封装成 BinderProxy 对象，调用 ServiceConnection.onServiceConnected 作为参数传递，具体可以看下面这张 bindServie 流程图，在 ActivityManagerNative.onTransact 中会把 IMyInterface$Stub 封装一下，IServiceConnection conn = IServiceConnection.Stub.asInterface(b); 这里把 IMyInterface$Stub 封装成 BinderProxy 对象。</li>
 </ol>
+<p><img src="/image/bindService.png" alt="bindService"></p>
+<h3 id="客户端调用服务端方法"><a href="#客户端调用服务端方法" class="headerlink" title="客户端调用服务端方法"></a>客户端调用服务端方法</h3><p>客户端拿到 BinderProxy 对象后，IMyAidlInterface.Stub.asInterface(service); 把它封装成 IMyInterface$Stub$Proxy 对象，然后客户端调用 getBookList 方法，也就是 Proxy 在执行 getBookList, 流程如下</p>
+<p><img src="/image/ipc_process.png" alt="进程间调用"></p>
 
       
     </div>
@@ -341,8 +335,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2018/01/24/java_collection/" rel="next" title="Java 集合简括">
-                <i class="fa fa-chevron-left"></i> Java 集合简括
+              <a href="/2018/10/24/CountDownLatch/" rel="next" title="并发编程 —— CountDownLatch 讲解">
+                <i class="fa fa-chevron-left"></i> 并发编程 —— CountDownLatch 讲解
               </a>
             
           </div>
@@ -350,10 +344,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2018/01/30/ActivitySection/" rel="prev" title="Activity 相关知识">
-                Activity 相关知识 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -405,8 +395,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -448,6 +447,22 @@
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#简介"><span class="nav-number">1.</span> <span class="nav-text">简介</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#首先对过程中出现的类进行解释"><span class="nav-number">1.0.0.1.</span> <span class="nav-text">首先对过程中出现的类进行解释</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#几个方法的解释"><span class="nav-number">1.0.0.2.</span> <span class="nav-text">几个方法的解释</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#客户端获取服务端的对象"><span class="nav-number">2.</span> <span class="nav-text">客户端获取服务端的对象</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#客户端调用服务端方法"><span class="nav-number">3.</span> <span class="nav-text">客户端调用服务端方法</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       

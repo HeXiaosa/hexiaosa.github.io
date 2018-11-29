@@ -181,7 +181,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
             
-            Startseite
+            Home
           </a>
         </li>
       
@@ -191,7 +191,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
             
-            Archiv
+            Archives
           </a>
         </li>
       
@@ -214,6 +214,135 @@
           <div id="content" class="content">
             
   <section id="posts" class="posts-expand">
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/11/29/binder/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Hexiaosa">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexiaosa">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/11/29/binder/" itemprop="url">进程间通信 —— Binder 深入理解</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-11-29T10:47:28+08:00">
+                2018-11-29
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h3 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h3><p>在可以使用 AIDL 进行进程间通信后，AIDL 是基于 Binder 的，来通过 AIDL 分析一下 Binder。</p>
+<p>使用 AIDL 的过程中会有这样的疑问：<br>Server onBind 方法返回的是一个 IMyInterface.Stub 对象，为什么客户端接收到的是 BinderProxy 对象呢</p>
+<h6 id="首先对过程中出现的类进行解释"><a href="#首先对过程中出现的类进行解释" class="headerlink" title="首先对过程中出现的类进行解释"></a>首先对过程中出现的类进行解释</h6><p>IMyInterface : 自定义的 AIDL 接口，实现了 IInterface 接口；<br>IMyInterface$Stub : IMyInterface 的内部类，继承 Binder, 实现了 IMyInterface 接口，Service 中返回的就是自己实现的这个对象，重写了它的里面自定义 AIDL 的方法；<br>IMyInterface$Stub$Proxy : Stub 的内部类，封装了 Binder 对象<br>BinderProxy : Binder 的内部类，进程间通信时传递的类型</p>
+<h6 id="几个方法的解释"><a href="#几个方法的解释" class="headerlink" title="几个方法的解释"></a>几个方法的解释</h6><p>IMyInterface$Stub.asInterface : 如果是相同进程，则返回该对象，不同进程就是把</p>
+<h3 id="客户端获取服务端的对象"><a href="#客户端获取服务端的对象" class="headerlink" title="客户端获取服务端的对象"></a>客户端获取服务端的对象</h3><ol>
+<li>客户端 binderService, 服务端 Service onBind 方法返回了一个 Stub 对象，当这一过程是跨进程时，返回的 Stub 对象会被封装成 BinderProxy 对象，调用 ServiceConnection.onServiceConnected 作为参数传递，具体可以看下面这张 bindServie 流程图，在 ActivityManagerNative.onTransact 中会把 IMyInterface$Stub 封装一下，IServiceConnection conn = IServiceConnection.Stub.asInterface(b); 这里把 IMyInterface$Stub 封装成 BinderProxy 对象。</li>
+</ol>
+<p><img src="/image/bindService.png" alt="bindService"></p>
+<h3 id="客户端调用服务端方法"><a href="#客户端调用服务端方法" class="headerlink" title="客户端调用服务端方法"></a>客户端调用服务端方法</h3><p>客户端拿到 BinderProxy 对象后，IMyAidlInterface.Stub.asInterface(service); 把它封装成 IMyInterface$Stub$Proxy 对象，然后客户端调用 getBookList 方法，也就是 Proxy 在执行 getBookList, 流程如下</p>
+<p><img src="/image/ipc_process.png" alt="进程间调用"></p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
     
       
 
@@ -257,7 +386,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-10-24T16:37:22+08:00">
                 2018-10-24
@@ -386,7 +515,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-10-24T15:03:59+08:00">
                 2018-10-24
@@ -517,7 +646,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-10-23T15:11:44+08:00">
                 2018-10-23
@@ -649,7 +778,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-09-11T12:10:38+08:00">
                 2018-09-11
@@ -773,7 +902,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-09-01T23:06:37+08:00">
                 2018-09-01
@@ -898,7 +1027,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-08-29T23:50:29+08:00">
                 2018-08-29
@@ -1021,7 +1150,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-08-22T18:24:03+08:00">
                 2018-08-22
@@ -1155,7 +1284,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-08-21T19:06:32+08:00">
                 2018-08-21
@@ -1279,7 +1408,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-08-21T18:29:48+08:00">
                 2018-08-21
@@ -1329,129 +1458,6 @@
 <blockquote>
 <p>总结：ReentrantLock 就是通过设置当前持有锁的线程和持有锁的数量，加锁时候通过判断这些来决定是否能获取锁，如果暂时不能获取锁，则线程中断。解锁过程是修改相应的持有锁线程和持有锁数量。</p>
 </blockquote>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/08/15/view-onDraw-LineChart/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Hexiaosa">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexiaosa">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/08/15/view-onDraw-LineChart/" itemprop="url">自定义 View ———— 折线图（重写 onDraw方法）</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Veröffentlicht am</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-08-15T20:55:08+08:00">
-                2018-08-15
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>实现一个如下效果的折线图<br><img src="/image/line_result.jpg" alt="line_result"></p>
-<p>这样的效果实现的方式很容易想到的就是重写 onDraw 方法，给定一组 float 值，分别画点、线，那么下面有颜色的阴影部分是用什么画呢，就用到了 Path, 一个点一个点相连成一个封闭的图形，便可画出这个图形。如果先画点，再画阴影部分，是会把点遮住一部分的，所以实现的时候先画完了阴影部分，再画线和点。不过这样子在 onDraw 方法里就有两个 for 循环，如果有好的办法欢迎提出。（邮箱：hexiaosa91@163.com）<br>下面直接贴出 View 的整个代码，代码不多</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div></pre></td><td class="code"><pre><div class="line">/**</div><div class="line"> * @author hexiaosa</div><div class="line"> * @date 2018/8/15</div><div class="line"> */</div><div class="line"></div><div class="line">public class CustomLineChart extends View &#123;</div><div class="line"></div><div class="line">    private int width; // 宽</div><div class="line">    private int height; // 高</div><div class="line">    private int pointNum; // 折点个数</div><div class="line">    private int lineColor; // 折线颜色</div><div class="line">    private int shadowColor; // 阴影颜色</div><div class="line">    private float[] percents; // 百分比，可以理解为任务完成百分比</div><div class="line">    private int itemWidth;</div><div class="line">    private Path path; // 避免在 onDraw 方法内创建多个对象，所以在这里声明一个成员变量</div><div class="line"></div><div class="line">    public CustomLineChart(Context context) &#123;</div><div class="line">        this(context, null);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public CustomLineChart(Context context, @Nullable AttributeSet attrs) &#123;</div><div class="line">        this(context, attrs, 0);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public CustomLineChart(Context context, @Nullable AttributeSet attrs, int defStyleAttr) &#123;</div><div class="line">        super(context, attrs, defStyleAttr);</div><div class="line"></div><div class="line">        // 线颜色，阴影颜色，折点个数</div><div class="line">        TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.CustomLineChart);</div><div class="line">        lineColor = typedArray.getColor(R.styleable.CustomLineChart_lineColor, Color.BLACK);</div><div class="line">        shadowColor = typedArray.getColor(R.styleable.CustomLineChart_shadowColor, Color.BLACK);</div><div class="line">        pointNum = typedArray.getInteger(R.styleable.CustomLineChart_pointNum, 0);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    protected void onDraw(Canvas canvas) &#123;</div><div class="line">        if (pointNum == 0) &#123;</div><div class="line">            return;</div><div class="line">        &#125;</div><div class="line">        if (percents == null || percents.length != pointNum) &#123;</div><div class="line">            return;</div><div class="line">        &#125;</div><div class="line">        if (width == 0) &#123;</div><div class="line">            width = getMeasuredWidth();</div><div class="line">        &#125;</div><div class="line">        if (height == 0) &#123;</div><div class="line">            height = getMeasuredHeight();</div><div class="line">        &#125;</div><div class="line">        if (path == null) &#123;</div><div class="line">            path = new Path();</div><div class="line">        &#125;</div><div class="line">        itemWidth = width/(pointNum-1);</div><div class="line">        Paint paint = new Paint();</div><div class="line">        paint.setStrokeWidth(5);</div><div class="line">        // 阴影部分使用 Path 连接成一个封闭图形</div><div class="line">        path.reset();</div><div class="line">        path.moveTo(0, height);</div><div class="line">        path.lineTo(0, height*(1-percents[0]));</div><div class="line">        for (int i = 1; i &lt; percents.length; i++) &#123;</div><div class="line">            // 连接阴影</div><div class="line">            path.lineTo(itemWidth*i, height*(1-percents[i]));</div><div class="line">        &#125;</div><div class="line">        path.lineTo(width, height);</div><div class="line">        path.lineTo(0, height);</div><div class="line">        paint.setColor(shadowColor);</div><div class="line">        // 画阴影</div><div class="line">        canvas.drawPath(path, paint);</div><div class="line">        path.close();</div><div class="line"></div><div class="line">        paint.setColor(lineColor);</div><div class="line">        canvas.drawCircle(0, height*(1-percents[0]), 10, paint);</div><div class="line">        for (int i = 1; i &lt; percents.length; i++) &#123;</div><div class="line">            // 画线</div><div class="line">            canvas.drawLine(itemWidth*(i-1), height*(1-percents[i-1]), itemWidth*i, height*(1-percents[i]), paint);</div><div class="line">            // 画点</div><div class="line">            canvas.drawCircle(itemWidth*i, height*(1-percents[i]), 10, paint);</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        canvas.save();</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    public void setPercents(float[] percents) &#123;</div><div class="line">        this.percents = percents;</div><div class="line">        invalidate();</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public void setLineColor(int lineColor) &#123;</div><div class="line">        this.lineColor = lineColor;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public void setShadowColor(int shadowColor) &#123;</div><div class="line">        this.shadowColor = shadowColor;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public void setPointNum(int pointNum) &#123;</div><div class="line">        this.pointNum = pointNum;</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line">// attr.xml</div><div class="line">    &lt;declare-styleable name=&quot;CustomLineChart&quot;&gt;</div><div class="line">        &lt;attr name=&quot;lineColor&quot; format=&quot;color&quot;/&gt;</div><div class="line">        &lt;attr name=&quot;shadowColor&quot; format=&quot;color&quot;/&gt;</div><div class="line">        &lt;attr name=&quot;pointNum&quot; format=&quot;integer&quot;/&gt;</div><div class="line">    &lt;/declare-styleable&gt;</div></pre></td></tr></table></figure>
-<p>使用示例：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">CustomLineChart clc = (CustomLineChart) findViewById(R.id.clc);</div><div class="line">// 必须设置，还有 pointNum 在布局或代码设置至少有一个地方设置，且 pointNum 需等于 percents.length</div><div class="line">clc.setPercents(new float[]&#123;0.5f, 0.3f, 0.4f, 0.7f, 0.1f, 0.2f, 0.6f, 0.8f, 0.9f, 1f&#125;);</div></pre></td></tr></table></figure></p>
 
           
         
@@ -1537,8 +1543,8 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">35</span>
-                  <span class="site-state-item-name">Artikel</span>
+                  <span class="site-state-item-count">36</span>
+                  <span class="site-state-item-name">posts</span>
                 </a>
               </div>
             
@@ -1588,7 +1594,7 @@
 </div>
 
 
-  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
 
 
 
