@@ -87,7 +87,7 @@
 <meta property="og:description" content="简介在可以使用 AIDL 进行进程间通信后，AIDL 是基于 Binder 的，来通过 AIDL 分析一下 Binder。 使用 AIDL 的过程中会有这样的疑问：Server onBind 方法返回的是一个 IMyInterface.Stub 对象，为什么客户端接收到的是 BinderProxy 对象呢 首先对过程中出现的类进行解释IMyInterface : 自定义的 AIDL 接口，实现了">
 <meta property="og:image" content="http://hexiaosa.com/image/bindService.png">
 <meta property="og:image" content="http://hexiaosa.com/image/ipc_process.png">
-<meta property="og:updated_time" content="2018-11-29T06:13:46.180Z">
+<meta property="og:updated_time" content="2018-11-29T06:21:30.238Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="进程间通信 —— Binder 深入理解">
 <meta name="twitter:description" content="简介在可以使用 AIDL 进行进程间通信后，AIDL 是基于 Binder 的，来通过 AIDL 分析一下 Binder。 使用 AIDL 的过程中会有这样的疑问：Server onBind 方法返回的是一个 IMyInterface.Stub 对象，为什么客户端接收到的是 BinderProxy 对象呢 首先对过程中出现的类进行解释IMyInterface : 自定义的 AIDL 接口，实现了">
@@ -187,7 +187,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
             
-            Home
+            Startseite
           </a>
         </li>
       
@@ -197,7 +197,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
             
-            Archives
+            Archiv
           </a>
         </li>
       
@@ -261,7 +261,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-11-29T10:47:28+08:00">
                 2018-11-29
@@ -304,7 +304,7 @@
         <h3 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h3><p>在可以使用 AIDL 进行进程间通信后，AIDL 是基于 Binder 的，来通过 AIDL 分析一下 Binder。</p>
 <p>使用 AIDL 的过程中会有这样的疑问：<br>Server onBind 方法返回的是一个 IMyInterface.Stub 对象，为什么客户端接收到的是 BinderProxy 对象呢</p>
 <h6 id="首先对过程中出现的类进行解释"><a href="#首先对过程中出现的类进行解释" class="headerlink" title="首先对过程中出现的类进行解释"></a>首先对过程中出现的类进行解释</h6><p>IMyInterface : 自定义的 AIDL 接口，实现了 IInterface 接口；<br>IMyInterface$Stub : IMyInterface 的内部类，继承 Binder, 实现了 IMyInterface 接口，Service 中返回的就是自己实现的这个对象，重写了它的里面自定义 AIDL 的方法；<br>IMyInterface$Stub$Proxy : Stub 的内部类，封装了 Binder 对象<br>BinderProxy : Binder 的内部类，进程间通信时传递的类型</p>
-<h6 id="几个方法的解释"><a href="#几个方法的解释" class="headerlink" title="几个方法的解释"></a>几个方法的解释</h6><p>IMyInterface$Stub.asInterface : 如果是相同进程，则返回该对象，不同进程就是把</p>
+<h6 id="方法的解释"><a href="#方法的解释" class="headerlink" title="方法的解释"></a>方法的解释</h6><p>IMyInterface$Stub.asInterface : 如果是相同进程，则返回该对象，不同进程就是把对象封装成 BinderProxy</p>
 <h3 id="客户端获取服务端的对象"><a href="#客户端获取服务端的对象" class="headerlink" title="客户端获取服务端的对象"></a>客户端获取服务端的对象</h3><ol>
 <li>客户端 binderService, 服务端 Service onBind 方法返回了一个 Stub 对象，当这一过程是跨进程时，返回的 Stub 对象会被封装成 BinderProxy 对象，调用 ServiceConnection.onServiceConnected 作为参数传递，具体可以看下面这张 bindServie 流程图，在 ActivityManagerNative.onTransact 中会把 IMyInterface$Stub 封装一下，IServiceConnection conn = IServiceConnection.Stub.asInterface(b); 这里把 IMyInterface$Stub 封装成 BinderProxy 对象。</li>
 </ol>
@@ -397,10 +397,10 @@
       
         <ul class="sidebar-nav motion-element">
           <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
-            Table of Contents
+            Inhaltsverzeichnis
           </li>
           <li class="sidebar-nav-overview" data-target="site-overview-wrap">
-            Overview
+            Übersicht
           </li>
         </ul>
       
@@ -421,7 +421,7 @@
                 <a href="/archives/">
               
                   <span class="site-state-item-count">36</span>
-                  <span class="site-state-item-name">posts</span>
+                  <span class="site-state-item-name">Artikel</span>
                 </a>
               </div>
             
@@ -457,7 +457,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#简介"><span class="nav-number">1.</span> <span class="nav-text">简介</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#首先对过程中出现的类进行解释"><span class="nav-number">1.0.0.1.</span> <span class="nav-text">首先对过程中出现的类进行解释</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#几个方法的解释"><span class="nav-number">1.0.0.2.</span> <span class="nav-text">几个方法的解释</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#客户端获取服务端的对象"><span class="nav-number">2.</span> <span class="nav-text">客户端获取服务端的对象</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#客户端调用服务端方法"><span class="nav-number">3.</span> <span class="nav-text">客户端调用服务端方法</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#简介"><span class="nav-number">1.</span> <span class="nav-text">简介</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#首先对过程中出现的类进行解释"><span class="nav-number">1.0.0.1.</span> <span class="nav-text">首先对过程中出现的类进行解释</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#方法的解释"><span class="nav-number">1.0.0.2.</span> <span class="nav-text">方法的解释</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#客户端获取服务端的对象"><span class="nav-number">2.</span> <span class="nav-text">客户端获取服务端的对象</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#客户端调用服务端方法"><span class="nav-number">3.</span> <span class="nav-text">客户端调用服务端方法</span></a></li></ol></div>
             
 
           </div>
@@ -487,7 +487,7 @@
 </div>
 
 
-  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
 
 
 
