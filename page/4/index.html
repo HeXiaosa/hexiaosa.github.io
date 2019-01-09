@@ -228,6 +228,131 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/01/19/ThreadLocal/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Hexiaosa">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexiaosa">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/01/19/ThreadLocal/" itemprop="url">ThreadLocal 详解</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-19T10:58:37+08:00">
+                2018-01-19
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h4 id="1-作用"><a href="#1-作用" class="headerlink" title="1. 作用"></a>1. 作用</h4><p>一个 ThreadLocal 对象在每个线程里面能保存一个值，同一个 ThreadLocal 保存同一个实例在不同线程中互不影响<br>为什么要用它 ——&gt; 在一个线程只需要唯一的某一类型实例</p>
+<h4 id="2-怎么用"><a href="#2-怎么用" class="headerlink" title="2. 怎么用"></a>2. 怎么用</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line">public class Test&#123;</div><div class="line">	</div><div class="line">	static ThreadLocal&lt;Integer&gt; local = new ThreadLocal&lt;&gt;();</div><div class="line">	</div><div class="line">	public static void main(String[] args) &#123;</div><div class="line">		local.set(100);</div><div class="line">		new Thread() &#123;</div><div class="line">			public void run() &#123;</div><div class="line">				System.out.println(&quot;new Thread :&quot; + local.get());</div><div class="line">				local.set(200);</div><div class="line">				System.out.println(&quot;new Thread :&quot; + local.get());</div><div class="line">			&#125;;</div><div class="line">		&#125;.start();</div><div class="line">		try &#123;</div><div class="line">			Thread.sleep(10);</div><div class="line">			System.out.println(local.get());</div><div class="line">		&#125; catch (InterruptedException e) &#123;</div><div class="line">			// TODO Auto-generated catch block</div><div class="line">			e.printStackTrace();</div><div class="line">		&#125;</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>上面代码的输出结果如下，可以看出同一个 ThreadLocal 在不同的线程中有各自的值。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">new Thread :null</div><div class="line">new Thread :200</div><div class="line">100</div></pre></td></tr></table></figure></p>
+<h4 id="3-原理"><a href="#3-原理" class="headerlink" title="3. 原理"></a>3. 原理</h4><p>保存数据的类似 key-value 保存的形式。key 就是当前的 ThreadLocal 对象, set 时如果 key 相同则覆盖 value 的值。<br>那么一个 ThreadLocal 对象是怎么保证一个线程只有一个值的呢？因为 Thread 中有一个 ThreadLocal.ThreadLocalMap 对象，每次 get/set 时都会取出这个对象进行操作。<br><img src="/image/ThreadLocal_get.png" alt="ThreadLocal_get"></p>
+<h4 id="4-Android-内源码使用分析"><a href="#4-Android-内源码使用分析" class="headerlink" title="4. Android 内源码使用分析"></a>4. Android 内源码使用分析</h4><p>Looper 在每个线程中只有一个对象，原因在创建 Looper 的源码中有声明一个线程只能有一个 Looper.<br><img src="/image/Looper_prepare.png" alt="Looper_prepare"></p>
+<p>具体为什么这样设计从这张图片可能会找到一些答案，有待更进一步研究。<br><img src="/image/Handle_Looper_Message.png" alt="Handle_Looper_Message"></p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/01/09/adb/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1165,7 +1290,7 @@ private void sendData() {
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">36</span>
+                  <span class="site-state-item-count">37</span>
                   <span class="site-state-item-name">Artikel</span>
                 </a>
               </div>
@@ -1206,7 +1331,7 @@ private void sendData() {
 
     <footer id="footer" class="footer">
       <div class="footer-inner">
-        <div class="copyright">&copy; <span itemprop="copyrightYear">2018</span>
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
   <span class="with-love">
     <i class="fa fa-user"></i>
   </span>

@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="View 坐标介绍View 坐标表示有以下几种， getLeft, getTranstationX, getScrollX, getRawX, getX. 那么这几种表示有什么区别呢  getLeft 表示 View  的实际坐标，View 的实际左上角距离父 View 左上角的水平距离。 getTranslationX 表示 View 与父 View 的水平偏移量，可以通过设置 view.set">
+<meta property="og:type" content="article">
+<meta property="og:title" content="View  坐标体系和 View 的滑动">
+<meta property="og:url" content="http://hexiaosa.com/2019/01/07/view-coordinate/index.html">
+<meta property="og:site_name" content="Hexiaosa">
+<meta property="og:description" content="View 坐标介绍View 坐标表示有以下几种， getLeft, getTranstationX, getScrollX, getRawX, getX. 那么这几种表示有什么区别呢  getLeft 表示 View  的实际坐标，View 的实际左上角距离父 View 左上角的水平距离。 getTranslationX 表示 View 与父 View 的水平偏移量，可以通过设置 view.set">
+<meta property="og:updated_time" content="2019-01-09T10:32:13.874Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="View  坐标体系和 View 的滑动">
+<meta name="twitter:description" content="View 坐标介绍View 坐标表示有以下几种， getLeft, getTranstationX, getScrollX, getRawX, getX. 那么这几种表示有什么区别呢  getLeft 表示 View  的实际坐标，View 的实际左上角距离父 View 左上角的水平距离。 getTranslationX 表示 View 与父 View 的水平偏移量，可以通过设置 view.set">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://hexiaosa.com/2019/01/07/view-coordinate/"/>
+
+
+
+
+
+  <title>View  坐标体系和 View 的滑动 | Hexiaosa</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Hexiaosa</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Startseite
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archiv
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2019/01/07/view-coordinate/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Hexiaosa">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexiaosa">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">View  坐标体系和 View 的滑动</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-01-07T17:37:33+08:00">
+                2019-01-07
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="View-坐标介绍"><a href="#View-坐标介绍" class="headerlink" title="View 坐标介绍"></a>View 坐标介绍</h3><p>View 坐标表示有以下几种， getLeft, getTranstationX, getScrollX, getRawX, getX. 那么这几种表示有什么区别呢</p>
+<ol>
+<li>getLeft 表示 View  的实际坐标，View 的实际左上角距离父 View 左上角的水平距离。</li>
+<li>getTranslationX 表示 View 与父 View 的水平偏移量，可以通过设置 view.setTranslationX(*) 来移动 view, 改变的就是 translationX.</li>
+<li>getScrollX 获取的是 view 的内容相对 view 移动的水平距离。</li>
+<li>getRawX 表示 View 的实际左上角距离屏幕左上角的水平距离。</li>
+<li>getX = getLeft() + getTranslationX</li>
+</ol>
+<p>注意：onTouchEvent 随手指移动时不应使用 view.getX() 来计算移动距离，应该使用 view.getRawX() 计算移动距离，因为 view.getX() 获取的是 view 左上角与 父 view 左上角的距离，但是 view 移动，view.getX() 也会随着变化，所以如果使用 view.getX() 随手指移动 view 会抖动。</p>
+<h3 id="View-移动方式"><a href="#View-移动方式" class="headerlink" title="View 移动方式"></a>View 移动方式</h3><p>使 View 移动的方式有这几种：动画，使用 scrollTo/scrollBy, 修改 LayoutParams, 使用 offsetTopAndBottom</p>
+<h6 id="动画"><a href="#动画" class="headerlink" title="动画"></a>动画</h6><p>通过 View 动画移动 View, View 的坐标不改变，其点击事件还是在移动前的位置触发，使用方式如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">TranslateAnimation animation = new TranslateAnimation(Animation.RELATIVE_TO_PARENT, 0, Animation.RELATIVE_TO_PARENT, 0.5F,</div><div class="line">        Animation.RELATIVE_TO_PARENT, 0, Animation.RELATIVE_TO_PARENT, 0.5F);</div><div class="line">animation.setFillAfter(true);</div><div class="line">viewTv.startAnimation(animation);</div></pre></td></tr></table></figure></p>
+<p>3.0 以后使用属性动画移动 View, 改变的是 translationX, 使用方式如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">ObjectAnimator animator = ObjectAnimator.ofFloat(viewTv, &quot;translationX&quot;, 0, 200);</div><div class="line">animator.start();</div></pre></td></tr></table></figure></p>
+<h6 id="使用-scrollTo-scrollBy"><a href="#使用-scrollTo-scrollBy" class="headerlink" title="使用 scrollTo/scrollBy"></a>使用 scrollTo/scrollBy</h6><p>scrollTo/scrollBy 移动的是 View 的内容，View 本身并不会移动，这种方式变化的是 scrollX, 使用直接调用 view.scrollTo/scrollBy 就可以，这个需要注意的是 onCreate 里直接调用无效，可以 postDelayed 里调用。</p>
+<p>scrollTo/scrollBy 与其它方式不同还有，值为正是向左滑动。</p>
+<h6 id="修改-LayoutParams"><a href="#修改-LayoutParams" class="headerlink" title="修改 LayoutParams"></a>修改 LayoutParams</h6><p>修改参数的这种方式修改的是 left, setLayoutParams 会调用 requestLayout, 会再进行一遍整个绘制流程。使用方法：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">LinearLayout.MarginLayoutParams layoutParams = (LinearLayout.MarginLayoutParams) viewTv.getLayoutParams();</div><div class="line">layoutParams.leftMargin = 200;</div><div class="line">viewTv.requestLayout();</div><div class="line">//viewTv.setLayoutParams(layoutParams);</div></pre></td></tr></table></figure></p>
+<h6 id="使用-offsetLeftAndRight"><a href="#使用-offsetLeftAndRight" class="headerlink" title="使用 offsetLeftAndRight"></a>使用 offsetLeftAndRight</h6><p>这种方式修改的是 left, 这个也同样不能再 onCreate 中直接调用，可以在 postDelayed 调用。 直接调用 view.offsetLeftAndRight(*) 即可。</p>
+<blockquote>
+<p>上述方法凡是修改 translationX 或者 left 的，移动后的位置都可以触发点击事件，不能修改这两个值的只能触发原来位置的点击事件。因为 x = left + translationX.</p>
+</blockquote>
+<h3 id="View-弹性滑动方式"><a href="#View-弹性滑动方式" class="headerlink" title="View 弹性滑动方式"></a>View 弹性滑动方式</h3><p>弹性滑动就是让 View 的移动有个过程，不是一下从原位置到目的位置，方式有以下几种。</p>
+<h6 id="动画-1"><a href="#动画-1" class="headerlink" title="动画"></a>动画</h6><p>动画本身就可以设置执行时间，实现弹性滑动，除了使用动画常用的方式实现弹性滑动之外，还可以利用 VallueAnimator 来实现，如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">ValueAnimator animator = ValueAnimator.ofInt(0, 1).setDuration(1000);</div><div class="line">animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() &#123;</div><div class="line">    @Override</div><div class="line">    public void onAnimationUpdate(ValueAnimator animation) &#123;</div><div class="line">        LinearLayout.MarginLayoutParams layoutParams = (LinearLayout.MarginLayoutParams) view.getLayoutParams();</div><div class="line">        // 动态设置，随着进度变化，从而实现弹性滑动</div><div class="line">        layoutParams.leftMargin = (int) (animation.getAnimatedFraction()*200);</div><div class="line">        view.requestLayout();</div><div class="line">    &#125;</div><div class="line">&#125;);</div><div class="line">animator.start();</div></pre></td></tr></table></figure></p>
+<h6 id="Scroller"><a href="#Scroller" class="headerlink" title="Scroller"></a>Scroller</h6><p>使用 Scroller 的方式是继承要滑动的 View, 重写 computeScroll 方法，computeScroll 方法如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">@Override</div><div class="line">public void computeScroll() &#123;</div><div class="line">    super.computeScroll();</div><div class="line">    //判断Scroller是否执行完毕，计算 mCurrX/mCurrY</div><div class="line">    if (mScroller.computeScrollOffset()) &#123;</div><div class="line">        ((View) getParent()).scrollTo(mScroller.getCurrX(), mScroller.getCurrY());</div><div class="line">    &#125;</div><div class="line">    //通过重绘来不断调用computeScroll</div><div class="line">    invalidate();</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>然后在需要开始弹性滑动的时候调用 mScroller.startScroll(0, 0, -300, 0, 1000);</p>
+<p>实际上，Scroller 实现的方式就是 invalidate 会调用到 draw 方法，draw 会调用 computeScroll, computeScroll 中 mScroller.computeScrollOffset 先判断是否结束，不是的话计算 mCurrX/mCurry 动态变化，然后使用变化后的这两个值。</p>
+<p>需要注意的是，上述 computeScroll 重写时调用了 getParent.scrollTo, scrollTo 移动的是 View 中的内容，所以当 getParent 中有多个子 View 时，其它子 View 会跟当前的一起移动。</p>
+<h6 id="handler-结合-Thread-sleep"><a href="#handler-结合-Thread-sleep" class="headerlink" title="handler 结合 Thread.sleep()"></a>handler 结合 Thread.sleep()</h6><p>这个就比较好理解了，相当于一个定时器，定时更改 View 位置即可。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/11/29/binder/" rel="next" title="进程间通信 —— Binder 深入理解">
+                <i class="fa fa-chevron-left"></i> 进程间通信 —— Binder 深入理解
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Inhaltsverzeichnis
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Übersicht
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Hexiaosa</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">37</span>
+                  <span class="site-state-item-name">Artikel</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#View-坐标介绍"><span class="nav-number">1.</span> <span class="nav-text">View 坐标介绍</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#View-移动方式"><span class="nav-number">2.</span> <span class="nav-text">View 移动方式</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#动画"><span class="nav-number">2.0.0.1.</span> <span class="nav-text">动画</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#使用-scrollTo-scrollBy"><span class="nav-number">2.0.0.2.</span> <span class="nav-text">使用 scrollTo/scrollBy</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#修改-LayoutParams"><span class="nav-number">2.0.0.3.</span> <span class="nav-text">修改 LayoutParams</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#使用-offsetLeftAndRight"><span class="nav-number">2.0.0.4.</span> <span class="nav-text">使用 offsetLeftAndRight</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#View-弹性滑动方式"><span class="nav-number">3.</span> <span class="nav-text">View 弹性滑动方式</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#动画-1"><span class="nav-number">3.0.0.1.</span> <span class="nav-text">动画</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#Scroller"><span class="nav-number">3.0.0.2.</span> <span class="nav-text">Scroller</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#handler-结合-Thread-sleep"><span class="nav-number">3.0.0.3.</span> <span class="nav-text">handler 结合 Thread.sleep()</span></a></li></ol></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Hexiaosa</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
