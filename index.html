@@ -181,7 +181,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
             
-            Startseite
+            Home
           </a>
         </li>
       
@@ -191,7 +191,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
             
-            Archiv
+            Archives
           </a>
         </li>
       
@@ -214,6 +214,131 @@
           <div id="content" class="content">
             
   <section id="posts" class="posts-expand">
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2019/01/29/dispatch-event-2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Hexiaosa">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexiaosa">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/01/29/dispatch-event-2/" itemprop="url">事件分发 ———— 从源码详细分析事件分发流程</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-01-29T15:53:43+08:00">
+                2019-01-29
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>从源码分析事件分发, <a href="https://blog.csdn.net/lmj623565791/article/details/39102591" target="_blank" rel="external">https://blog.csdn.net/lmj623565791/article/details/39102591</a> 这篇博客和 《Android开发艺术探索》 已经讲的很清晰了，我按从正常事件分发流程（返回结果都是 super），从源码角度分析事件分发的流程为什么是这样的。</p>
+<p>假设现在 DecoreView 里包含一个 ViewGourp(V1), ViewGroup 中包含一个 View(V2)</p>
+<p>我们应该知道流程是 DecoreView:dispatchTouchEvent -&gt; DecoreView:onInterceptTouchEvent -&gt; V1:dispatchTouchEvent<br>                 -&gt; VI:onInterceptTouchEvent V2:dispatchTouchEvent -&gt; V2:onTouchEvent -&gt; V1:onTouchEvent -&gt; DecoreView:onTouchEvent</p>
+<p>从 ACTION_DOWN 事件分析，先看源码 Activity.dispatchTouchEvent<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">public boolean dispatchTouchEvent(MotionEvent ev) &#123;</div><div class="line">    if (ev.getAction() == MotionEvent.ACTION_DOWN) &#123;</div><div class="line">        onUserInteraction();</div><div class="line">    &#125;</div><div class="line">    // 这里执行了 PhoneWindow superDispatchTouchEvent</div><div class="line">    if (getWindow().superDispatchTouchEvent(ev)) &#123;</div><div class="line">        return true;</div><div class="line">    &#125;</div><div class="line">    // 执行 Activity 的 onTouchEvent</div><div class="line">    return onTouchEvent(ev);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>上面看到执行的是 PhoneWindow.superDispatchTouchvent, 这个方法是 return mDecore.superDispatchTouchEvent, mDecore 是 DecoreView, DecoreView 的 superDispatchTouchEvent 方法执行的是 super.dispatchTouchEvent, DecoreView 的父类是 FrameLayout, 所以执行的就是 ViewGroup 的 dispatchTouchEvent, 下面就来看 ViewGourp 的 dispatchTouchEvent 方法。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div></pre></td><td class="code"><pre><div class="line">@Override</div><div class="line">public boolean dispatchTouchEvent(MotionEvent ev) &#123;</div><div class="line">    // ...</div><div class="line">    boolean handled = false;</div><div class="line">    if (onFilterTouchEventForSecurity(ev)) &#123;</div><div class="line">        final int action = ev.getAction();</div><div class="line">        final int actionMasked = action &amp; MotionEvent.ACTION_MASK;</div><div class="line"></div><div class="line">        if (actionMasked == MotionEvent.ACTION_DOWN) &#123;</div><div class="line">            // ACTION_DOWN 时清除 target, mGroupFlags(requestDisallowInterceptTouchEvent设置的)</div><div class="line">            cancelAndClearTouchTargets(ev);</div><div class="line">            resetTouchState();</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        // 看是否被拦截</div><div class="line">        final boolean intercepted;</div><div class="line">        if (actionMasked == MotionEvent.ACTION_DOWN || mFirstTouchTarget != null) &#123;</div><div class="line"></div><div class="line">            // DOWN 事件会走到这里（actionMasked == MotionEvent.ACTION_DOWN 且 mFirstTouchTarget == null）</div><div class="line">            // 上面会清除 mGroupFlags, 所以这里不管有没有 requestDisallow, disallowIntercept 都是 false</div><div class="line"></div><div class="line">            final boolean disallowIntercept = (mGroupFlags &amp; FLAG_DISALLOW_INTERCEPT) != 0;</div><div class="line">            if (!disallowIntercept) &#123;</div><div class="line">            	// 执行这里的 onInterceptTouchEvent, 默认返回 false, 所以 intercept 为 false</div><div class="line">                intercepted = onInterceptTouchEvent(ev);</div><div class="line">                ev.setAction(action); // restore action in case it was changed</div><div class="line">            &#125; else &#123;</div><div class="line">                intercepted = false;</div><div class="line">            &#125;</div><div class="line">        &#125; // ...</div><div class="line"></div><div class="line">        // 是否手势取消</div><div class="line">        final boolean canceled = resetCancelNextUpFlag(this) || actionMasked == MotionEvent.ACTION_CANCEL;</div><div class="line"></div><div class="line">        // ...</div><div class="line">        if (!canceled &amp;&amp; !intercepted) &#123; // 现在这种情况下，两个都是 false</div><div class="line">            if (actionMasked == MotionEvent.ACTION_DOWN  // true || ...) &#123;</div><div class="line">                // ...</div><div class="line">                final int childrenCount = mChildrenCount;</div><div class="line">                if (newTouchTarget == null &amp;&amp; childrenCount != 0) &#123;</div><div class="line">                	// ...</div><div class="line">                    // 获取触摸到的子 View 列表，根据 getZ 和绘制顺序得到，本次分析的情况就是 0位置是V1</div><div class="line">                    final ArrayList&lt;View&gt; preorderedList = buildOrderedChildList();</div><div class="line">                    //...</div><div class="line">                    final View[] children = mChildren;</div><div class="line">                    for (int i = childrenCount - 1; i &gt;= 0; i--) &#123;</div><div class="line">                        // child 就是 V1</div><div class="line">                        newTouchTarget = getTouchTarget(child); // return null</div><div class="line"></div><div class="line">                        // 下面 dispatchTransformedTouchEvent 中, child 就是 V1, 该方法内部调用了 child.dispatchTouchEvent,</div><div class="line">                        // 方法的返回值也就是 child.dispatchTouchEvent 的返回值</div><div class="line"></div><div class="line">                        // 也就是会执行 V1.dispatchTouchEvent, 也就是说到这里，流程已经到了，DecoreView.dispatchTouchEvent -&gt; </div><div class="line">                        // DecoreView.onInterceptTouchEvent -&gt; V1.dispatchTouchEvent -&gt; V1.onInterceptTouchEvent</div><div class="line"></div><div class="line">                        // 然后 V1 执行到这里的时候 child 是 V2, 在 dispatchTransformedTouchEvent 方法中执行了 </div><div class="line">                        // V2.dispatchTouchEvent, 也就是执行了 View 的 dispatchTouchEvent, View 的 dispatchTouchEvent </div><div class="line">                        // 方法后面再分析其它的，现在我们就知道会调用 View.onTouchEvent 就可以了。 onTouchEvent 默认返回 false</div><div class="line"></div><div class="line">                        // 可以看出这里是类似在递归执行</div><div class="line"></div><div class="line">                        // 也就是 dispatchTransformedTouchEvent 在 child 是 V2 时返回了 false, 那么下面的赋值 newTouchTarget 和 </div><div class="line">                        // mFristTouchTarget 就不会执行, 所以这两个值都是 null</div><div class="line"></div><div class="line">                        if (dispatchTransformedTouchEvent(ev, false, child, idBitsToAssign)) &#123;</div><div class="line">                            &lt;!-- ... 本次分析这里执行不到， --&gt;</div><div class="line">                        &#125;</div><div class="line">                    &#125;</div><div class="line">                    if (preorderedList != null) preorderedList.clear();</div><div class="line">                &#125;</div><div class="line">                // ...</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        // Dispatch to touch targets.</div><div class="line">        if (mFirstTouchTarget == null) &#123;</div><div class="line">            // DecoreView/V1 执行到这里，传递的 child 是 null, 方法里面执行 super.dispatchTouchEvent, ViewGourp 父类是 View, </div><div class="line">            // 也就是执行 View.dispatchTouchEvent 方法，默认还是返回 false</div><div class="line"></div><div class="line">            handled = dispatchTransformedTouchEvent(ev, canceled, null,</div><div class="line">                    TouchTarget.ALL_POINTER_IDS);</div><div class="line">        &#125; else &#123;</div><div class="line">            &lt;!-- ... --&gt;</div><div class="line">        &#125;</div><div class="line">        // ...</div><div class="line">    &#125;</div><div class="line">    // ...</div><div class="line">    return handled;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>跟着上面源码的执行流程，就可以得到上述 View 事件分发的执行流程，下面清晰的描述了执行流程<br><img src="/image/default_dispatch.jpg" alt="default_dispatch"></p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
     
       
 
@@ -257,7 +382,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-01-07T17:37:33+08:00">
                 2019-01-07
@@ -307,6 +432,7 @@
 <li>getRawX 表示 View 的实际左上角距离屏幕左上角的水平距离。</li>
 <li>getX = getLeft() + getTranslationX</li>
 </ol>
+<p><img src="/image/view_coordinate.png" alt="view_coordinate"></p>
 <p>注意：onTouchEvent 随手指移动时不应使用 view.getX() 来计算移动距离，应该使用 view.getRawX() 计算移动距离，因为 view.getX() 获取的是 view 左上角与 父 view 左上角的距离，但是 view 移动，view.getX() 也会随着变化，所以如果使用 view.getX() 随手指移动 view 会抖动。</p>
 <h3 id="View-移动方式"><a href="#View-移动方式" class="headerlink" title="View 移动方式"></a>View 移动方式</h3><p>使 View 移动的方式有这几种：动画，使用 scrollTo/scrollBy, 修改 LayoutParams, 使用 offsetTopAndBottom</p>
 <h6 id="动画"><a href="#动画" class="headerlink" title="动画"></a>动画</h6><p>通过 View 动画移动 View, View 的坐标不改变，其点击事件还是在移动前的位置触发，使用方式如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">TranslateAnimation animation = new TranslateAnimation(Animation.RELATIVE_TO_PARENT, 0, Animation.RELATIVE_TO_PARENT, 0.5F,</div><div class="line">        Animation.RELATIVE_TO_PARENT, 0, Animation.RELATIVE_TO_PARENT, 0.5F);</div><div class="line">animation.setFillAfter(true);</div><div class="line">viewTv.startAnimation(animation);</div></pre></td></tr></table></figure></p>
@@ -402,7 +528,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-11-29T10:47:28+08:00">
                 2018-11-29
@@ -531,7 +657,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-10-24T16:37:22+08:00">
                 2018-10-24
@@ -660,7 +786,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-10-24T15:03:59+08:00">
                 2018-10-24
@@ -762,7 +888,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/10/23/TouchEvent/">
+    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/10/23/dispatch_event_1/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Hexiaosa">
@@ -781,7 +907,7 @@
         
           <h1 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2018/10/23/TouchEvent/" itemprop="url">自定义View —— 可删除 item 的 ListView (事件分发)</a></h1>
+                <a class="post-title-link" href="/2018/10/23/dispatch_event_1/" itemprop="url">事件分发 —— 自定义可删除 item 的 ListView</a></h1>
         
 
         <div class="post-meta">
@@ -791,7 +917,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-10-23T15:11:44+08:00">
                 2018-10-23
@@ -923,7 +1049,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-09-11T12:10:38+08:00">
                 2018-09-11
@@ -1047,7 +1173,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-09-01T23:06:37+08:00">
                 2018-09-01
@@ -1172,7 +1298,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-08-29T23:50:29+08:00">
                 2018-08-29
@@ -1295,7 +1421,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-08-22T18:24:03+08:00">
                 2018-08-22
@@ -1387,130 +1513,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/08/21/rxjava-theory/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Hexiaosa">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexiaosa">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/08/21/rxjava-theory/" itemprop="url">RxJava 从源码分析流程</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Veröffentlicht am</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-08-21T19:06:32+08:00">
-                2018-08-21
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>以下面这段代码为示例<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line">public void run(final ThreadListener&lt;T&gt; listener) &#123;</div><div class="line">    Observable.create(new ObservableOnSubscribe&lt;T&gt;() &#123;</div><div class="line">        @Override</div><div class="line">        public void subscribe(ObservableEmitter&lt;T&gt; e) throws Exception &#123;</div><div class="line">            listener.start(e);</div><div class="line">        &#125;</div><div class="line">    &#125;).subscribeOn(Schedulers.io())</div><div class="line">            .observeOn(AndroidSchedulers.mainThread())</div><div class="line">            .subscribe(new Observer&lt;T&gt;() &#123;</div><div class="line">                @Override</div><div class="line">                public void onSubscribe(Disposable d) &#123;</div><div class="line"></div><div class="line">                &#125;</div><div class="line"></div><div class="line">                @Override</div><div class="line">                public void onNext(T t) &#123;</div><div class="line">                    listener.onNext(t);</div><div class="line">                &#125;</div><div class="line"></div><div class="line">                @Override</div><div class="line">                public void onError(Throwable e) &#123;</div><div class="line">                    listener.onError(e.getMessage());</div><div class="line">                &#125;</div><div class="line"></div><div class="line">                @Override</div><div class="line">                public void onComplete() &#123;</div><div class="line"></div><div class="line">                &#125;</div><div class="line">            &#125;);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>源码流程就看下面这个手画的图吧：<br><img src="/image/rxjava_flow.jpg" alt="rxjava_flow"></p>
-<p>可以看到类是一层一层被包裹的，那么当 ObservableEmitter 执行 e.next() 时，会调到 ObservableObserveOn 的内部类 ObserveOnObserver 的 onNext 方法, onNext 方法中调了 schedule, schedule 方法如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">void schedule() &#123;</div><div class="line">    if (getAndIncrement() == 0) &#123;</div><div class="line">        worker.schedule(this); // worker 是 HandlerScheduler.createWorker, 返回的是 HandlerScheduler 的内部类 HandlerWorker</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>wordker.schedule 的主要代码如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">public Disposable schedule(Runnable run, long delay, TimeUnit unit) &#123;</div><div class="line">	// 这里的 handler 是 new Handler(Looper.getMainLooper())</div><div class="line">    ScheduledRunnable scheduled = new ScheduledRunnable(handler, run);</div><div class="line"></div><div class="line">    Message message = Message.obtain(handler, scheduled);</div><div class="line">    message.obj = this; // Used as token for batch disposal of this worker&apos;s runnables.</div><div class="line">    // 这里切换到主线程</div><div class="line">    handler.sendMessageDelayed(message, Math.max(0L, unit.toMillis(delay)));</div><div class="line"></div><div class="line">    return scheduled;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>所以接下来会执行 ScheduledRunnable 的 run 方法，接着执行到 run 方法中，会调用 drainNormal<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line">void drainNormal() &#123;</div><div class="line">    // ...</div><div class="line">    final Observer&lt;? super T&gt; a = actual;</div><div class="line">    for (;;) &#123;</div><div class="line">    	// ...</div><div class="line">        for (;;) &#123;</div><div class="line">        	// ...</div><div class="line">            try &#123;</div><div class="line">            	// ...</div><div class="line">            &#125; catch (Throwable ex) &#123;</div><div class="line">                // ...</div><div class="line">                a.onError(ex);</div><div class="line">                return;</div><div class="line">            &#125;</div><div class="line">            // ...</div><div class="line">            // 这里执行 onNext 方法，也就是会执行到我们实现的代码</div><div class="line">            a.onNext(v);</div><div class="line">        &#125;</div><div class="line">        // ...</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -1561,8 +1563,8 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">37</span>
-                  <span class="site-state-item-name">Artikel</span>
+                  <span class="site-state-item-count">38</span>
+                  <span class="site-state-item-name">posts</span>
                 </a>
               </div>
             
@@ -1612,7 +1614,7 @@
 </div>
 
 
-  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
 
 
 

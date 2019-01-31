@@ -85,10 +85,12 @@
 <meta property="og:url" content="http://hexiaosa.com/2019/01/07/view-coordinate/index.html">
 <meta property="og:site_name" content="Hexiaosa">
 <meta property="og:description" content="View 坐标介绍View 坐标表示有以下几种， getLeft, getTranstationX, getScrollX, getRawX, getX. 那么这几种表示有什么区别呢  getLeft 表示 View  的实际坐标，View 的实际左上角距离父 View 左上角的水平距离。 getTranslationX 表示 View 与父 View 的水平偏移量，可以通过设置 view.set">
-<meta property="og:updated_time" content="2019-01-09T10:32:13.874Z">
+<meta property="og:image" content="http://hexiaosa.com/image/view_coordinate.png">
+<meta property="og:updated_time" content="2019-01-10T02:22:00.568Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="View  坐标体系和 View 的滑动">
 <meta name="twitter:description" content="View 坐标介绍View 坐标表示有以下几种， getLeft, getTranstationX, getScrollX, getRawX, getX. 那么这几种表示有什么区别呢  getLeft 表示 View  的实际坐标，View 的实际左上角距离父 View 左上角的水平距离。 getTranslationX 表示 View 与父 View 的水平偏移量，可以通过设置 view.set">
+<meta name="twitter:image" content="http://hexiaosa.com/image/view_coordinate.png">
 
 
 
@@ -184,7 +186,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
             
-            Startseite
+            Home
           </a>
         </li>
       
@@ -194,7 +196,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
             
-            Archiv
+            Archives
           </a>
         </li>
       
@@ -258,7 +260,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-01-07T17:37:33+08:00">
                 2019-01-07
@@ -306,6 +308,7 @@
 <li>getRawX 表示 View 的实际左上角距离屏幕左上角的水平距离。</li>
 <li>getX = getLeft() + getTranslationX</li>
 </ol>
+<p><img src="/image/view_coordinate.png" alt="view_coordinate"></p>
 <p>注意：onTouchEvent 随手指移动时不应使用 view.getX() 来计算移动距离，应该使用 view.getRawX() 计算移动距离，因为 view.getX() 获取的是 view 左上角与 父 view 左上角的距离，但是 view 移动，view.getX() 也会随着变化，所以如果使用 view.getX() 随手指移动 view 会抖动。</p>
 <h3 id="View-移动方式"><a href="#View-移动方式" class="headerlink" title="View 移动方式"></a>View 移动方式</h3><p>使 View 移动的方式有这几种：动画，使用 scrollTo/scrollBy, 修改 LayoutParams, 使用 offsetTopAndBottom</p>
 <h6 id="动画"><a href="#动画" class="headerlink" title="动画"></a>动画</h6><p>通过 View 动画移动 View, View 的坐标不改变，其点击事件还是在移动前的位置触发，使用方式如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">TranslateAnimation animation = new TranslateAnimation(Animation.RELATIVE_TO_PARENT, 0, Animation.RELATIVE_TO_PARENT, 0.5F,</div><div class="line">        Animation.RELATIVE_TO_PARENT, 0, Animation.RELATIVE_TO_PARENT, 0.5F);</div><div class="line">animation.setFillAfter(true);</div><div class="line">viewTv.startAnimation(animation);</div></pre></td></tr></table></figure></p>
@@ -357,6 +360,10 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/01/29/dispatch-event-2/" rel="prev" title="事件分发 ———— 从源码详细分析事件分发流程">
+                事件分发 ———— 从源码详细分析事件分发流程 <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -410,10 +417,10 @@
       
         <ul class="sidebar-nav motion-element">
           <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
-            Inhaltsverzeichnis
+            Table of Contents
           </li>
           <li class="sidebar-nav-overview" data-target="site-overview-wrap">
-            Übersicht
+            Overview
           </li>
         </ul>
       
@@ -433,8 +440,8 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">37</span>
-                  <span class="site-state-item-name">Artikel</span>
+                  <span class="site-state-item-count">38</span>
+                  <span class="site-state-item-name">posts</span>
                 </a>
               </div>
             
@@ -500,7 +507,7 @@
 </div>
 
 
-  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
 
 
 

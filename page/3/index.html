@@ -181,7 +181,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
             
-            Startseite
+            Home
           </a>
         </li>
       
@@ -191,7 +191,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
             
-            Archiv
+            Archives
           </a>
         </li>
       
@@ -214,6 +214,135 @@
           <div id="content" class="content">
             
   <section id="posts" class="posts-expand">
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/07/31/GreenDao-Cache/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Hexiaosa">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexiaosa">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/07/31/GreenDao-Cache/" itemprop="url">GreenDao 缓存</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-07-31T11:34:33+08:00">
+                2018-07-31
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <blockquote>
+<p>在项目中遇到这样的问题，数据库使用的 GreenDao, 两个 Activity, 分别添加同一个 Fragment, 查本地数据库，实体类中有一个是否选中状态的字段是不保存到数据库的，@transient 标记的，发现会出现这样的现象：在 Activity1 中的 Fragment 查出来，第一个位置选中，到 Activity2 中的 Fragment 查出来的第一个位置也是选中的，what???</p>
+</blockquote>
+<p> 两个 Activity 分别 new Fragment, 这是在两个 Fragment 对象中的，最后 debug 跟踪到原来是在 Activity2 中数据库查出来的数据就是选中的，脑子里闪现出难道是 GreenDao 有缓存，于是搜索 “GreenDao 缓存”，果然是有，网上给出的清除缓存的方式就是调 daoSession.clear(), 这样的话不是把所有的表缓存都给清了吗，怎么让只是这个查询不缓存呢，看下 daoSession.clear() 里面做了什么</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">public void clear() &#123;</div><div class="line">    ***DaoConfig.getIdentityScope().clear();</div><div class="line">    ***DaoConfig.getIdentityScope().clear();</div><div class="line">    ***DaoConfig.getIdentityScope().clear();</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>可以看到清除的就是 DaoConfig 的 identityScope，下面看下这个做了什么<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line">public final class DaoConfig implements Cloneable &#123;</div><div class="line"></div><div class="line">    //...</div><div class="line">    private IdentityScope&lt;?, ?&gt; identityScope;</div><div class="line"></div><div class="line">    //...</div><div class="line"></div><div class="line">    // identityScope 在这里被赋值</div><div class="line">    @SuppressWarnings(&quot;rawtypes&quot;)</div><div class="line">    public void initIdentityScope(IdentityScopeType type) &#123;</div><div class="line">        if (type == IdentityScopeType.None) &#123;</div><div class="line">        	// 当 type 是 IdentityScopeType.None 时就没有缓存了</div><div class="line">            identityScope = null;</div><div class="line">        &#125; else if (type == IdentityScopeType.Session) &#123;</div><div class="line">            if (keyIsNumeric) &#123;</div><div class="line">                identityScope = new IdentityScopeLong();</div><div class="line">            &#125; else &#123;</div><div class="line">                identityScope = new IdentityScopeObject();</div><div class="line">            &#125;</div><div class="line">        &#125; else &#123;</div><div class="line">            throw new IllegalArgumentException(&quot;Unsupported type: &quot; + type);</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>设置 identityScope 是在 new Session 时传的，自动生成的 DaoMaster 类有两个 newSession 方法</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"> public class DaoMaster extends AbstractDaoMaster &#123;</div><div class="line">    //...</div><div class="line">    public DaoSession newSession() &#123;</div><div class="line">        return new DaoSession(db, IdentityScopeType.Session, daoConfigMap);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public DaoSession newSession(IdentityScopeType type) &#123;</div><div class="line">        return new DaoSession(db, type, daoConfigMap);</div><div class="line">    &#125;</div><div class="line">    //...</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>所以只要在 newSession 时传 IdentityScopeType.None 就可以不使用缓存了。</p>
+<p>当然，这次遇到的问题是查出来的状态需要是不选中的，也可以再查出来之后是选中状态的话进行修改，具体就要看具体问题适合哪种解决方式了。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
     
       
 
@@ -257,7 +386,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-07-26T14:46:35+08:00">
                 2018-07-26
@@ -421,7 +550,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-06-21T15:58:20+08:00">
                 2018-06-21
@@ -553,7 +682,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-06-07T10:14:00+08:00">
                 2018-06-07
@@ -706,7 +835,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-06-05T11:10:33+08:00">
                 2018-06-05
@@ -900,7 +1029,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-05-30T17:25:53+08:00">
                 2018-05-30
@@ -1041,7 +1170,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-05-28T17:37:05+08:00">
                 2018-05-28
@@ -1181,7 +1310,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-05-24T16:13:41+08:00">
                 2018-05-24
@@ -1313,7 +1442,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-30T09:17:37+08:00">
                 2018-01-30
@@ -1440,7 +1569,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-29T11:20:58+08:00">
                 2018-01-29
@@ -1536,144 +1665,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/01/24/java_collection/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Hexiaosa">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexiaosa">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/01/24/java_collection/" itemprop="url">Java 集合简括</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Veröffentlicht am</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-24T17:10:20+08:00">
-                2018-01-24
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>首先放一张全部总结的图<br><img src="/image/Java_collection_sumarize.png" alt="Java_collection_sumarize"></p>
-<h4 id="Map"><a href="#Map" class="headerlink" title="Map"></a>Map</h4><h6 id="HashMap"><a href="#HashMap" class="headerlink" title="HashMap"></a>HashMap</h6><p>HashMap 是一个重复 key 值覆盖，键值对形式的集合。<br>HashMap 是用数组加链表的数据结构，put 时要放到数组的某个位置，这个位置的计算是 key 的 hash &amp; (length-1), put 时如果 key 在集合中存在，则直接覆盖掉旧值并返回旧值。如果 key 在集合中不存在，首先会判断是否 size 是不是已经大于数组长度的3/4, 如果是的话就进行数组扩容。然后判断要插入的位置是否已经有元素存在，是的话则使用头插法将该元素插入到该位置的链表中。</p>
-<blockquote>
-<ol>
-<li>HashMap 的长度<br>hashMap 的初始默认长度是 16, 每次扩容的长度都是原长度的 2 倍。每次的 HashMap 数组的长度都是 2 的整数幂，其原因是取 index 时会跟 length-1 做与操作，length-1 的二进制数每位都是 1, 更能降低重复率。<br>如果能在最初预估长度，最好能指定固定长度，这样就避免了扩容，因为扩容的过程会再新建一个 2 倍长度的数组，再计算位置进行复制</li>
-<li>冲突解决<br>HashMap put 时的冲突解决方法是拉链法，也就是对于冲突使用链表的形式，这样的优点的是插入快，空间不需要连续，节省空间。</li>
-<li>加载因子对性能的影响<br>加载因子默认是 0.75, 其值越大，空间效率越低，冲突越小，查找时间效率越高；其值越小，空间效率越高，冲突越大，查找时间效率越低。</li>
-<li>HashMap 是线程不安全的，想要实现线程安全可以通过 Collections.synchronizedCollection 返回 SynchronizedCollection 对象来实现线程安全，或者使用 java.util.concurrent 包下的 ConcurrentHashMap 来实现。</li>
-</ol>
-</blockquote>
-<h6 id="HashTable"><a href="#HashTable" class="headerlink" title="HashTable"></a>HashTable</h6><p>与 HashMap 相比，支持线程同步，避免多线程同时写而造成的数据不一致，但实现线程同步需要很高的花费，因此不建议用。<br>与 HashMap 相比，其 key, value 不可为 null</p>
-<h6 id="TreeMap"><a href="#TreeMap" class="headerlink" title="TreeMap"></a>TreeMap</h6><p>TreeMap是按 key 值有序，相同 key 重复覆盖，非线程安全，内部使用二叉树结构。</p>
-<h6 id="ConcurrentHashMap"><a href="#ConcurrentHashMap" class="headerlink" title="ConcurrentHashMap"></a>ConcurrentHashMap</h6><p>ConcurrentHashMap 是线程安全的，并且相对于 HashTable 来说具有更高的性能。性能更高的原因是尽量减少了加锁的范围、使用 volitile 关键字、CAS，都增加了保证线程安全的性能。<br>从 JDK8 之后加锁开始使用 synchronized 而不是 ReentrantLock, 因为 synchronized 做了足够的优化了。</p>
-<h4 id="List"><a href="#List" class="headerlink" title="List"></a>List</h4><h6 id="ArrayList"><a href="#ArrayList" class="headerlink" title="ArrayList"></a>ArrayList</h6><p>以数组形式保存，初始化时可以指定数组长度，不指定的话有默认的长度，每次 add 时检测数组长度是否够用，不够用的话即扩容。如果现有长度是数组长度的 3/4 则开始扩容，扩容的长度是 现有长度 + （内部定义的最小长度或现有长度的 2 2倍）<br>查找效率高，插入，删除都需要移动该元素后面的所有元素。</p>
-<h6 id="Vector"><a href="#Vector" class="headerlink" title="Vector"></a>Vector</h6><p>与 ArrayList 相比，支持线程同步，避免多线程同时写而造成的数据不一致，但实现线程同步需要很高的花费，因此不建议用。<br>与 ArrayList 相比，Vector 每次扩容都是现有长度的 2 倍</p>
-<h6 id="LinkedList"><a href="#LinkedList" class="headerlink" title="LinkedList"></a>LinkedList</h6><p>以双链表形式保存，在头尾插入删除效率高；查找指定位置的会根据要查找的位置来判断从头还是尾开始查。</p>
-<h4 id="Set"><a href="#Set" class="headerlink" title="Set"></a>Set</h4><h6 id="HashSet"><a href="#HashSet" class="headerlink" title="HashSet"></a>HashSet</h6><p>无顺序，无重复元素。如果插入的元素已存在，会覆盖已存在的那个。使用的是 HashMap 的 key 来存放。</p>
-<h6 id="TreeSet"><a href="#TreeSet" class="headerlink" title="TreeSet"></a>TreeSet</h6><p>有顺序，无重复元素。如果 add 的元素已存在，会覆盖已存在的那个。实际存的就是 TreeMap 的 key.</p>
-<h4 id="Queue"><a href="#Queue" class="headerlink" title="Queue"></a>Queue</h4><h6 id="PriorityQue"><a href="#PriorityQue" class="headerlink" title="PriorityQue"></a>PriorityQue</h6><p>通过二叉小顶堆实现，保证每次取出的元素都是最小的。</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -1724,8 +1715,8 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">37</span>
-                  <span class="site-state-item-name">Artikel</span>
+                  <span class="site-state-item-count">38</span>
+                  <span class="site-state-item-name">posts</span>
                 </a>
               </div>
             
@@ -1775,7 +1766,7 @@
 </div>
 
 
-  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
 
 
 
