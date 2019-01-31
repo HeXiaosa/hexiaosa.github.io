@@ -181,7 +181,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
             
-            Home
+            Startseite
           </a>
         </li>
       
@@ -191,7 +191,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
             
-            Archives
+            Archiv
           </a>
         </li>
       
@@ -257,7 +257,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-01-29T15:53:43+08:00">
                 2019-01-29
@@ -299,12 +299,13 @@
       
         
           
-            <p>从源码分析事件分发, <a href="https://blog.csdn.net/lmj623565791/article/details/39102591" target="_blank" rel="external">https://blog.csdn.net/lmj623565791/article/details/39102591</a> 这篇博客和 《Android开发艺术探索》 已经讲的很清晰了，我按从正常事件分发流程（返回结果都是 super），从源码角度分析事件分发的流程为什么是这样的。</p>
+            <p>从源码分析事件分发, <a href="https://blog.csdn.net/lmj623565791/article/details/39102591" target="_blank" rel="external">https://blog.csdn.net/lmj623565791/article/details/39102591</a> 这篇博客和 《Android开发艺术探索》 已经讲的很清晰了，我按从正常事件分发流程（返回结果都是 super情况下），从源码角度分析事件分发的流程为什么是这样的（这里只分析一个DOWN事件），分析主要在代码里的注释，就着源码看更香。</p>
 <p>假设现在 DecoreView 里包含一个 ViewGourp(V1), ViewGroup 中包含一个 View(V2)</p>
 <p>我们应该知道流程是 DecoreView:dispatchTouchEvent -&gt; DecoreView:onInterceptTouchEvent -&gt; V1:dispatchTouchEvent<br>                 -&gt; VI:onInterceptTouchEvent V2:dispatchTouchEvent -&gt; V2:onTouchEvent -&gt; V1:onTouchEvent -&gt; DecoreView:onTouchEvent</p>
-<p>从 ACTION_DOWN 事件分析，先看源码 Activity.dispatchTouchEvent<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">public boolean dispatchTouchEvent(MotionEvent ev) &#123;</div><div class="line">    if (ev.getAction() == MotionEvent.ACTION_DOWN) &#123;</div><div class="line">        onUserInteraction();</div><div class="line">    &#125;</div><div class="line">    // 这里执行了 PhoneWindow superDispatchTouchEvent</div><div class="line">    if (getWindow().superDispatchTouchEvent(ev)) &#123;</div><div class="line">        return true;</div><div class="line">    &#125;</div><div class="line">    // 执行 Activity 的 onTouchEvent</div><div class="line">    return onTouchEvent(ev);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>看图<br><img src="/image/default_dispatch.jpg" alt="default_dispatch"></p>
+<p>先从 Activity.dispatchTouchEvent 看<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">public boolean dispatchTouchEvent(MotionEvent ev) &#123;</div><div class="line">    if (ev.getAction() == MotionEvent.ACTION_DOWN) &#123;</div><div class="line">        onUserInteraction();</div><div class="line">    &#125;</div><div class="line">    // 这里执行了 PhoneWindow superDispatchTouchEvent</div><div class="line">    if (getWindow().superDispatchTouchEvent(ev)) &#123;</div><div class="line">        return true;</div><div class="line">    &#125;</div><div class="line">    // 执行 Activity 的 onTouchEvent</div><div class="line">    return onTouchEvent(ev);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
 <p>上面看到执行的是 PhoneWindow.superDispatchTouchvent, 这个方法是 return mDecore.superDispatchTouchEvent, mDecore 是 DecoreView, DecoreView 的 superDispatchTouchEvent 方法执行的是 super.dispatchTouchEvent, DecoreView 的父类是 FrameLayout, 所以执行的就是 ViewGroup 的 dispatchTouchEvent, 下面就来看 ViewGourp 的 dispatchTouchEvent 方法。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div></pre></td><td class="code"><pre><div class="line">@Override</div><div class="line">public boolean dispatchTouchEvent(MotionEvent ev) &#123;</div><div class="line">    // ...</div><div class="line">    boolean handled = false;</div><div class="line">    if (onFilterTouchEventForSecurity(ev)) &#123;</div><div class="line">        final int action = ev.getAction();</div><div class="line">        final int actionMasked = action &amp; MotionEvent.ACTION_MASK;</div><div class="line"></div><div class="line">        if (actionMasked == MotionEvent.ACTION_DOWN) &#123;</div><div class="line">            // ACTION_DOWN 时清除 target, mGroupFlags(requestDisallowInterceptTouchEvent设置的)</div><div class="line">            cancelAndClearTouchTargets(ev);</div><div class="line">            resetTouchState();</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        // 看是否被拦截</div><div class="line">        final boolean intercepted;</div><div class="line">        if (actionMasked == MotionEvent.ACTION_DOWN || mFirstTouchTarget != null) &#123;</div><div class="line"></div><div class="line">            // DOWN 事件会走到这里（actionMasked == MotionEvent.ACTION_DOWN 且 mFirstTouchTarget == null）</div><div class="line">            // 上面会清除 mGroupFlags, 所以这里不管有没有 requestDisallow, disallowIntercept 都是 false</div><div class="line"></div><div class="line">            final boolean disallowIntercept = (mGroupFlags &amp; FLAG_DISALLOW_INTERCEPT) != 0;</div><div class="line">            if (!disallowIntercept) &#123;</div><div class="line">            	// 执行这里的 onInterceptTouchEvent, 默认返回 false, 所以 intercept 为 false</div><div class="line">                intercepted = onInterceptTouchEvent(ev);</div><div class="line">                ev.setAction(action); // restore action in case it was changed</div><div class="line">            &#125; else &#123;</div><div class="line">                intercepted = false;</div><div class="line">            &#125;</div><div class="line">        &#125; // ...</div><div class="line"></div><div class="line">        // 是否手势取消</div><div class="line">        final boolean canceled = resetCancelNextUpFlag(this) || actionMasked == MotionEvent.ACTION_CANCEL;</div><div class="line"></div><div class="line">        // ...</div><div class="line">        if (!canceled &amp;&amp; !intercepted) &#123; // 现在这种情况下，两个都是 false</div><div class="line">            if (actionMasked == MotionEvent.ACTION_DOWN  // true || ...) &#123;</div><div class="line">                // ...</div><div class="line">                final int childrenCount = mChildrenCount;</div><div class="line">                if (newTouchTarget == null &amp;&amp; childrenCount != 0) &#123;</div><div class="line">                	// ...</div><div class="line">                    // 获取触摸到的子 View 列表，根据 getZ 和绘制顺序得到，本次分析的情况就是 0位置是V1</div><div class="line">                    final ArrayList&lt;View&gt; preorderedList = buildOrderedChildList();</div><div class="line">                    //...</div><div class="line">                    final View[] children = mChildren;</div><div class="line">                    for (int i = childrenCount - 1; i &gt;= 0; i--) &#123;</div><div class="line">                        // child 就是 V1</div><div class="line">                        newTouchTarget = getTouchTarget(child); // return null</div><div class="line"></div><div class="line">                        // 下面 dispatchTransformedTouchEvent 中, child 就是 V1, 该方法内部调用了 child.dispatchTouchEvent,</div><div class="line">                        // 方法的返回值也就是 child.dispatchTouchEvent 的返回值</div><div class="line"></div><div class="line">                        // 也就是会执行 V1.dispatchTouchEvent, 也就是说到这里，流程已经到了，DecoreView.dispatchTouchEvent -&gt; </div><div class="line">                        // DecoreView.onInterceptTouchEvent -&gt; V1.dispatchTouchEvent -&gt; V1.onInterceptTouchEvent</div><div class="line"></div><div class="line">                        // 然后 V1 执行到这里的时候 child 是 V2, 在 dispatchTransformedTouchEvent 方法中执行了 </div><div class="line">                        // V2.dispatchTouchEvent, 也就是执行了 View 的 dispatchTouchEvent, View 的 dispatchTouchEvent </div><div class="line">                        // 方法后面再分析其它的，现在我们就知道会调用 View.onTouchEvent 就可以了。 onTouchEvent 默认返回 false</div><div class="line"></div><div class="line">                        // 可以看出这里是类似在递归执行</div><div class="line"></div><div class="line">                        // 也就是 dispatchTransformedTouchEvent 在 child 是 V2 时返回了 false, 那么下面的赋值 newTouchTarget 和 </div><div class="line">                        // mFristTouchTarget 就不会执行, 所以这两个值都是 null</div><div class="line"></div><div class="line">                        if (dispatchTransformedTouchEvent(ev, false, child, idBitsToAssign)) &#123;</div><div class="line">                            &lt;!-- ... 本次分析这里执行不到， --&gt;</div><div class="line">                        &#125;</div><div class="line">                    &#125;</div><div class="line">                    if (preorderedList != null) preorderedList.clear();</div><div class="line">                &#125;</div><div class="line">                // ...</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        // Dispatch to touch targets.</div><div class="line">        if (mFirstTouchTarget == null) &#123;</div><div class="line">            // DecoreView/V1 执行到这里，传递的 child 是 null, 方法里面执行 super.dispatchTouchEvent, ViewGourp 父类是 View, </div><div class="line">            // 也就是执行 View.dispatchTouchEvent 方法，默认还是返回 false</div><div class="line"></div><div class="line">            handled = dispatchTransformedTouchEvent(ev, canceled, null,</div><div class="line">                    TouchTarget.ALL_POINTER_IDS);</div><div class="line">        &#125; else &#123;</div><div class="line">            &lt;!-- ... --&gt;</div><div class="line">        &#125;</div><div class="line">        // ...</div><div class="line">    &#125;</div><div class="line">    // ...</div><div class="line">    return handled;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>跟着上面源码的执行流程，就可以得到上述 View 事件分发的执行流程，下面清晰的描述了执行流程<br><img src="/image/default_dispatch.jpg" alt="default_dispatch"></p>
+<p>跟着上面源码的执行流程，就可以得到上述 View 事件分发的执行流程</p>
 
           
         
@@ -382,7 +383,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-01-07T17:37:33+08:00">
                 2019-01-07
@@ -528,7 +529,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-11-29T10:47:28+08:00">
                 2018-11-29
@@ -657,7 +658,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-10-24T16:37:22+08:00">
                 2018-10-24
@@ -786,7 +787,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-10-24T15:03:59+08:00">
                 2018-10-24
@@ -917,7 +918,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-10-23T15:11:44+08:00">
                 2018-10-23
@@ -1049,7 +1050,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-09-11T12:10:38+08:00">
                 2018-09-11
@@ -1173,7 +1174,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-09-01T23:06:37+08:00">
                 2018-09-01
@@ -1298,7 +1299,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-08-29T23:50:29+08:00">
                 2018-08-29
@@ -1421,7 +1422,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-08-22T18:24:03+08:00">
                 2018-08-22
@@ -1564,7 +1565,7 @@
                 <a href="/archives/">
               
                   <span class="site-state-item-count">38</span>
-                  <span class="site-state-item-name">posts</span>
+                  <span class="site-state-item-name">Artikel</span>
                 </a>
               </div>
             
@@ -1614,7 +1615,7 @@
 </div>
 
 
-  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
 
 
 
