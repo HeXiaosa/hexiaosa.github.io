@@ -79,16 +79,18 @@
 
 
 
-<meta name="description" content="RecyclerView 的使用：123RecyclerView lv = (RecyclerView) findViewById(R.id.lv);lv.setLayoutManager(new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.VERTICAL, false));lv.setAdapter(new">
+<meta name="description" content="HTTPS 相对于 HTTP 是安全的，它是加密传输的，那么它是怎么加密传输呢，数字证书又是什么，有数字证书就一定是可信任的吗，下面来一一解答 什么是数字证书数字证书可以是组织颁发，也可以是自己颁发的，组织颁发的证书，客户端会信任该服务，直接访问，自己颁发的证书，会弹框，用户确认后才可以访问。 HTTPS 加密中使用了非对称加密，数字证书中就包含了非对称加密所需的公钥和私钥。 tip :CA :">
 <meta property="og:type" content="article">
-<meta property="og:title" content="RecycleView 缓存机制">
-<meta property="og:url" content="http://hexiaosa.com/2018/09/01/RecyclerView/index.html">
+<meta property="og:title" content="HTTPS 加密传输">
+<meta property="og:url" content="http://hexiaosa.com/2019/04/09/about-https/index.html">
 <meta property="og:site_name" content="Hexiaosa">
-<meta property="og:description" content="RecyclerView 的使用：123RecyclerView lv = (RecyclerView) findViewById(R.id.lv);lv.setLayoutManager(new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.VERTICAL, false));lv.setAdapter(new">
-<meta property="og:updated_time" content="2018-09-01T15:11:05.430Z">
+<meta property="og:description" content="HTTPS 相对于 HTTP 是安全的，它是加密传输的，那么它是怎么加密传输呢，数字证书又是什么，有数字证书就一定是可信任的吗，下面来一一解答 什么是数字证书数字证书可以是组织颁发，也可以是自己颁发的，组织颁发的证书，客户端会信任该服务，直接访问，自己颁发的证书，会弹框，用户确认后才可以访问。 HTTPS 加密中使用了非对称加密，数字证书中就包含了非对称加密所需的公钥和私钥。 tip :CA :">
+<meta property="og:image" content="http://hexiaosa.com/image/https.png">
+<meta property="og:updated_time" content="2019-04-09T04:10:56.211Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="RecycleView 缓存机制">
-<meta name="twitter:description" content="RecyclerView 的使用：123RecyclerView lv = (RecyclerView) findViewById(R.id.lv);lv.setLayoutManager(new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.VERTICAL, false));lv.setAdapter(new">
+<meta name="twitter:title" content="HTTPS 加密传输">
+<meta name="twitter:description" content="HTTPS 相对于 HTTP 是安全的，它是加密传输的，那么它是怎么加密传输呢，数字证书又是什么，有数字证书就一定是可信任的吗，下面来一一解答 什么是数字证书数字证书可以是组织颁发，也可以是自己颁发的，组织颁发的证书，客户端会信任该服务，直接访问，自己颁发的证书，会弹框，用户确认后才可以访问。 HTTPS 加密中使用了非对称加密，数字证书中就包含了非对称加密所需的公钥和私钥。 tip :CA :">
+<meta name="twitter:image" content="http://hexiaosa.com/image/https.png">
 
 
 
@@ -118,13 +120,13 @@
 
 
 
-  <link rel="canonical" href="http://hexiaosa.com/2018/09/01/RecyclerView/"/>
+  <link rel="canonical" href="http://hexiaosa.com/2019/04/09/about-https/"/>
 
 
 
 
 
-  <title>RecycleView 缓存机制 | Hexiaosa</title>
+  <title>HTTPS 加密传输 | Hexiaosa</title>
   
 
 
@@ -231,7 +233,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/09/01/RecyclerView/">
+    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2019/04/09/about-https/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="Hexiaosa">
@@ -248,7 +250,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">RecycleView 缓存机制</h1>
+          <h1 class="post-title" itemprop="name headline">HTTPS 加密传输</h1>
         
 
         <div class="post-meta">
@@ -260,8 +262,8 @@
               
                 <span class="post-meta-item-text">Posted on</span>
               
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-09-01T23:06:37+08:00">
-                2018-09-01
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-04-09T11:15:38+08:00">
+                2019-04-09
               </time>
             
 
@@ -298,12 +300,18 @@
       
 
       
-        <p>RecyclerView 的使用：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">RecyclerView lv = (RecyclerView) findViewById(R.id.lv);</div><div class="line">lv.setLayoutManager(new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.VERTICAL, false));</div><div class="line">lv.setAdapter(new MyListAdapter(getApplicationContext()));</div></pre></td></tr></table></figure></p>
-<p>setLayoutManager 给 RecyclerView 设置了 mLayout, setAdapter 设置 mAdapter, 清除缓存的一些信息，并 requestLayout. RecyclerView 执行 onLayout 过程中，会调用 mLayout.layoutChildren 方法，然后到 LinearLayoutManager 的 layoutChildren 方法，fill(recycler, mLayoutState, state, false) 再到 layoutChunk 方法中看，第一行代码就是 layoutState.next(recycler), 进去看这个方法，这个方法获取了下一个需要 layout 的 view, 看下源码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">if (mScrapList != null) &#123;</div><div class="line">	// mScrapList 不为 null, 则取 mScrapList 中的 View</div><div class="line">    return nextViewFromScrapList();</div><div class="line">&#125;</div><div class="line">// mScrapList 为 null, 则继续查找 view, 从 getViewForPosition, tryGetViewHolderForPositionByDeadline 方法看</div><div class="line">final View view = recycler.getViewForPosition(mCurrentPosition);</div><div class="line">mCurrentPosition += mItemDirection;</div><div class="line">return view;</div></pre></td></tr></table></figure></p>
-<p>tryGetViewHolderForPositionByDeadline 方法，主要查缓存 View 的地方<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div></pre></td><td class="code"><pre><div class="line">ViewHolder tryGetViewHolderForPositionByDeadline(int position,</div><div class="line">        boolean dryRun, long deadlineNs) &#123;</div><div class="line">    boolean fromScrapOrHiddenOrCache = false;</div><div class="line">    ViewHolder holder = null;</div><div class="line">    // 0) 首先从 mChangeScrap 中查</div><div class="line">    if (mState.isPreLayout()) &#123;</div><div class="line">        holder = getChangedScrapViewForPosition(position);</div><div class="line">        fromScrapOrHiddenOrCache = holder != null;</div><div class="line">    &#125;</div><div class="line">    // 1) 没有找到就从 mAttachView 或 mCacheView 中查</div><div class="line">    if (holder == null) &#123;</div><div class="line">        holder = getScrapOrHiddenOrCachedHolderForPosition(position, dryRun);</div><div class="line">        if (holder != null) &#123;</div><div class="line">            // ...</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    if (holder == null) &#123;</div><div class="line">        final int type = mAdapter.getItemViewType(offsetPosition);</div><div class="line">        // 2) 通过 stableIs 在 mAttachView 和 mCacheView 中查</div><div class="line">        if (mAdapter.hasStableIds()) &#123;</div><div class="line">            holder = getScrapOrCachedViewForId(mAdapter.getItemId(offsetPosition),</div><div class="line">                    type, dryRun);</div><div class="line">            if (holder != null) &#123;</div><div class="line">                // ...</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        if (holder == null &amp;&amp; mViewCacheExtension != null) &#123;</div><div class="line">            // 通过 mViewCacheExtension 查</div><div class="line">        &#125;</div><div class="line">        if (holder == null) &#123; // 从 mRecyclerPool 中查</div><div class="line">            holder = getRecycledViewPool().getRecycledView(type);</div><div class="line">            if (holder != null) &#123;</div><div class="line">                // ...</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        if (holder == null) &#123;</div><div class="line">        	// 自己创建 View, 也就是我们自己实现的 onCreateViewHolder 方法</div><div class="line">            holder = mAdapter.createViewHolder(RecyclerView.this, type);</div><div class="line">            // ...</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    // ...</div><div class="line"></div><div class="line">    // 设置 layoutParams</div><div class="line">    return holder;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>layout 过程中就是以上面的方式获取缓存的 View, 然后加到 RecyclerView 中。</p>
-<p>下面再看滑动过程中 item 是怎么复用的，RecyclerView 的 onTouchEvent 方法 ACTION_MOVE 事件中调用了 mGapWorker.postFromTraversal(this, dx, dy), 接着到 GapWorker 中看，它的 postFromTraversal 方法主要执行了 recycleview.post(this), GapWorker 是一个 Runnable, 那么执行的就是 GapWorker 的 run() 方法，在这里面一直跟进去 prefetch, flushTasksWithDeadline, prefetchPositionWithDeadline, 我们能看到在 prefetchPositionWithDeadline 方法中同样调了 recycler.tryGetViewHolderForPositionByDeadline 来获取缓存中的 ViewHolder, 所以滑动过程中 item 的复用就是这样实现的。</p>
-<p>好吧，分析的不是很清晰，先到这里吧，继续看源码(<em>^▽^</em>)</p>
+        <p>HTTPS 相对于 HTTP 是安全的，它是加密传输的，那么它是怎么加密传输呢，数字证书又是什么，有数字证书就一定是可信任的吗，下面来一一解答</p>
+<h4 id="什么是数字证书"><a href="#什么是数字证书" class="headerlink" title="什么是数字证书"></a>什么是数字证书</h4><p>数字证书可以是组织颁发，也可以是自己颁发的，组织颁发的证书，客户端会信任该服务，直接访问，自己颁发的证书，会弹框，用户确认后才可以访问。</p>
+<p>HTTPS 加密中使用了非对称加密，数字证书中就包含了非对称加密所需的公钥和私钥。</p>
+<p>tip :<br>CA : 颁发证书的机构<br>CA 证书：CA 颁发的证书，就是我们说的数字证书，包括持有者身份，CA机构的签名，公钥和私钥。CA机构的签名用于验证证书的有效性。</p>
+<h4 id="HTTPS-是怎么加密的"><a href="#HTTPS-是怎么加密的" class="headerlink" title="HTTPS 是怎么加密的"></a>HTTPS 是怎么加密的</h4><p>对称加密是通过一个秘钥来加密和解密的，秘钥在客户端和服务端之间传输，如果被劫持，还是会被破解；<br>非对称加密是通过公钥加密，私钥解密的，服务端把公钥传给客户端，然后客户端用公钥加密传输的内容，传给服务端，服务端用私钥解密内容，这样就算被劫持，因为没有私钥，也无法解密。</p>
+<p>所以使用对称加密是不安全的，非对称加密是安全的，但是非对称加密效率比较低，HTTPS 就采用了对称加密和非对称加密结合的方式。</p>
+<p>具体过程用这篇文章里找到的这张图描述更清晰 （<a href="https://juejin.im/post/5a4f4884518825732b19a3ce）" target="_blank" rel="external">https://juejin.im/post/5a4f4884518825732b19a3ce）</a><br><img src="/image/https.png" alt="https"></p>
+<p>这个过程用文字描述：<br>服务端把公钥给客户端，客户端在验证有效后，生成一个随机值，这个随机值就是对称加密的秘钥，公钥加密这个秘钥传给服务端，服务端用私钥解密，得到对称加密的秘钥，然后用这个秘钥加密要传输的内容。</p>
+<h4 id="HTTPS-证书相关"><a href="#HTTPS-证书相关" class="headerlink" title="HTTPS 证书相关"></a>HTTPS 证书相关</h4><p>上面基本搞清楚加密传输的流程，但是加密过程中使用的数字证书，客户端是怎么验证这个证书是可信任的呢。<br>客户端通过 TSL 协议（SSL发展过来的，3.0改为TSL）来验证，TSL 的作用包含：</p>
+<p>加密<br>证书验证<br>验证消息完整性</p>
+<p>加密过程在上面已经介绍过了，这里只说下证书验证，证书验证就是从数字证书中取出颁发者，源头的颁发者非常少，于是就是看颁发者是否可信，颁发者可信，这个证书也就是可信的。</p>
+<p>参考文章：<br>HTTPS加密过程： <a href="https://juejin.im/post/5a4f4884518825732b19a3ce" target="_blank" rel="external">https://juejin.im/post/5a4f4884518825732b19a3ce</a><br>TSL相关： <a href="https://www.jianshu.com/p/24af67c40e8d" target="_blank" rel="external">https://www.jianshu.com/p/24af67c40e8d</a></p>
 
       
     </div>
@@ -328,8 +336,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2018/08/29/ListView/" rel="next" title="从 ListView 源码讲解缓存复用流程">
-                <i class="fa fa-chevron-left"></i> 从 ListView 源码讲解缓存复用流程
+              <a href="/2019/01/29/dispatch-event-2/" rel="next" title="事件分发 ———— 从源码详细分析事件分发流程">
+                <i class="fa fa-chevron-left"></i> 事件分发 ———— 从源码详细分析事件分发流程
               </a>
             
           </div>
@@ -337,10 +345,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2018/09/11/android-bitmap/" rel="prev" title="Android 图片处理">
-                Android 图片处理 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -392,8 +396,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -435,6 +448,22 @@
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#什么是数字证书"><span class="nav-number">1.</span> <span class="nav-text">什么是数字证书</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#HTTPS-是怎么加密的"><span class="nav-number">2.</span> <span class="nav-text">HTTPS 是怎么加密的</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#HTTPS-证书相关"><span class="nav-number">3.</span> <span class="nav-text">HTTPS 证书相关</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       

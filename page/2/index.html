@@ -181,7 +181,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
             
-            Startseite
+            Home
           </a>
         </li>
       
@@ -191,7 +191,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
             
-            Archiv
+            Archives
           </a>
         </li>
       
@@ -214,6 +214,140 @@
           <div id="content" class="content">
             
   <section id="posts" class="posts-expand">
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/08/22/asynctask-theory/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Hexiaosa">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexiaosa">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/08/22/asynctask-theory/" itemprop="url">AsyncTask 详解与思考</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-08-22T18:24:03+08:00">
+                2018-08-22
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h3 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h3><p>先上一段熟悉的代码，AsyncTask 的使用<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div></pre></td><td class="code"><pre><div class="line">MyAsyncTask task = new MyAsyncTask();</div><div class="line">task.execute(&quot;1&quot;);</div><div class="line"></div><div class="line">private class MyAsyncTask extends AsyncTask&lt;String, Void, String&gt; &#123;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    protected void onPreExecute() &#123;</div><div class="line">        Log.e(&quot;TAG&quot;, &quot;onPreExecute THREAD:&quot; + Thread.currentThread());</div><div class="line">        super.onPreExecute();</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    protected String doInBackground(String... params) &#123;</div><div class="line">        Log.e(&quot;TAG&quot;, &quot;doInBackground start &quot; + params[0] + &quot; THREAD:&quot; + Thread.currentThread());</div><div class="line">        try &#123;</div><div class="line">            Thread.sleep(2000);</div><div class="line">        &#125; catch (InterruptedException e) &#123;</div><div class="line">            e.printStackTrace();</div><div class="line">        &#125;</div><div class="line">        Log.e(&quot;TAG&quot;, &quot;doInBackground end&quot;);</div><div class="line">        return &quot;1&quot;;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    protected void onPostExecute(String s) &#123;</div><div class="line">        Log.e(&quot;TAG&quot;, &quot;onPostExecute:&quot; + s + &quot; THREAD:&quot; + Thread.currentThread());</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>以上代码的输出：<br>onPreExecute THREAD:Thread[main,5,main]<br>doInBackground start 1 THREAD:Thread[AsyncTask #3,5,main]<br>doInBackground end<br>onPostExecute:1 THREAD:Thread[main,5,main]</p>
+<p>可以看到 doInBackground 在子线程中执行，onPostExecute 在主线程执行。</p>
+<h3 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h3><p>先从源码分析一下整个执行的流程(以下源码来自 api-25)</p>
+<p>AsyncTask 中重要的列举几个成员变量：<br>THREAD_POOL_EXECUTOR : 内部线程池<br>sDefaultExecutor :  负责排队取方法执行的<br>sHandler : 内部 Handler, 用于切换主线程的<br>mWorker : 封装了 doInBackground 方法，mWorker 的 call 方法中调用 doInBackground, 执行完后调用 postResult<br>mFuture : 封装了 mWorker, 在 mFuture 的 run 方法中调用 mWorker.call, 执行完后再处理一些</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div><div class="line">113</div><div class="line">114</div><div class="line">115</div><div class="line">116</div><div class="line">117</div></pre></td><td class="code"><pre><div class="line">AsyncTask 的构造函数</div><div class="line">public AsyncTask() &#123;</div><div class="line">	// 初始化 mWorker, 后面执行时候会用到</div><div class="line">    mWorker = new WorkerRunnable&lt;Params, Result&gt;() &#123;</div><div class="line">        public Result call() throws Exception &#123;</div><div class="line">            mTaskInvoked.set(true);</div><div class="line">            Result result = null;</div><div class="line">            try &#123;</div><div class="line">                Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);</div><div class="line">                // 实际执行 doInBackground</div><div class="line">                result = doInBackground(mParams);</div><div class="line">                Binder.flushPendingCommands();</div><div class="line">            &#125; catch (Throwable tr) &#123;</div><div class="line">                mCancelled.set(true);</div><div class="line">                throw tr;</div><div class="line">            &#125; finally &#123;</div><div class="line">            	// 处理返回结果，切换主线程到 onPostResult</div><div class="line">                postResult(result);</div><div class="line">            &#125;</div><div class="line">            return result;</div><div class="line">        &#125;</div><div class="line">    &#125;;</div><div class="line"></div><div class="line">    mFuture = new FutureTask&lt;Result&gt;(mWorker) &#123;</div><div class="line">        @Override</div><div class="line">        protected void done() &#123;</div><div class="line">            // ... 意外处理</div><div class="line">        &#125;</div><div class="line">    &#125;;</div><div class="line">&#125;</div><div class="line"></div><div class="line">// execute 方法，注解声明了必须在主线程调用此方法</div><div class="line">@MainThread</div><div class="line">public final AsyncTask&lt;Params, Progress, Result&gt; execute(Params... params) &#123;</div><div class="line">    return executeOnExecutor(sDefaultExecutor, params);</div><div class="line">&#125;</div><div class="line">@MainThread</div><div class="line">public final AsyncTask&lt;Params, Progress, Result&gt; executeOnExecutor(Executor exec,</div><div class="line">        Params... params) &#123;</div><div class="line">    if (mStatus != Status.PENDING) &#123;</div><div class="line">        // ...</div><div class="line">    &#125;</div><div class="line">    mStatus = Status.RUNNING;</div><div class="line">    // 我们可以实现的 onPreExecute 方法，这时还没有切换线程，所以该方法是在主线程执行</div><div class="line">    onPreExecute();</div><div class="line">    // 开始执行 doInBackground 方法</div><div class="line">    mWorker.mParams = params;</div><div class="line">    exec.execute(mFuture);</div><div class="line"></div><div class="line">    return this;</div><div class="line">&#125;</div><div class="line"></div><div class="line">// 上面的 sDefaultExecutor 是下面这个类：</div><div class="line">private static class SerialExecutor implements Executor &#123;</div><div class="line">    final ArrayDeque&lt;Runnable&gt; mTasks = new ArrayDeque&lt;Runnable&gt;();</div><div class="line">    Runnable mActive;</div><div class="line">    // 这里的参数 r 就是 mFuture</div><div class="line">    public synchronized void execute(final Runnable r) &#123;</div><div class="line">    	// 挨个从队列中取出，一个执行完再取下一个</div><div class="line">        mTasks.offer(new Runnable() &#123;</div><div class="line">            public void run() &#123;</div><div class="line">                try &#123;</div><div class="line">                	// 执行 mFuture.run()，方法实现看下一段代码</div><div class="line">                    r.run();</div><div class="line">                &#125; finally &#123;</div><div class="line">                    scheduleNext();</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">        &#125;);</div><div class="line">        if (mActive == null) &#123;</div><div class="line">            scheduleNext();</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    protected synchronized void scheduleNext() &#123;</div><div class="line">        if ((mActive = mTasks.poll()) != null) &#123;</div><div class="line">        	// 子线程实际开始执行，THREAD_POOL_EXECUTOR 是线程池</div><div class="line">            THREAD_POOL_EXECUTOR.execute(mActive);</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line">// FutureTask 的 run 方法</div><div class="line">public void run() &#123;</div><div class="line">    // ...</div><div class="line">    try &#123;</div><div class="line">    	// callable 是 AsyncTask 的 mWorker</div><div class="line">        Callable&lt;V&gt; c = callable;</div><div class="line">        if (c != null &amp;&amp; state == NEW) &#123;</div><div class="line">            V result;</div><div class="line">            boolean ran;</div><div class="line">            try &#123;</div><div class="line">            	// 执行 mWorker.call(), mWorker 在 AsyncTask 的构造函数中重写了 call 方法，</div><div class="line">            	// 里面执行了 result = doInBackground(mParams); 这个就是我们必须实现的方法</div><div class="line">            	// 接下来看 postResult(result);</div><div class="line">                result = c.call();</div><div class="line">                ran = true;</div><div class="line">            &#125; catch (Throwable ex) &#123;</div><div class="line">                // ...</div><div class="line">            &#125;</div><div class="line">            if (ran)</div><div class="line">                set(result);</div><div class="line">        &#125;</div><div class="line">    &#125; finally &#123;</div><div class="line">        // ...</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line">// mWorker 执行完 doInBackground 后</div><div class="line">private Result postResult(Result result) &#123;</div><div class="line">    // getHandler() 返回的是内部 Handler 类 InternalHandler, </div><div class="line">    // 这里处理了 MESSAGE_POST_RESULT : result.mTask.finish(result.mData[0]); </div><div class="line">    // finish 就是调用 onPostResult, 所以切主线程就是在这里</div><div class="line">    Message message = getHandler().obtainMessage(MESSAGE_POST_RESULT,</div><div class="line">            new AsyncTaskResult&lt;Result&gt;(this, result));</div><div class="line">    message.sendToTarget();</div><div class="line">    return result;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<hr>
+<h3 id="思考"><a href="#思考" class="headerlink" title="思考"></a>思考</h3><p>到这里源码部分已分析完成，有几个值得思考的问题</p>
+<h5 id="1-AsyncTask-不同版本的区分"><a href="#1-AsyncTask-不同版本的区分" class="headerlink" title="1. AsyncTask 不同版本的区分"></a>1. AsyncTask 不同版本的区分</h5><p>AsyncTask 版本变动较大是从 api-11(3.0) 之后，上面源码分析的是来自 api-25, 是更新后的版本，多次调用 execute 对于同一个 AsyncTask 会执行完一个再执行下一个，但是 api-10(包括) 之前的版本是并行执行的，调用 exceute 内部的线程池就去执行（除非线程池满需排队等待）。下面来看一下 api-10 的源码处理<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">public final AsyncTask&lt;Params, Progress, Result&gt; execute(Params... params) &#123;</div><div class="line">    //...</div><div class="line">    onPreExecute();</div><div class="line">    // sExecutor 执行，sExecutor 是线程池，直接执行了 call 方法，没有去排队</div><div class="line">    mWorker.mParams = params;</div><div class="line">    sExecutor.execute(mFuture);</div><div class="line">    return this;</div><div class="line">&#125;</div><div class="line">// sExecutor, 核心线程数量是 5, 最大线程数是 128. </div><div class="line">// 而新版本的 AsyncTask 核心线程数是 Math.max(2, Math.min(CPU_COUNT - 1, 4)), 最大线程数是 CPU_COUNT * 2 + 1</div><div class="line">private static final ThreadPoolExecutor sExecutor = new ThreadPoolExecutor(CORE_POOL_SIZE,</div><div class="line">        MAXIMUM_POOL_SIZE, KEEP_ALIVE, TimeUnit.SECONDS, sWorkQueue, sThreadFactory);</div></pre></td></tr></table></figure></p>
+<h5 id="2-AsyncTask-是否可以取消"><a href="#2-AsyncTask-是否可以取消" class="headerlink" title="2. AsyncTask 是否可以取消"></a>2. AsyncTask 是否可以取消</h5><p>AsyncTask 提供了 cancel 方法来取消，需传一个 boolean 类型的参数，true 表示会 intercept 中断 doInBackground, false 不会中断 doInBackground, 它会完整地执行完。true/false 都不会再执行 onPostResult 方法。</p>
+<h5 id="3-AsyncTask-的缺点"><a href="#3-AsyncTask-的缺点" class="headerlink" title="3. AsyncTask 的缺点"></a>3. AsyncTask 的缺点</h5><ol>
+<li>内部类形式时可能持有外部类引用，或者 。导致内存泄漏或异常<br>–&gt; 解决方法：改为静态内部类</li>
+<li>Activity 已被销毁，doInBackground 还没有执行完，执行完后再执行 onPostResult, 导致产生异常<br>–&gt; 解决方法：Activity 的 onDestroy 方法中调 cancel 方法取消 AsyncTask</li>
+<li>AsyncTask 内部封装了线程池，比较适合多次执行的时候使用，当仅需要在子线程执行一些简单操作时使用 AsyncTask 会浪费消耗。<br>–&gt; 解决方法：根据场景决定是否使用 AsyncTask</li>
+</ol>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
     
       
 
@@ -257,7 +391,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-08-21T19:06:32+08:00">
                 2018-08-21
@@ -381,7 +515,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-08-21T18:29:48+08:00">
                 2018-08-21
@@ -508,7 +642,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-08-15T20:55:08+08:00">
                 2018-08-15
@@ -631,7 +765,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-08-15T20:47:33+08:00">
                 2018-08-15
@@ -755,7 +889,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-08-14T21:16:41+08:00">
                 2018-08-14
@@ -884,7 +1018,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-08-14T21:15:28+08:00">
                 2018-08-14
@@ -1023,7 +1157,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-08-12T14:39:43+08:00">
                 2018-08-12
@@ -1194,7 +1328,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-08-11T23:44:51+08:00">
                 2018-08-11
@@ -1319,7 +1453,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Veröffentlicht am</span>
+                <span class="post-meta-item-text">Posted on</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-08-09T11:04:00+08:00">
                 2018-08-09
@@ -1368,130 +1502,6 @@
 <p>那么最近最少使用原理是怎么实现的呢？就是靠 LinkedHashMap, 在 new LruCache 时创建 map,<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">this.map = new LinkedHashMap&lt;K, V&gt;(0, 0.75f, true);</div></pre></td></tr></table></figure></p>
 <p>这里把 accesssOrder 参数的值赋为 true, accesssOrder 在官方文档的解释是：the ordering mode - true for access-order, false for insertion-order, 也是是设为 true 则表示以访问排序。</p>
 
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/08/07/custom-view-event1/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Hexiaosa">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexiaosa">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/08/07/custom-view-event1/" itemprop="url">自定义 View —— 事件体系例子 StickyLayout</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Veröffentlicht am</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-08-07T18:58:51+08:00">
-                2018-08-07
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>本文例子是《Android 开发艺术探索》作者的 github, <a href="https://github.com/singwhatiwanna/PinnedHeaderExpandableListView。结合该例子学习自定义" target="_blank" rel="external">https://github.com/singwhatiwanna/PinnedHeaderExpandableListView。结合该例子学习自定义</a> View 的事件体系和弹性滑动。<br>效果图也看 github 上的吧，都一样的。</p>
-<blockquote>
-<p>思路：<br>先是随着滑动更改头部的高度，这一部分是由 StickyLayout 处理 onTouchEvent 事件；<br>头部高度为 0 时，StickyLayout 不再处理，分发给子 View 处理；<br>滑动过程中松手后，根据滑动的位置决定是否实现惯性滑动，以及滑动方向。</p>
-</blockquote>
-<p>上述是否自己处理 onTouchEvent 事件是由 onInterceptTouchEvent() 实现的，return true 则会调自己的 onTouchEvent，否则会到子 View 的 onInterceptTouchEvent/onTouchEvent（根据子 View 是 ViewGroup 还是 View 决定，View 是直接执行 onTouchEvent 的，因为 View 没有 onInterceptTouchEvent, 最后一层是肯定会执行 onTouchEvent 的）</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div></pre></td><td class="code"><pre><div class="line">@Override</div><div class="line">public boolean onInterceptTouchEvent(MotionEvent event) &#123;</div><div class="line">    int intercepted = 0;</div><div class="line">    switch (event.getAction()) &#123;</div><div class="line">    case MotionEvent.ACTION_DOWN: &#123;</div><div class="line">        // ...</div><div class="line">        intercepted = 0;</div><div class="line">        break;</div><div class="line">    &#125;</div><div class="line">    case MotionEvent.ACTION_MOVE: &#123;</div><div class="line">        int deltaX = x - mLastXIntercept;</div><div class="line">        int deltaY = y - mLastYIntercept;</div><div class="line">        if (y &lt;= getHeaderHeight()) &#123;</div><div class="line">        	// 自己不拦截，看子级的实现</div><div class="line">            intercepted = 0;</div><div class="line">        &#125; else if (Math.abs(deltaY) &lt;= Math.abs(deltaX)) &#123;</div><div class="line">        	// 这样认为是横向滑动，不处理 onTouchEvent</div><div class="line">            intercepted = 0;</div><div class="line">            // 否则当滑动距离 &gt; mTouchSlop(滑动的最小距离) 时就处理 onTouchEvent</div><div class="line">        &#125; else if (mStatus == STATUS_EXPANDED &amp;&amp; deltaY &lt;= -mTouchSlop) &#123;</div><div class="line">            intercepted = 1;</div><div class="line">        &#125; else if (deltaY &gt;= mTouchSlop) &#123;</div><div class="line">            intercepted = 1;</div><div class="line">        &#125;</div><div class="line">        break;</div><div class="line">    &#125;</div><div class="line">    case MotionEvent.ACTION_UP: &#123;</div><div class="line">        // ...</div><div class="line">        break;</div><div class="line">    &#125;</div><div class="line">    return intercepted != 0;</div><div class="line">&#125;</div><div class="line"></div><div class="line">@Override</div><div class="line">public boolean onTouchEvent(MotionEvent event) &#123;</div><div class="line">    int x = (int) event.getX();</div><div class="line">    int y = (int) event.getY();</div><div class="line">    switch (event.getAction()) &#123;</div><div class="line">    case MotionEvent.ACTION_DOWN: &#123;</div><div class="line">        break;</div><div class="line">    &#125;</div><div class="line">    case MotionEvent.ACTION_MOVE: &#123;</div><div class="line">        int deltaX = x - mLastX;</div><div class="line">        int deltaY = y - mLastY;</div><div class="line">        // 通过 LayoutParams 实现动画</div><div class="line">        setHeaderHeight(mHeaderHeight);</div><div class="line">        break;</div><div class="line">    &#125;</div><div class="line">    case MotionEvent.ACTION_UP: &#123;</div><div class="line">        // 这里做了下判断，当松开手的时候，会自动向两边滑动，具体向哪边滑，要看当前所处的位置</div><div class="line">        int destHeight = 0;</div><div class="line">        if (mHeaderHeight &lt;= mOriginalHeaderHeight * 0.5) &#123;</div><div class="line">            destHeight = 0;</div><div class="line">            mStatus = STATUS_COLLAPSED;</div><div class="line">        &#125; else &#123;</div><div class="line">            destHeight = mOriginalHeaderHeight;</div><div class="line">            mStatus = STATUS_EXPANDED;</div><div class="line">        &#125;</div><div class="line">        // 慢慢滑向终点</div><div class="line">        this.smoothSetHeaderHeight(mHeaderHeight, destHeight, 500);</div><div class="line">        break;</div><div class="line">    &#125;</div><div class="line">    default:</div><div class="line">        break;</div><div class="line">    &#125;</div><div class="line">    mLastX = x;</div><div class="line">    mLastY = y;</div><div class="line">    return true;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
           
         
       
@@ -1576,8 +1586,8 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">38</span>
-                  <span class="site-state-item-name">Artikel</span>
+                  <span class="site-state-item-count">39</span>
+                  <span class="site-state-item-name">posts</span>
                 </a>
               </div>
             
@@ -1627,7 +1637,7 @@
 </div>
 
 
-  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
 
 
 
