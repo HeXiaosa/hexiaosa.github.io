@@ -181,7 +181,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
             
-            Home
+            Startseite
           </a>
         </li>
       
@@ -191,7 +191,7 @@
             
               <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
             
-            Archives
+            Archiv
           </a>
         </li>
       
@@ -214,6 +214,131 @@
           <div id="content" class="content">
             
   <section id="posts" class="posts-expand">
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/08/09/LruCache-theory/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Hexiaosa">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexiaosa">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/08/09/LruCache-theory/" itemprop="url">LruCache 原理</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-08-09T11:04:00+08:00">
+                2018-08-09
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h3 id="LruCache-的使用"><a href="#LruCache-的使用" class="headerlink" title="LruCache 的使用"></a>LruCache 的使用</h3><p>LruCache 是用于缓存的，缓存的原理是使用近期最少使用的方法，使用例子代码如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">int cacheSize = ((int) (Runtime.getRuntime().maxMemory() / 1024)) / 8; // 最大可缓存的大小</div><div class="line">LruCache&lt;String, Bitmap&gt; lruCache = new LruCache&lt;String, Bitmap&gt;(cacheSize) &#123;</div><div class="line">    @Override</div><div class="line">    protected int sizeOf(String key, Bitmap value) &#123;</div><div class="line">        // 计算每次存放的 value 的大小</div><div class="line">        return value.getRowBytes() * value.getHeight() * 1024;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    protected Bitmap create(String key) &#123;</div><div class="line">        // 自己根据 key 来创建需要的 value, 在 get 方法取不到 key 对应的 value 时会调用该方法</div><div class="line">        // 也可以选择不实现该方法，在取到的 value 是 null 时自己根据需要创建</div><div class="line">        return super.create(key);</div><div class="line">    &#125;</div><div class="line">&#125;;</div><div class="line">// 此处仅作为演示，实际使用时可根据需要优化 bitmap 的加载</div><div class="line">lruCache.put(&quot;test1&quot;, BitmapFactory.decodeResource(getApplicationContext().getResources(), R.mipmap.ic_launcher));</div><div class="line">if (lruCache.get(&quot;test1&quot;) == null) &#123;</div><div class="line">	lruCache.put(&quot;test1&quot;, bitmap);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h3 id="原理分析"><a href="#原理分析" class="headerlink" title="原理分析"></a>原理分析</h3><p>上面的使用方法中主要的就是 put, get 两个方法，下面具体看这两个方法都做了什么。</p>
+<p>put 方法分析：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div></pre></td><td class="code"><pre><div class="line">public final V put(K key, V value) &#123;</div><div class="line">    // key, value 不可为 null</div><div class="line">    if (key == null || value == null) &#123;</div><div class="line">        throw new NullPointerException(&quot;key == null || value == null&quot;);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    V previous; // key 原有的 value</div><div class="line">    synchronized (this) &#123;</div><div class="line">    	// 存的次数增加</div><div class="line">        putCount++;</div><div class="line">        // 存的 size 增加</div><div class="line">        size += safeSizeOf(key, value);</div><div class="line">        // 实际存 value, 原来的 value 返回</div><div class="line">        previous = map.put(key, value);</div><div class="line">        if (previous != null) &#123;</div><div class="line">        	// 原来的 value 不为 null 则 size 也相应的减少</div><div class="line">            size -= safeSizeOf(key, previous);</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    if (previous != null) &#123;</div><div class="line">    	// 删除了原来的 value, 根据自己需要做相应的操作</div><div class="line">        entryRemoved(false, key, previous, value);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    // 在缓存的大小已经超过 maxSize 时去除近期最少使用的 value</div><div class="line">    trimToSize(maxSize);</div><div class="line">    return previous;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>get 方法分析：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">public final V get(K key) &#123;</div><div class="line">	// key 不可为 null</div><div class="line">    if (key == null) &#123;</div><div class="line">        throw new NullPointerException(&quot;key == null&quot;);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    // 记录查到的 value</div><div class="line">    V mapValue;</div><div class="line">    synchronized (this) &#123;</div><div class="line">        mapValue = map.get(key);</div><div class="line">        if (mapValue != null) &#123;</div><div class="line">        	// 查到缓存的次数加 1</div><div class="line">            hitCount++;</div><div class="line">            return mapValue;</div><div class="line">        &#125;</div><div class="line">        // 没有查到缓存的次数加 1</div><div class="line">        missCount++;</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    V createdValue = create(key);</div><div class="line"></div><div class="line">    // 看自己是否实现了 create 方法，如果没有实现就 return null</div><div class="line">    if (createdValue == null) &#123;</div><div class="line">        return null;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    // create 方法创建过程中可能已经 put 了同样的 key, 如果相同则释放掉 create 方法创建的，保留  put 进去的</div><div class="line">    synchronized (this) &#123;</div><div class="line">    	// create 次数加 1</div><div class="line">        createCount++;</div><div class="line">        // 存 create 的，返回 key 对应的原来的值，也就是在 create 过程中 put 进去了相同 key 的值(mapValue)</div><div class="line">        mapValue = map.put(key, createdValue);</div><div class="line"></div><div class="line">        // mapValue 有值，则以 put 的为主，否则就正常保存 create 的，size 相应增加</div><div class="line">        if (mapValue != null) &#123;</div><div class="line">            map.put(key, mapValue);</div><div class="line">        &#125; else &#123;</div><div class="line">            size += safeSizeOf(key, createdValue);</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    // mapValue 有值，则执行清除 createValue 时根据我们的需要要做的操作，返回 mapValue</div><div class="line">    // 否则就是 create 执行正常，在缓存的大小已经超过 maxSize 时去除近期最少使用的 value, 返回 createValue</div><div class="line">    if (mapValue != null) &#123;</div><div class="line">        entryRemoved(false, key, createdValue, mapValue);</div><div class="line">        return mapValue;</div><div class="line">    &#125; else &#123;</div><div class="line">        trimToSize(maxSize);</div><div class="line">        return createdValue;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>那么最近最少使用原理是怎么实现的呢？就是靠 LinkedHashMap, 在 new LruCache 时创建 map,<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">this.map = new LinkedHashMap&lt;K, V&gt;(0, 0.75f, true);</div></pre></td></tr></table></figure></p>
+<p>这里把 accesssOrder 参数的值赋为 true, accesssOrder 在官方文档的解释是：the ordering mode - true for access-order, false for insertion-order, 也是是设为 true 则表示以访问排序。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
     
       
 
@@ -257,7 +382,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-08-07T18:58:51+08:00">
                 2018-08-07
@@ -381,7 +506,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-07-31T11:34:33+08:00">
                 2018-07-31
@@ -510,7 +635,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-07-26T14:46:35+08:00">
                 2018-07-26
@@ -674,7 +799,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-06-21T15:58:20+08:00">
                 2018-06-21
@@ -806,7 +931,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-06-07T10:14:00+08:00">
                 2018-06-07
@@ -959,7 +1084,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-06-05T11:10:33+08:00">
                 2018-06-05
@@ -1153,7 +1278,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-05-30T17:25:53+08:00">
                 2018-05-30
@@ -1294,7 +1419,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-05-28T17:37:05+08:00">
                 2018-05-28
@@ -1434,7 +1559,7 @@
                 <i class="fa fa-calendar-o"></i>
               </span>
               
-                <span class="post-meta-item-text">Posted on</span>
+                <span class="post-meta-item-text">Veröffentlicht am</span>
               
               <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-05-24T16:13:41+08:00">
                 2018-05-24
@@ -1524,133 +1649,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/01/30/ActivitySection/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Hexiaosa">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexiaosa">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/01/30/ActivitySection/" itemprop="url">Activity 相关知识</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Posted on</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-01-30T09:17:37+08:00">
-                2018-01-30
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h3 id="关于生命周期"><a href="#关于生命周期" class="headerlink" title="关于生命周期"></a>关于生命周期</h3><p>两个 Activity 跳转，不管有没有执行 onNewIntent, 都会前一个 Activity 执行 onPause, onStop, 后一个 Activity 执行 onStart, onResume 方法。</p>
-<h3 id="关于-configChanges"><a href="#关于-configChanges" class="headerlink" title="关于 configChanges"></a>关于 configChanges</h3><p>在 AndroidManifest 文件中声明 configChanges, 那么当声明的系统配置发生变化时，Activity 不会重新执行生命周期，只会调用 onConfigurationChanged() 方法。</p>
-<h6 id="configChanges-orientation"><a href="#configChanges-orientation" class="headerlink" title="configChanges:orientation"></a>configChanges:orientation</h6><p>屏幕方向 “orientation|screenSize”，官方文档这样说</p>
-<blockquote>
-<p>Beginning with Android 3.2 (API level 13), the “screen size” also changes when the device switches between portrait and landscape orientation. Thus, if you want to prevent runtime restarts due to orientation change when developing for API level 13 or higher (as declared by the minSdkVersion and targetSdkVersion attributes), you must include the “screenSize” value in addition to the “orientation” value. However, if your application targets API level 12 or lower, then your activity always handles this configuration change itself (this configuration change does not restart your activity, even when running on an Android 3.2 or higher device).</p>
-</blockquote>
-<p>也就是说 API 13 以上的如果要在 configChanges 设置 orientation 时，必须要加上 screenSize 才会有效。但是这里指的 API 13 是在程序中设置的 targetApi, 如果 targetApi 是 13 以下的，那么只设置 orientation 运行在 13 以上的版本上也是可以的。 </p>
-<h3 id="关于启动模式"><a href="#关于启动模式" class="headerlink" title="关于启动模式"></a>关于启动模式</h3><p>AActivity 启动 BActivity, 当 B 的启动模式为 standard 或 singleTop, B 启动后会位于 A 所在的栈（除了 A 的启动模式是 singleInstance 外）。所以当 context 启动 Activity 时，由于 context 不是 Activity, 也没有所位于的栈，所以启动的时候需加上标记 FLAG_ACTIVITY_NEW_TASK.<br>当 A 和 B 位于不同栈，并且 B 的启动模式为 singleInstance/singleTask 时，启动后的 B 和 A 不在同一栈内<br>另：taskAffinity 在 AndroidManifest 中声明 Activity 所在的栈，栈名必须包含 “.”</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -1701,8 +1699,8 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">39</span>
-                  <span class="site-state-item-name">posts</span>
+                  <span class="site-state-item-count">40</span>
+                  <span class="site-state-item-name">Artikel</span>
                 </a>
               </div>
             
@@ -1752,7 +1750,7 @@
 </div>
 
 
-  <div class="powered-by">Powered by <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
 
 
 

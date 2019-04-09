@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="View 的绘制流程 layout,measure,draw，追溯到源头，就是 Activity 创建时 View 的绘制。 从源码来看，大概会涉及到 Activity 的 attach, create, resume 这三个过程 Activity 的 attach 过程启动 Activity 时，ActivityThread 的 performLaunchActivity 方法中先调用了 act">
+<meta property="og:type" content="article">
+<meta property="og:title" content="从源头分析 Android 中 View 的绘制流程">
+<meta property="og:url" content="http://hexiaosa.com/2019/04/09/android-view-window/index.html">
+<meta property="og:site_name" content="Hexiaosa">
+<meta property="og:description" content="View 的绘制流程 layout,measure,draw，追溯到源头，就是 Activity 创建时 View 的绘制。 从源码来看，大概会涉及到 Activity 的 attach, create, resume 这三个过程 Activity 的 attach 过程启动 Activity 时，ActivityThread 的 performLaunchActivity 方法中先调用了 act">
+<meta property="og:image" content="http://hexiaosa.com/image/view.png">
+<meta property="og:updated_time" content="2019-04-09T07:25:21.698Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="从源头分析 Android 中 View 的绘制流程">
+<meta name="twitter:description" content="View 的绘制流程 layout,measure,draw，追溯到源头，就是 Activity 创建时 View 的绘制。 从源码来看，大概会涉及到 Activity 的 attach, create, resume 这三个过程 Activity 的 attach 过程启动 Activity 时，ActivityThread 的 performLaunchActivity 方法中先调用了 act">
+<meta name="twitter:image" content="http://hexiaosa.com/image/view.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://hexiaosa.com/2019/04/09/android-view-window/"/>
+
+
+
+
+
+  <title>从源头分析 Android 中 View 的绘制流程 | Hexiaosa</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Hexiaosa</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Startseite
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archiv
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2019/04/09/android-view-window/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Hexiaosa">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexiaosa">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">从源头分析 Android 中 View 的绘制流程</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-04-09T12:21:19+08:00">
+                2019-04-09
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>View 的绘制流程 layout,measure,draw，追溯到源头，就是 Activity 创建时 View 的绘制。</p>
+<p>从源码来看，大概会涉及到 Activity 的 attach, create, resume 这三个过程</p>
+<h4 id="Activity-的-attach-过程"><a href="#Activity-的-attach-过程" class="headerlink" title="Activity 的 attach 过程"></a>Activity 的 attach 过程</h4><p>启动 Activity 时，ActivityThread 的 performLaunchActivity 方法中先调用了 activity.attach 方法，attach 中创建了 mWindow 和 mWindowManager<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">mWindow = new PhoneWindow(this); // 创建了 window</div><div class="line">mWindow.setCallback(this);</div><div class="line">mWindow.setOnWindowDismissedCallback(this);</div><div class="line">mWindow.getLayoutInflater().setPrivateFactory(this);</div><div class="line">if (info.softInputMode != WindowManager.LayoutParams.SOFT_INPUT_STATE_UNSPECIFIED) &#123;</div><div class="line">    mWindow.setSoftInputMode(info.softInputMode);</div><div class="line">&#125;</div><div class="line">if (info.uiOptions != 0) &#123;</div><div class="line">    mWindow.setUiOptions(info.uiOptions);</div><div class="line">&#125;</div><div class="line"></div><div class="line">mWindow.setWindowManager(</div><div class="line">        (WindowManager)context.getSystemService(Context.WINDOW_SERVICE),</div><div class="line">        mToken, mComponent.flattenToString(),</div><div class="line">        (info.flags &amp; ActivityInfo.FLAG_HARDWARE_ACCELERATED) != 0); // 这里创建了 windowManager 对象</div><div class="line">if (mParent != null) &#123;</div><div class="line">    mWindow.setContainer(mParent.getWindow());</div><div class="line">&#125;</div><div class="line">mWindowManager = mWindow.getWindowManager();</div></pre></td></tr></table></figure></p>
+<p>mWindow.setWindowManager 方法中创建了 mWindowManager<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">mWindowManager = ((WindowManagerImpl)wm).createLocalWindowManager(this);</div><div class="line"></div><div class="line">    public WindowManagerImpl createLocalWindowManager(Window parentWindow) &#123;</div><div class="line">        return new WindowManagerImpl(mDisplay, parentWindow);</div><div class="line">    &#125;</div></pre></td></tr></table></figure></p>
+<p>WindowManagerImpl 类中有个变量<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">private final WindowManagerGlobal mGlobal = WindowManagerGlobal.getInstance();</div></pre></td></tr></table></figure></p>
+<p>到此就是 attch 方法创建的 window 相关的对象。</p>
+<h4 id="create-过程"><a href="#create-过程" class="headerlink" title="create 过程"></a>create 过程</h4><p>onCreate 中 setContentView 调用了 PhoneWindow.setContentView, 这里创建了 DecoreView(继承自 FrameLayout) 对象，作为 PhoneWindow 的成员变量，并且给 DecoreView 添加了子 View, 根据不同的 window feature 添加不同的布局，但每个布局中都会有一个 id 为 content 的 View, 然后再把 activity 的 xml 文件添加到 content 中</p>
+<p>整个 setContentView 添加的 View 就是这样子，到现在为止总结来说就是 Window 中有一个 DecoreView 对象，View 的层级图如下<br><img src="/image/view.png" alt="view"></p>
+<h4 id="resume-过程"><a href="#resume-过程" class="headerlink" title="resume 过程"></a>resume 过程</h4><p>onCreate 完成后，会接着调用 ActivityThread 的 handleResumeActivity 方法，主要看这几行代码<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div></pre></td><td class="code"><pre><div class="line">if (r.window == null &amp;&amp; !a.mFinished &amp;&amp; willBeVisible) &#123;</div><div class="line">    // r.window 在前面没有赋值，会走到这里的逻辑</div><div class="line">    r.window = r.activity.getWindow();</div><div class="line">    View decor = r.window.getDecorView();</div><div class="line">    decor.setVisibility(View.INVISIBLE);</div><div class="line">    ViewManager wm = a.getWindowManager(); // 这里的 wm 就是 attach 时的 mWindowManager, 是 WindowManagerImpl 对象</div><div class="line">    WindowManager.LayoutParams l = r.window.getAttributes();</div><div class="line">    a.mDecor = decor;</div><div class="line">    l.type = WindowManager.LayoutParams.TYPE_BASE_APPLICATION;</div><div class="line">    l.softInputMode |= forwardBit;</div><div class="line">    if (a.mVisibleFromClient) &#123;</div><div class="line">        a.mWindowAdded = true;</div><div class="line">        wm.addView(decor, l); // ① 这里执行了 WindowManagerImpl.addView</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line">WindowManager.LayoutParams l = r.window.getAttributes();</div><div class="line">if ((l.softInputMode</div><div class="line">        &amp; WindowManager.LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION)</div><div class="line">        != forwardBit) &#123;</div><div class="line">    l.softInputMode = (l.softInputMode</div><div class="line">            &amp; (~WindowManager.LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION))</div><div class="line">            | forwardBit;</div><div class="line">    if (r.activity.mVisibleFromClient) &#123;</div><div class="line">        ViewManager wm = a.getWindowManager(); // 这里的 wm 就是 attach 时的 mWindowManager, 是 WindowManagerImpl 对象</div><div class="line">        View decor = r.window.getDecorView(); // decore 就是 create 时的 DecoreView</div><div class="line">        wm.updateViewLayout(decor, l); // ② 这里这行了 WindowManagerImpl.updateViewLayout</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>重点在上述代码中的注释 ①,②，WindowManagerImpl内部都是通过 mGlobal 来实现的，mGlobal 在 attach 过程中介绍过，是 WindowManagerGlobal 对象。<br>下面就先看 WindowManagerGlobal.addView 方法<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">public void addView(View view, ViewGroup.LayoutParams params,</div><div class="line">        Display display, Window parentWindow) &#123;</div><div class="line">    ...</div><div class="line">    ViewRootImpl root;</div><div class="line">    root = new ViewRootImpl(view.getContext(), display); // 这里创建了 ViewRootImpl</div><div class="line"></div><div class="line">    view.setLayoutParams(wparams);</div><div class="line"></div><div class="line">    mViews.add(view);</div><div class="line">    mRoots.add(root); // 把 ViewRootImpl 加进来</div><div class="line">    mParams.add(wparams);</div><div class="line">    ...</div><div class="line">    root.setView(view, wparams, panelParentView);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>接着看 WindowManagerGlobal.uodateViewLayout 方法<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">public void updateViewLayout(View view, ViewGroup.LayoutParams params) &#123;</div><div class="line">    ...</div><div class="line">    final WindowManager.LayoutParams wparams = (WindowManager.LayoutParams)params;</div><div class="line"></div><div class="line">    view.setLayoutParams(wparams);</div><div class="line"></div><div class="line">    synchronized (mLock) &#123;</div><div class="line">        int index = findViewLocked(view, true);</div><div class="line">        ViewRootImpl root = mRoots.get(index); // 这里得到的是 addView 时创建的 ViewRootImpl 对象</div><div class="line">        mParams.remove(index);</div><div class="line">        mParams.add(index, wparams);</div><div class="line">        root.setLayoutParams(wparams, false); // ③ 这里又是重点</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>到这里，注释 ① ② 都分析完了，上面代码中有个注释 ③，这是又一个重点，跟进代码里来看会发现到最后调用了一个方法 scheduleTraversals()，这个方法应该很熟悉了，很多文章都有写过绘制流程的入口就是这个方法。<br>接下来就是 scheduleTraversals 方法中会执行 mTraversalRunnable, TraversalRunnable 的 run 方法执行了 doTraversal, doTraversal 又调用了 performTraversals，然后这个方法就是一步一步绘制的流程了，会执行 layout,measure,draw 方法。</p>
+<hr>
+<p>到这里启动一个 Activity 界面的绘制就很清晰了，到这我们就可以思考一个常见的问题，就是非 UI 线程更改 View 报的错 “Only the original thread that created a view hierarchy can touch its views”，在 onCreate 中创建子线程 setText 不报错的原因。<br>这句描述是在 ViewRootImpl.checkThread 报的，但 ViewRootImpl 对象是在 resume 时候创建的，所以 onCreate 中创建子线程修改 UI 时可能 ViewRootImpl 对象还没创建，所以就没有报错。</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/04/09/about-https/" rel="next" title="HTTPS 加密传输">
+                <i class="fa fa-chevron-left"></i> HTTPS 加密传输
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Inhaltsverzeichnis
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Übersicht
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Hexiaosa</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">40</span>
+                  <span class="site-state-item-name">Artikel</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-4"><a class="nav-link" href="#Activity-的-attach-过程"><span class="nav-number">1.</span> <span class="nav-text">Activity 的 attach 过程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#create-过程"><span class="nav-number">2.</span> <span class="nav-text">create 过程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#resume-过程"><span class="nav-number">3.</span> <span class="nav-text">resume 过程</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Hexiaosa</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
