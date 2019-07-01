@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next muse use-motion" lang="">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Hexo, NexT" />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="内存泄漏是性能优化中必须去关注的一个方面，LeakCanary 在发现内存泄漏问题上是一个优秀的工具，今天来分析下它内部的工作原理是怎样的。 首先来看几个问题：  集成 LeakCanary 后，安装应用到手机上，会发现桌面上多了一个 LeakCanary 的图标，这个图标是怎么来的呢 内存泄漏的问题是怎么检测到的呢   先来看第一个问题吧，这个比较简单，在调用 LeakCanary.instal">
+<meta property="og:type" content="article">
+<meta property="og:title" content="LeakCanary 原理详解">
+<meta property="og:url" content="http://hexiaosa.com/2019/06/30/leak-canary/index.html">
+<meta property="og:site_name" content="Hexiaosa">
+<meta property="og:description" content="内存泄漏是性能优化中必须去关注的一个方面，LeakCanary 在发现内存泄漏问题上是一个优秀的工具，今天来分析下它内部的工作原理是怎样的。 首先来看几个问题：  集成 LeakCanary 后，安装应用到手机上，会发现桌面上多了一个 LeakCanary 的图标，这个图标是怎么来的呢 内存泄漏的问题是怎么检测到的呢   先来看第一个问题吧，这个比较简单，在调用 LeakCanary.instal">
+<meta property="og:updated_time" content="2019-07-01T07:56:38.092Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="LeakCanary 原理详解">
+<meta name="twitter:description" content="内存泄漏是性能优化中必须去关注的一个方面，LeakCanary 在发现内存泄漏问题上是一个优秀的工具，今天来分析下它内部的工作原理是怎样的。 首先来看几个问题：  集成 LeakCanary 后，安装应用到手机上，会发现桌面上多了一个 LeakCanary 的图标，这个图标是怎么来的呢 内存泄漏的问题是怎么检测到的呢   先来看第一个问题吧，这个比较简单，在调用 LeakCanary.instal">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Muse',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: 'Author'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://hexiaosa.com/2019/06/30/leak-canary/"/>
+
+
+
+
+
+  <title>LeakCanary 原理详解 | Hexiaosa</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Hexiaosa</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            Startseite
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            Archiv
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2019/06/30/leak-canary/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Hexiaosa">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexiaosa">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">LeakCanary 原理详解</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-06-30T12:18:51+08:00">
+                2019-06-30
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>内存泄漏是性能优化中必须去关注的一个方面，LeakCanary 在发现内存泄漏问题上是一个优秀的工具，今天来分析下它内部的工作原理是怎样的。</p>
+<p>首先来看几个问题：</p>
+<ol>
+<li>集成 LeakCanary 后，安装应用到手机上，会发现桌面上多了一个 LeakCanary 的图标，这个图标是怎么来的呢</li>
+<li>内存泄漏的问题是怎么检测到的呢</li>
+</ol>
+<hr>
+<p>先来看第一个问题吧，这个比较简单，在调用 LeakCanary.install(this) 时，点进源码，会看到这样一行代码<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">enableDisplayLeakActivity(application);</div></pre></td></tr></table></figure></p>
+<p>这行代码最终执行的是<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">public static void setEnabledBlocking(Context appContext, Class&lt;?&gt; componentClass, boolean enabled) &#123;</div><div class="line">    ComponentName component = new ComponentName(appContext, componentClass);</div><div class="line">    PackageManager packageManager = appContext.getPackageManager();</div><div class="line">    int newState = enabled?1:2;</div><div class="line">    packageManager.setComponentEnabledSetting(component, newState, 1);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>这里的 componentClass 是 DisplayLeakActivity.class, 在 AndroidManifest.xml 文件中声明这个 Activity 时，设置 android:enabled=”false”, 然后再在代码中动态这样设置，就会在桌面上生成新的图标，作为 Activity 的入口。</p>
+<hr>
+<p>接下来解答第二个问题，内存泄漏的问题是怎么检测到的，也就是说比如如何检测 Activity finish 后还没有被回收，这里 LeakCanary 用的方法是，记录所有的 Activity，在 Application 中注册 LeakCanary 时通过 registerActivityLifecycleCallbacks 监听 Activity 的生命周期，然后在 Activity 执行 onDestroy 时看 Activity 是否被回收，如果没有没回收，触发 gc, 再看有没有被回收，如果还没有被回收，那么就是有内存泄漏了，就收集内存泄漏相关日志信息。<br>大概的流程就是这样子了，具体细节，如何检测 Activity 是否被回收，如何触发了 gc, 看下 LeakCanary 的实现方式的主要代码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">public void watch(Object watchedReference, String referenceName) &#123;</div><div class="line">    //...</div><div class="line">    if(!this.debuggerControl.isDebuggerAttached()) &#123;</div><div class="line">        final long watchStartNanoTime = System.nanoTime();</div><div class="line">        String key = UUID.randomUUID().toString();</div><div class="line">        this.retainedKeys.add(key);</div><div class="line">        // watchedReference 执行过onDrstroy的Activity的引用，key为随机数，queue 是一个ReferenceQueue对象，在引用中用于记录回收的对象</div><div class="line">        final KeyedWeakReference reference = new KeyedWeakReference(watchedReference, key, referenceName, this.queue);</div><div class="line">        this.watchExecutor.execute(new Runnable() &#123;</div><div class="line">            public void run() &#123;</div><div class="line">                // 方法最后执行到这里</div><div class="line">                RefWatcher.this.ensureGone(reference, watchStartNanoTime);</div><div class="line">            &#125;</div><div class="line">        &#125;);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line">// reference 这是一个弱引用</div><div class="line">void ensureGone(KeyedWeakReference reference, long watchStartNanoTime) &#123;</div><div class="line">    long gcStartNanoTime = System.nanoTime();</div><div class="line">    long watchDurationMs = TimeUnit.NANOSECONDS.toMillis(gcStartNanoTime - watchStartNanoTime);</div><div class="line">    // 这个方法做的操作是 有被回收的，从集合中移除 reference.key</div><div class="line">    // 这个方法里就利用的 Reference.queue, 从 queue 里面取出来说明是被回收的</div><div class="line">    this.removeWeaklyReachableReferences();</div><div class="line">    if(!this.gone(reference) &amp;&amp; !this.debuggerControl.isDebuggerAttached()) &#123;</div><div class="line">        // 进到 if 里面说明还没有被回收</div><div class="line">        // 触发 gc, 这里触发 gc 的方式是调用 Runtime.getRuntime().gc();</div><div class="line">        this.gcTrigger.runGc();</div><div class="line">        // 重新把已回收的 key 从集合中 remove 掉</div><div class="line">        this.removeWeaklyReachableReferences();</div><div class="line">        if(!this.gone(reference)) &#123;</div><div class="line">            // 进到 if 里，说明还没有被回收，gc后还没有被回收，说明这是回收不了的了，也就是发生了内存泄漏了</div><div class="line">            long startDumpHeap = System.nanoTime();</div><div class="line">            long gcDurationMs = TimeUnit.NANOSECONDS.toMillis(startDumpHeap - gcStartNanoTime);</div><div class="line">            // 收集 hprof 文件</div><div class="line">            File heapDumpFile = this.heapDumper.dumpHeap();</div><div class="line">            if(heapDumpFile == HeapDumper.NO_DUMP) &#123;</div><div class="line">                return;</div><div class="line">            &#125;</div><div class="line"></div><div class="line">            long heapDumpDurationMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startDumpHeap);</div><div class="line">            // 解析泄漏日志，通知有泄漏，并保存到本地</div><div class="line">            this.heapdumpListener.analyze(new HeapDump(heapDumpFile, reference.key, reference.name, this.excludedRefs, watchDurationMs, gcDurationMs, heapDumpDurationMs));</div><div class="line">        &#125;</div><div class="line"></div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/04/09/android-view-window/" rel="next" title="从源头分析 Android 中 View 的绘制流程">
+                <i class="fa fa-chevron-left"></i> 从源头分析 Android 中 View 的绘制流程
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">Hexiaosa</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">41</span>
+                  <span class="site-state-item-name">Artikel</span>
+                </a>
+              </div>
+            
+
+            
+
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Hexiaosa</span>
+
+  
+</div>
+
+
+  <div class="powered-by">Erstellt mit  <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a></div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Muse</a> v5.1.4</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -228,6 +228,131 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/09/01/RecyclerView/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Hexiaosa">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexiaosa">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/09/01/RecyclerView/" itemprop="url">RecycleView 缓存机制</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-09-01T23:06:37+08:00">
+                2018-09-01
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>RecyclerView 的使用：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">RecyclerView lv = (RecyclerView) findViewById(R.id.lv);</div><div class="line">lv.setLayoutManager(new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.VERTICAL, false));</div><div class="line">lv.setAdapter(new MyListAdapter(getApplicationContext()));</div></pre></td></tr></table></figure></p>
+<p>setLayoutManager 给 RecyclerView 设置了 mLayout, setAdapter 设置 mAdapter, 清除缓存的一些信息，并 requestLayout. RecyclerView 执行 onLayout 过程中，会调用 mLayout.layoutChildren 方法，然后到 LinearLayoutManager 的 layoutChildren 方法，fill(recycler, mLayoutState, state, false) 再到 layoutChunk 方法中看，第一行代码就是 layoutState.next(recycler), 进去看这个方法，这个方法获取了下一个需要 layout 的 view, 看下源码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">if (mScrapList != null) &#123;</div><div class="line">	// mScrapList 不为 null, 则取 mScrapList 中的 View</div><div class="line">    return nextViewFromScrapList();</div><div class="line">&#125;</div><div class="line">// mScrapList 为 null, 则继续查找 view, 从 getViewForPosition, tryGetViewHolderForPositionByDeadline 方法看</div><div class="line">final View view = recycler.getViewForPosition(mCurrentPosition);</div><div class="line">mCurrentPosition += mItemDirection;</div><div class="line">return view;</div></pre></td></tr></table></figure></p>
+<p>tryGetViewHolderForPositionByDeadline 方法，主要查缓存 View 的地方<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div></pre></td><td class="code"><pre><div class="line">ViewHolder tryGetViewHolderForPositionByDeadline(int position,</div><div class="line">        boolean dryRun, long deadlineNs) &#123;</div><div class="line">    boolean fromScrapOrHiddenOrCache = false;</div><div class="line">    ViewHolder holder = null;</div><div class="line">    // 0) 首先从 mChangeScrap 中查</div><div class="line">    if (mState.isPreLayout()) &#123;</div><div class="line">        holder = getChangedScrapViewForPosition(position);</div><div class="line">        fromScrapOrHiddenOrCache = holder != null;</div><div class="line">    &#125;</div><div class="line">    // 1) 没有找到就从 mAttachView 或 mCacheView 中查</div><div class="line">    if (holder == null) &#123;</div><div class="line">        holder = getScrapOrHiddenOrCachedHolderForPosition(position, dryRun);</div><div class="line">        if (holder != null) &#123;</div><div class="line">            // ...</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    if (holder == null) &#123;</div><div class="line">        final int type = mAdapter.getItemViewType(offsetPosition);</div><div class="line">        // 2) 通过 stableIs 在 mAttachView 和 mCacheView 中查</div><div class="line">        if (mAdapter.hasStableIds()) &#123;</div><div class="line">            holder = getScrapOrCachedViewForId(mAdapter.getItemId(offsetPosition),</div><div class="line">                    type, dryRun);</div><div class="line">            if (holder != null) &#123;</div><div class="line">                // ...</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        if (holder == null &amp;&amp; mViewCacheExtension != null) &#123;</div><div class="line">            // 通过 mViewCacheExtension 查</div><div class="line">        &#125;</div><div class="line">        if (holder == null) &#123; // 从 mRecyclerPool 中查</div><div class="line">            holder = getRecycledViewPool().getRecycledView(type);</div><div class="line">            if (holder != null) &#123;</div><div class="line">                // ...</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        if (holder == null) &#123;</div><div class="line">        	// 自己创建 View, 也就是我们自己实现的 onCreateViewHolder 方法</div><div class="line">            holder = mAdapter.createViewHolder(RecyclerView.this, type);</div><div class="line">            // ...</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    // ...</div><div class="line"></div><div class="line">    // 设置 layoutParams</div><div class="line">    return holder;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>layout 过程中就是以上面的方式获取缓存的 View, 然后加到 RecyclerView 中。</p>
+<p>下面再看滑动过程中 item 是怎么复用的，RecyclerView 的 onTouchEvent 方法 ACTION_MOVE 事件中调用了 mGapWorker.postFromTraversal(this, dx, dy), 接着到 GapWorker 中看，它的 postFromTraversal 方法主要执行了 recycleview.post(this), GapWorker 是一个 Runnable, 那么执行的就是 GapWorker 的 run() 方法，在这里面一直跟进去 prefetch, flushTasksWithDeadline, prefetchPositionWithDeadline, 我们能看到在 prefetchPositionWithDeadline 方法中同样调了 recycler.tryGetViewHolderForPositionByDeadline 来获取缓存中的 ViewHolder, 所以滑动过程中 item 的复用就是这样实现的。</p>
+<p>好吧，分析的不是很清晰，先到这里吧，继续看源码(<em>^▽^</em>)</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/08/29/ListView/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1409,136 +1534,11 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/08/11/Activity-setContentView/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Hexiaosa">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexiaosa">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/08/11/Activity-setContentView/" itemprop="url">从源码分析 setContentView 做了什么</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Veröffentlicht am</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-08-11T23:44:51+08:00">
-                2018-08-11
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>从源码分析 Activity 的 onCreate 方法的 setContentView 都做了什么。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">public void setContentView(int layoutResID) &#123;</div><div class="line">    getWindow().setContentView(layoutResID);</div><div class="line">    // 如果需要的话，初始化 ActionBar</div><div class="line">    initWindowDecorActionBar();</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>其中 getWindow() 返回的是 PhoneWindow, 它的初始化是在 Activity.attach 时赋值的<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">mWindow = PolicyManager.makeNewWindow(this); // 实际执行的在 Policy.makeNewWindows</div></pre></td></tr></table></figure></p>
-<p>下面看 PhoneWindow.setContentView, 这里做的就是初始化 DecoreView 和加载给定的 layout id.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line">@Override</div><div class="line">public void setContentView(int layoutResID) &#123;</div><div class="line">    if (mContentParent == null) &#123;</div><div class="line">    	// 初始化 DecoreView, 这里会赋值 mContentParent</div><div class="line">        installDecor();</div><div class="line">    &#125; else if (!hasFeature(FEATURE_CONTENT_TRANSITIONS)) &#123;</div><div class="line">        mContentParent.removeAllViews();</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    // 是否有 transition</div><div class="line">    if (hasFeature(FEATURE_CONTENT_TRANSITIONS)) &#123;</div><div class="line">        final Scene newScene = Scene.getSceneForLayout(mContentParent, layoutResID,</div><div class="line">                getContext());</div><div class="line">        transitionTo(newScene);</div><div class="line">    &#125; else &#123;</div><div class="line">    	// 直接加载 layoutResID，到这里 layout 已加载完毕</div><div class="line">        mLayoutInflater.inflate(layoutResID, mContentParent);</div><div class="line">    &#125;</div><div class="line">    final Callback cb = getCallback();</div><div class="line">    if (cb != null &amp;&amp; !isDestroyed()) &#123;</div><div class="line">        cb.onContentChanged();</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>接下来我们就来看 installDecor 方法做了什么吧，<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div></pre></td><td class="code"><pre><div class="line">private void installDecor() &#123;</div><div class="line">	// 初始化 mDecor</div><div class="line">    if (mDecor == null) &#123;</div><div class="line">        mDecor = generateDecor();</div><div class="line">        // ...</div><div class="line">    &#125;</div><div class="line">    // 初始化 mContentParent</div><div class="line">    if (mContentParent == null) &#123;</div><div class="line">        mContentParent = generateLayout(mDecor);</div><div class="line"></div><div class="line">        // Set up decor part of UI to ignore fitsSystemWindows if appropriate.</div><div class="line">        mDecor.makeOptionalFitsSystemWindows();</div><div class="line"></div><div class="line">        // 填充 title 和 content</div><div class="line">        final DecorContentParent decorContentParent = (DecorContentParent) mDecor.findViewById(</div><div class="line">                R.id.decor_content_parent);</div><div class="line"></div><div class="line">        // ...</div><div class="line"></div><div class="line">        if (mDecor.getBackground() == null &amp;&amp; mBackgroundFallbackResource != 0) &#123;</div><div class="line">            mDecor.setBackgroundFallback(mBackgroundFallbackResource);</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        if (hasFeature(FEATURE_ACTIVITY_TRANSITIONS)) &#123;</div><div class="line">            // 设置一些 transition</div><div class="line">            // ...</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>初始化 DecoreView 方法中就是 new 了一个 DecoreView, 下面看初始化 mContentParent 的方法，这一段代码比较多，就主要介绍一下<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line">protected ViewGroup generateLayout(DecorView decor) &#123;</div><div class="line">	// 先设置 style</div><div class="line">	// ... </div><div class="line"></div><div class="line">	// 根据版本和设置来决定是否需要菜单</div><div class="line">	// ... </div><div class="line"></div><div class="line">    mDecor.startChanging();</div><div class="line"></div><div class="line">	// 添加指定需要的 View(title, actionBar, 等)</div><div class="line">	View in = mLayoutInflater.inflate(layoutResource, null);</div><div class="line">    decor.addView(in, new ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT));</div><div class="line">    mContentRoot = (ViewGroup) in;</div><div class="line"></div><div class="line">	// 获取 contentParent</div><div class="line">	ViewGroup contentParent = (ViewGroup)findViewById(ID_ANDROID_CONTENT);</div><div class="line"></div><div class="line">	// 设置背景，title, 颜色 等</div><div class="line"></div><div class="line">    mDecor.finishChanging();</div><div class="line">	return contentParent;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>这样也就可以理解下图了：<br><img src="/image/activity_view.png" alt="activity_view"></p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><a class="extend next" rel="next" href="/page/3/"><i class="fa fa-angle-right"></i></a>
+    <a class="extend prev" rel="prev" href="/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/5/">5</a><a class="extend next" rel="next" href="/page/3/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 
@@ -1584,7 +1584,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">40</span>
+                  <span class="site-state-item-count">41</span>
                   <span class="site-state-item-name">Artikel</span>
                 </a>
               </div>

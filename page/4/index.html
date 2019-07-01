@@ -228,6 +228,138 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/05/24/Handler/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Hexiaosa">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexiaosa">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/05/24/Handler/" itemprop="url">Handler 机制详解</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-05-24T16:13:41+08:00">
+                2018-05-24
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h3 id="Handler-的原理看这张图就可以知道"><a href="#Handler-的原理看这张图就可以知道" class="headerlink" title="Handler 的原理看这张图就可以知道"></a>Handler 的原理看这张图就可以知道</h3><p><img src="/image/handler.png" alt="handler"></p>
+<p>Handler sendMessage(msg) 会调用 sendMessageAtTime(msg, uptimeMillis), 在这里会调 enqueueMessage(queue, msg, uptimeMillis), 其中 queue 是 handler 的全局变量 mQueue, 在构造函数里，有这两行代码<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">mLooper = Looper.myLooper();</div><div class="line">mQueue = mLooper.mQueue;</div></pre></td></tr></table></figure></p>
+<p>最终会调用 queue.enqueueMessage(msg, uptimeMiilis), 在这个方法里会设置 msg.target = this, 然后把该 msg 插入 queue 中。<br>Looper.loop() 方法会循环取 mQueue 中的值，取到消息就分发执行。</p>
+<h3 id="思考："><a href="#思考：" class="headerlink" title="思考："></a>思考：</h3><h6 id="1-为什么子线程中直接-new-Handler-会报异常呢？"><a href="#1-为什么子线程中直接-new-Handler-会报异常呢？" class="headerlink" title="1. 为什么子线程中直接 new Handler() 会报异常呢？"></a>1. 为什么子线程中直接 new Handler() 会报异常呢？</h6><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">mLooper = Looper.myLooper();</div><div class="line">if (mLooper == null) &#123;</div><div class="line">    throw new RuntimeException(</div><div class="line">        &quot;Can&apos;t create handler inside thread that has not called Looper.prepare()&quot;);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>上面一段代码是 Handler 的构造方法中的一段代码，创建 Handler 时会取 Looper.myLooper(), 返回的是当前线程的 Looper 对象，由于子线程中还没有 Looper 对象，所以会报异常。主线程是在 ActivityThread 的 main 方法中创建的 Looper 对象。<br>注：子线程先调用 Looper.prepare() 之后也可以创建 Handler, 但是更新 UI 时不建议这样做，因为这样还是在子线程中更新的 UI, 还是线程不安全的。</p>
+<h6 id="2-一个线程只能有一个-Looper-对象？"><a href="#2-一个线程只能有一个-Looper-对象？" class="headerlink" title="2. 一个线程只能有一个 Looper 对象？"></a>2. 一个线程只能有一个 Looper 对象？</h6><p>创建 Looper 对象是调用 Looper.prepare, 其源码如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">if (sThreadLocal.get() != null) &#123;</div><div class="line">    throw new RuntimeException(&quot;Only one Looper may be created per thread&quot;);</div><div class="line">&#125;</div><div class="line">sThreadLocal.set(new Looper(quitAllowed));</div></pre></td></tr></table></figure></p>
+<p>这里使用 ThreadLocal 保证了一个线程只有一个 Looper 对象。</p>
+<h6 id="3-主线程的-Looper-loop-无限循环为什么不会造成-ANR"><a href="#3-主线程的-Looper-loop-无限循环为什么不会造成-ANR" class="headerlink" title="3. 主线程的 Looper.loop 无限循环为什么不会造成 ANR?"></a>3. 主线程的 Looper.loop 无限循环为什么不会造成 ANR?</h6><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">for (;;) &#123;</div><div class="line">    Message msg = queue.next(); // might block</div><div class="line">    if (msg == null) &#123;</div><div class="line">        // No message indicates that the message queue is quitting.</div><div class="line">        return;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>之所以不会造成 ANR 就是因为消息的阻塞和唤醒机制，重点在 queue.next() 获取新的消息时，<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">Message next() &#123;</div><div class="line">    // ...</div><div class="line">    for (;;) &#123;</div><div class="line">        //...</div><div class="line"></div><div class="line">        nativePollOnce(ptr, nextPollTimeoutMillis); // 重点在这里，</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>nativePollOnce 会引起阻塞消息队列，在唤醒时间到的时候再唤醒。<br>在此处会唤醒，还有在 enqueueMessage 时，如果有在消息队列头部插入的话，就会调用唤醒 nativeWake(mPtr).<br>推荐这篇文章<a href="https://my.oschina.net/youranhongcha/blog/492591，讲的很清楚。" target="_blank" rel="external">https://my.oschina.net/youranhongcha/blog/492591，讲的很清楚。</a></p>
+<h6 id="4-Handler发送延迟消息的原理"><a href="#4-Handler发送延迟消息的原理" class="headerlink" title="4. Handler发送延迟消息的原理"></a>4. Handler发送延迟消息的原理</h6><p>发送延迟消息，最终一样都是调用 sendMessageAtTime，给设置一个唤醒的时间，在时间到了就唤醒。</p>
+<h6 id="5-是否可以停止消息循环"><a href="#5-是否可以停止消息循环" class="headerlink" title="5. 是否可以停止消息循环"></a>5. 是否可以停止消息循环</h6><p>Looper 提供了一个 quit() 方法，那么主线程的 Looper 能否停止循环呢，试图调 Looper.getMainLooper().quit() 会抛出异常 “Main thread not allowed to quit.”，原因：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">// MessageQueue</div><div class="line">void quit(boolean safe) &#123;</div><div class="line">    /* mQuitAllowed 是在创建 MessageQueue 时指定的，主线程创建 Looper 是调用 Looper.prepareMainLoop(), 传进来的是 false, 所以停止主线程的 Looper 会抛异常 */</div><div class="line">    if (!mQuitAllowed) &#123; </div><div class="line">        throw new IllegalStateException(&quot;Main thread not allowed to quit.&quot;);</div><div class="line">    &#125;</div><div class="line">    // ...</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>子线程的 Looper 创建是调 Looper.prepare, 传的 mQuitAllowed 是 true, 所以子线程是可以停止的</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/01/30/ActivitySection/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1519,135 +1651,11 @@ private void sendData() {
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2017/10/09/MotionEvent_description/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Hexiaosa">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexiaosa">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2017/10/09/MotionEvent_description/" itemprop="url">MotionEvent介绍</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Veröffentlicht am</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2017-10-09T10:32:48+08:00">
-                2017-10-09
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>本文主要介绍 MotionEvent 的两点，一：MotionEvent 的点击事件；二：MotionEvent 的 X, Y 等含义。</p>
-<h4 id="MotionEvent-的点击事件"><a href="#MotionEvent-的点击事件" class="headerlink" title="MotionEvent 的点击事件"></a>MotionEvent 的点击事件</h4><p>常用的有这几个：<br>ACTION_DOWN 刚接触到屏幕执行一次<br>ACTION_MOVE 在屏幕上滑动<br>ACTION_UP 离开屏幕执行一次<br>ACTION_POINTER_DOWN 已经有event 事件，又有一个手指的触摸 DOWN 事件发生<br>ACTION_POINTER_UP 一个手指离开屏幕，但还有其它触摸点在</p>
-<p>单指触摸事件：ACTION_DOWN -&gt; ACTION_MOVE -&gt; ACTION_UP<br>多指触摸事件：ACTION_DOWN -&gt; ACTION_MOVE -&gt; ACTION_POINTER_DOWN -&gt; ACTION_POINTER_UP -&gt; ACTION_UP</p>
-<h4 id="MotionEvent-的位置参数含义"><a href="#MotionEvent-的位置参数含义" class="headerlink" title="MotionEvent 的位置参数含义"></a>MotionEvent 的位置参数含义</h4><p>常用的主要有 getX(), getY(), getRawX(), getRawY(), 下面用一张图来展示：<br>getX : 触摸点到当前 view 左边的距离<br>getY : 触摸点到当前 view 上边的距离<br>getRawX : 触摸点到屏幕左边的距离<br>getRawY : 触摸点到屏幕上边的距离</p>
-<p><img src="/image/motionevent_description1.jpg" alt="motionevent_description1"></p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
   <nav class="pagination">
-    <a class="extend prev" rel="prev" href="/page/3/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/3/">3</a><span class="page-number current">4</span>
+    <a class="extend prev" rel="prev" href="/page/3/"><i class="fa fa-angle-left"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/3/">3</a><span class="page-number current">4</span><a class="page-number" href="/page/5/">5</a><a class="extend next" rel="next" href="/page/5/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 
@@ -1693,7 +1701,7 @@ private void sendData() {
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">40</span>
+                  <span class="site-state-item-count">41</span>
                   <span class="site-state-item-name">Artikel</span>
                 </a>
               </div>

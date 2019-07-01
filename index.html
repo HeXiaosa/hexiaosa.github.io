@@ -228,6 +228,138 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2019/06/30/leak-canary/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="Hexiaosa">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexiaosa">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/06/30/leak-canary/" itemprop="url">LeakCanary 原理详解</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Veröffentlicht am</span>
+              
+              <time title="Post created" itemprop="dateCreated datePublished" datetime="2019-06-30T12:18:51+08:00">
+                2019-06-30
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>内存泄漏是性能优化中必须去关注的一个方面，LeakCanary 在发现内存泄漏问题上是一个优秀的工具，今天来分析下它内部的工作原理是怎样的。</p>
+<p>首先来看几个问题：</p>
+<ol>
+<li>集成 LeakCanary 后，安装应用到手机上，会发现桌面上多了一个 LeakCanary 的图标，这个图标是怎么来的呢</li>
+<li>内存泄漏的问题是怎么检测到的呢</li>
+</ol>
+<hr>
+<p>先来看第一个问题吧，这个比较简单，在调用 LeakCanary.install(this) 时，点进源码，会看到这样一行代码<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">enableDisplayLeakActivity(application);</div></pre></td></tr></table></figure></p>
+<p>这行代码最终执行的是<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">public static void setEnabledBlocking(Context appContext, Class&lt;?&gt; componentClass, boolean enabled) &#123;</div><div class="line">    ComponentName component = new ComponentName(appContext, componentClass);</div><div class="line">    PackageManager packageManager = appContext.getPackageManager();</div><div class="line">    int newState = enabled?1:2;</div><div class="line">    packageManager.setComponentEnabledSetting(component, newState, 1);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>这里的 componentClass 是 DisplayLeakActivity.class, 在 AndroidManifest.xml 文件中声明这个 Activity 时，设置 android:enabled=”false”, 然后再在代码中动态这样设置，就会在桌面上生成新的图标，作为 Activity 的入口。</p>
+<hr>
+<p>接下来解答第二个问题，内存泄漏的问题是怎么检测到的，也就是说比如如何检测 Activity finish 后还没有被回收，这里 LeakCanary 用的方法是，记录所有的 Activity，在 Application 中注册 LeakCanary 时通过 registerActivityLifecycleCallbacks 监听 Activity 的生命周期，然后在 Activity 执行 onDestroy 时看 Activity 是否被回收，如果没有没回收，触发 gc, 再看有没有被回收，如果还没有被回收，那么就是有内存泄漏了，就收集内存泄漏相关日志信息。<br>大概的流程就是这样子了，具体细节，如何检测 Activity 是否被回收，如何触发了 gc, 看下 LeakCanary 的实现方式的主要代码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">public void watch(Object watchedReference, String referenceName) &#123;</div><div class="line">    //...</div><div class="line">    if(!this.debuggerControl.isDebuggerAttached()) &#123;</div><div class="line">        final long watchStartNanoTime = System.nanoTime();</div><div class="line">        String key = UUID.randomUUID().toString();</div><div class="line">        this.retainedKeys.add(key);</div><div class="line">        // watchedReference 执行过onDrstroy的Activity的引用，key为随机数，queue 是一个ReferenceQueue对象，在引用中用于记录回收的对象</div><div class="line">        final KeyedWeakReference reference = new KeyedWeakReference(watchedReference, key, referenceName, this.queue);</div><div class="line">        this.watchExecutor.execute(new Runnable() &#123;</div><div class="line">            public void run() &#123;</div><div class="line">                // 方法最后执行到这里</div><div class="line">                RefWatcher.this.ensureGone(reference, watchStartNanoTime);</div><div class="line">            &#125;</div><div class="line">        &#125;);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line">// reference 这是一个弱引用</div><div class="line">void ensureGone(KeyedWeakReference reference, long watchStartNanoTime) &#123;</div><div class="line">    long gcStartNanoTime = System.nanoTime();</div><div class="line">    long watchDurationMs = TimeUnit.NANOSECONDS.toMillis(gcStartNanoTime - watchStartNanoTime);</div><div class="line">    // 这个方法做的操作是 有被回收的，从集合中移除 reference.key</div><div class="line">    // 这个方法里就利用的 Reference.queue, 从 queue 里面取出来说明是被回收的</div><div class="line">    this.removeWeaklyReachableReferences();</div><div class="line">    if(!this.gone(reference) &amp;&amp; !this.debuggerControl.isDebuggerAttached()) &#123;</div><div class="line">        // 进到 if 里面说明还没有被回收</div><div class="line">        // 触发 gc, 这里触发 gc 的方式是调用 Runtime.getRuntime().gc();</div><div class="line">        this.gcTrigger.runGc();</div><div class="line">        // 重新把已回收的 key 从集合中 remove 掉</div><div class="line">        this.removeWeaklyReachableReferences();</div><div class="line">        if(!this.gone(reference)) &#123;</div><div class="line">            // 进到 if 里，说明还没有被回收，gc后还没有被回收，说明这是回收不了的了，也就是发生了内存泄漏了</div><div class="line">            long startDumpHeap = System.nanoTime();</div><div class="line">            long gcDurationMs = TimeUnit.NANOSECONDS.toMillis(startDumpHeap - gcStartNanoTime);</div><div class="line">            // 收集 hprof 文件</div><div class="line">            File heapDumpFile = this.heapDumper.dumpHeap();</div><div class="line">            if(heapDumpFile == HeapDumper.NO_DUMP) &#123;</div><div class="line">                return;</div><div class="line">            &#125;</div><div class="line"></div><div class="line">            long heapDumpDurationMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startDumpHeap);</div><div class="line">            // 解析泄漏日志，通知有泄漏，并保存到本地</div><div class="line">            this.heapdumpListener.analyze(new HeapDump(heapDumpFile, reference.key, reference.name, this.excludedRefs, watchDurationMs, gcDurationMs, heapDumpDurationMs));</div><div class="line">        &#125;</div><div class="line"></div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2019/04/09/android-view-window/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1396,136 +1528,11 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://hexiaosa.com/2018/09/01/RecyclerView/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="Hexiaosa">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexiaosa">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/09/01/RecyclerView/" itemprop="url">RecycleView 缓存机制</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">Veröffentlicht am</span>
-              
-              <time title="Post created" itemprop="dateCreated datePublished" datetime="2018-09-01T23:06:37+08:00">
-                2018-09-01
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>RecyclerView 的使用：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">RecyclerView lv = (RecyclerView) findViewById(R.id.lv);</div><div class="line">lv.setLayoutManager(new LinearLayoutManager(getApplicationContext(), LinearLayoutManager.VERTICAL, false));</div><div class="line">lv.setAdapter(new MyListAdapter(getApplicationContext()));</div></pre></td></tr></table></figure></p>
-<p>setLayoutManager 给 RecyclerView 设置了 mLayout, setAdapter 设置 mAdapter, 清除缓存的一些信息，并 requestLayout. RecyclerView 执行 onLayout 过程中，会调用 mLayout.layoutChildren 方法，然后到 LinearLayoutManager 的 layoutChildren 方法，fill(recycler, mLayoutState, state, false) 再到 layoutChunk 方法中看，第一行代码就是 layoutState.next(recycler), 进去看这个方法，这个方法获取了下一个需要 layout 的 view, 看下源码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">if (mScrapList != null) &#123;</div><div class="line">	// mScrapList 不为 null, 则取 mScrapList 中的 View</div><div class="line">    return nextViewFromScrapList();</div><div class="line">&#125;</div><div class="line">// mScrapList 为 null, 则继续查找 view, 从 getViewForPosition, tryGetViewHolderForPositionByDeadline 方法看</div><div class="line">final View view = recycler.getViewForPosition(mCurrentPosition);</div><div class="line">mCurrentPosition += mItemDirection;</div><div class="line">return view;</div></pre></td></tr></table></figure></p>
-<p>tryGetViewHolderForPositionByDeadline 方法，主要查缓存 View 的地方<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div></pre></td><td class="code"><pre><div class="line">ViewHolder tryGetViewHolderForPositionByDeadline(int position,</div><div class="line">        boolean dryRun, long deadlineNs) &#123;</div><div class="line">    boolean fromScrapOrHiddenOrCache = false;</div><div class="line">    ViewHolder holder = null;</div><div class="line">    // 0) 首先从 mChangeScrap 中查</div><div class="line">    if (mState.isPreLayout()) &#123;</div><div class="line">        holder = getChangedScrapViewForPosition(position);</div><div class="line">        fromScrapOrHiddenOrCache = holder != null;</div><div class="line">    &#125;</div><div class="line">    // 1) 没有找到就从 mAttachView 或 mCacheView 中查</div><div class="line">    if (holder == null) &#123;</div><div class="line">        holder = getScrapOrHiddenOrCachedHolderForPosition(position, dryRun);</div><div class="line">        if (holder != null) &#123;</div><div class="line">            // ...</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    if (holder == null) &#123;</div><div class="line">        final int type = mAdapter.getItemViewType(offsetPosition);</div><div class="line">        // 2) 通过 stableIs 在 mAttachView 和 mCacheView 中查</div><div class="line">        if (mAdapter.hasStableIds()) &#123;</div><div class="line">            holder = getScrapOrCachedViewForId(mAdapter.getItemId(offsetPosition),</div><div class="line">                    type, dryRun);</div><div class="line">            if (holder != null) &#123;</div><div class="line">                // ...</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        if (holder == null &amp;&amp; mViewCacheExtension != null) &#123;</div><div class="line">            // 通过 mViewCacheExtension 查</div><div class="line">        &#125;</div><div class="line">        if (holder == null) &#123; // 从 mRecyclerPool 中查</div><div class="line">            holder = getRecycledViewPool().getRecycledView(type);</div><div class="line">            if (holder != null) &#123;</div><div class="line">                // ...</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        if (holder == null) &#123;</div><div class="line">        	// 自己创建 View, 也就是我们自己实现的 onCreateViewHolder 方法</div><div class="line">            holder = mAdapter.createViewHolder(RecyclerView.this, type);</div><div class="line">            // ...</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    // ...</div><div class="line"></div><div class="line">    // 设置 layoutParams</div><div class="line">    return holder;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>layout 过程中就是以上面的方式获取缓存的 View, 然后加到 RecyclerView 中。</p>
-<p>下面再看滑动过程中 item 是怎么复用的，RecyclerView 的 onTouchEvent 方法 ACTION_MOVE 事件中调用了 mGapWorker.postFromTraversal(this, dx, dy), 接着到 GapWorker 中看，它的 postFromTraversal 方法主要执行了 recycleview.post(this), GapWorker 是一个 Runnable, 那么执行的就是 GapWorker 的 run() 方法，在这里面一直跟进去 prefetch, flushTasksWithDeadline, prefetchPositionWithDeadline, 我们能看到在 prefetchPositionWithDeadline 方法中同样调了 recycler.tryGetViewHolderForPositionByDeadline 来获取缓存中的 ViewHolder, 所以滑动过程中 item 的复用就是这样实现的。</p>
-<p>好吧，分析的不是很清晰，先到这里吧，继续看源码(<em>^▽^</em>)</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
   <nav class="pagination">
-    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/4/">4</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right"></i></a>
+    <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><span class="space">&hellip;</span><a class="page-number" href="/page/5/">5</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-angle-right"></i></a>
   </nav>
 
 
@@ -1571,7 +1578,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">40</span>
+                  <span class="site-state-item-count">41</span>
                   <span class="site-state-item-name">Artikel</span>
                 </a>
               </div>
